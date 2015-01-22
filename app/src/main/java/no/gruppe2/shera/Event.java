@@ -31,6 +31,7 @@ public class Event extends ActionBarActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            int i = 0;
             return true;
         }
 
