@@ -4,14 +4,29 @@ import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
-
+import android.widget.TextView;
 
 public class Event extends ActionBarActivity {
+
+
+    TextView titleView;
+    TextView descriptionView;
+    TextView participantsView;
+    TextView dateView;
+    TextView timeView;
+    TextView addressView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_event);
+
+        titleView = (TextView) findViewById(R.id.titleView);
+        descriptionView = (TextView) findViewById(R.id.descriptionView);
+        participantsView = (TextView) findViewById(R.id.participantsView);
+        dateView = (TextView) findViewById(R.id.dateView);
+        timeView = (TextView) findViewById(R.id.timeView);
+        addressView = (TextView) findViewById(R.id.addressView);
     }
 
 
