@@ -10,5 +10,16 @@
     <string name="title_activity_event_creator">EventCreator</string>
     <string name="title_activity_events">Events</string>
     <string name="title_activity_event">Event</string>
+    <string name="name">Name</string>
+    <string name="description">Description</string>
+    <string name="address">Address</string>
+    <string name="participants">Number of participants</string>
+    <string name="pickDate">Pick date</string>
+    <string name="pickTime">Pick time</string>
+    <string name="save">Save</string>
+    <string name="cancel">Cancel</string>
+    <string name="when">When?</string>
+    <string name="where">Where?</string>
+    <string name="title">Title</string>
 
 </resources>
