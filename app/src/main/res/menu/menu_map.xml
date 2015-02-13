@@ -26,4 +26,10 @@
         android:title="@string/title_activity_event"
         android:orderInCategory="400"
         app:showAsAction="never" />
+
+    <item
+        android:id="@+id/logout_option"
+        android:title="@string/logout"
+        android:orderInCategory="500"
+        app:showAsAction="never" />
 </menu>

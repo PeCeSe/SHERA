@@ -21,5 +21,10 @@
     <string name="when">When?</string>
     <string name="where">Where?</string>
     <string name="title">Title</string>
+    <string name="title_facebook_login">Login</string>
+    <string name="logout">Log out</string>
+
+
+    <string name="facebook_api_key">817450594983198</string>
 
 </resources>

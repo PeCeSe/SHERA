@@ -7,13 +7,14 @@
         android:minSdkVersion="15"
         android:targetSdkVersion="19" />
 
-    <android:uses-permission
+    <uses-permission
         android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         android:maxSdkVersion="18" />
-    <android:uses-permission android:name="android.permission.READ_PHONE_STATE" />
-    <android:uses-permission
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission
         android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="18" />
+    <uses-permission android:name="android.permission.INTERNET"/>
 
     <application
         android:allowBackup="true"
@@ -31,11 +32,7 @@
         </activity>
         <activity
             android:name=".Map"
-            android:label="@string/title_activity_map"
-            android:parentActivityName=".LogIn" >
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="no.gruppe2.shera.LogIn" />
+            android:label="@string/title_activity_map">
         </activity>
         <activity
             android:name=".EventCreator"
@@ -61,6 +58,14 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="no.gruppe2.shera.Map" />
         </activity>
+
+        <activity
+            android:name="com.facebook.LoginActivity"
+            android:label="@string/title_facebook_login" >
+        </activity>
+
+        <meta-data android:name="com.facebook.sdk.ApplicationId"
+            android:value="@string/facebook_api_key"/>
     </application>
 
 </manifest>

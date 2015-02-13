@@ -1,19 +1,35 @@
 package no.gruppe2.shera;
 
 import android.content.Intent;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Toast;
+
+import com.facebook.Session;
 
 
 public class Map extends ActionBarActivity {
+
+    Session session;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
+
+        setSession();
+    }
+
+    public void setSession(){
+        Bundle extras = getIntent().getExtras();
+        if (extras != null) {
+            Session.setActiveSession((Session) extras.getSerializable("fb_session"));
+        }
+        session = Session.getActiveSession();
+        if(!session.isOpened()){
+            finish();
+        }
     }
 
 
@@ -47,11 +63,11 @@ public class Map extends ActionBarActivity {
             Intent i = new Intent(this, Event.class);
             startActivity(i);
         }
+        else if(id == R.id.logout_option){
+            session.close();
+            finish();
+        }
 
         return super.onOptionsItemSelected(item);
     }
 }
-
-
-//Toast toast = Toast.makeText(this, "Wohoo", Toast.LENGTH_LONG);
-//toast.show();
