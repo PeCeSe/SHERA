@@ -12,14 +12,9 @@ import android.widget.TextView;
 
 public class EventCreator extends ActionBarActivity {
 
-    EditText nameInput;
-    EditText descriptionInput;
-    EditText addressInput;
-    EditText participantsInput;
-    TextView timeView;
-    TextView dateView;
-    Button pickDateIn;
-    Button pickTimeIn;
+    EditText nameInput, descriptionInput, addressInput, participantsInput;
+    TextView timeView, dateView;
+    Button pickDateIn, pickTimeIn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

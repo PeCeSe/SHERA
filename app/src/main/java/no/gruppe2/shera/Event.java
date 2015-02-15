@@ -9,12 +9,7 @@ import android.widget.TextView;
 public class Event extends ActionBarActivity {
 
 
-    TextView titleView;
-    TextView descriptionView;
-    TextView participantsView;
-    TextView dateView;
-    TextView timeView;
-    TextView addressView;
+    TextView titleView, descriptionView, participantsView, dateView, timeView, addressView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,6 +22,8 @@ public class Event extends ActionBarActivity {
         dateView = (TextView) findViewById(R.id.dateView);
         timeView = (TextView) findViewById(R.id.timeView);
         addressView = (TextView) findViewById(R.id.addressView);
+
+
     }
 
 
