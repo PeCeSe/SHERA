@@ -6,7 +6,7 @@
         <option name="GRADLE_PROJECT_PATH" value=":facebook" />
       </configuration>
     </facet>
-<<<<<<< HEAD
+
     <facet type="android" name="Android">
       <configuration>
         <option name="SELECTED_BUILD_VARIANT" value="debug" />
@@ -21,8 +21,7 @@
         <option name="LIBRARY_PROJECT" value="true" />
       </configuration>
     </facet>
-=======
->>>>>>> master
+
   </component>
   <component name="NewModuleRootManager" inherit-compiler-output="true">
     <exclude-output />
