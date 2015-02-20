@@ -1,18 +1,28 @@
 package no.gruppe2.shera;
 
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
 //This class is going to contain a listfragment
 
-public class Events extends ActionBarActivity {
+public class Events extends FragmentActivity {
+
+    private EventList eventListFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_events);
+
+        if	(findViewById(R.id.fragment_container)	!=	null)	{
+            if	(savedInstanceState	!=	null)	{
+                return;
+            }
+            eventListFragment = new EventList();
+            getFragmentManager().beginTransaction().add(R.id.fragment_container, eventListFragment).commit();
+        }
     }
 
 
@@ -36,5 +46,15 @@ public class Events extends ActionBarActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        if	(findViewById(R.id.fragment_container)	!=	null)	{
+            eventListFragment = new EventList();
+            getFragmentManager().beginTransaction().add(R.id.fragment_container, eventListFragment).commit();
+        }
     }
 }
