@@ -9,11 +9,10 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-
 public class EventCreator extends ActionBarActivity {
 
     EditText nameInput, descriptionInput, addressInput, participantsInput;
-    TextView timeView, dateView;
+    TextView dateView, timeView;
     Button pickDateIn, pickTimeIn;
 
     @Override
@@ -30,16 +29,13 @@ public class EventCreator extends ActionBarActivity {
         timeView = (TextView) findViewById(R.id.timeText);
         dateView = (TextView) findViewById(R.id.dateText);
 
-
         pickDateIn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View arg0) {
 
-
             }
         });
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
