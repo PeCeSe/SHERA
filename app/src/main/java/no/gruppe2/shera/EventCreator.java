@@ -12,7 +12,7 @@ import android.widget.TextView;
 public class EventCreator extends ActionBarActivity {
 
     EditText nameInput, descriptionInput, addressInput, participantsInput;
-    TextView dateView, timeView;
+    TextView timeView, dateView;
     Button pickDateIn, pickTimeIn;
 
     @Override
