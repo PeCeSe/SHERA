@@ -22,6 +22,7 @@ import com.facebook.Request;
 import com.facebook.Response;
 import com.facebook.Session;
 import com.facebook.model.GraphUser;
+import com.firebase.client.Firebase;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -35,8 +36,10 @@ public class EventCreator extends ActionBarActivity {
     CheckBox adultCheck;
     Spinner catSpinner;
 
+    private DBHandler db;
+    private Firebase ref;
+
     private String userID;
-    private Boolean adult;
 
     DialogFragment dateFragment;
     DialogFragment timeFragment;
@@ -49,6 +52,9 @@ public class EventCreator extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_event_creator);
+        db=new DBHandler();
+        Firebase.setAndroidContext(this);
+        ref=new Firebase("https://shera.firebaseio.com/");
 
         nameInput = (EditText) findViewById(R.id.nameInputField);
         descriptionInput = (EditText) findViewById(R.id.descriptionInputField);
@@ -123,14 +129,11 @@ public class EventCreator extends ActionBarActivity {
     }
 
     public void createEventObject(){
-
-        if(adultCheck.isChecked()){
-            adult = true;
-        }
-
         EventObject eventObject = new EventObject(userID, nameInput.getText().toString(),descriptionInput.getText().toString(),
                 addressInput.getText().toString(), Integer.parseInt(participantsInput.getText().toString()),
-                catSpinner.getSelectedItemPosition()+1, cal, adult);
+                (catSpinner.getSelectedItemPosition()+1), cal, adultCheck.isChecked());
+
+        db.pushToDB(eventObject,ref);
     }
 
     public void showTimePickerDialog(View v) {

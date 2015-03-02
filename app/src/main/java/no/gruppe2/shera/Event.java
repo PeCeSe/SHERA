@@ -1,14 +1,12 @@
 package no.gruppe2.shera;
 
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
 
 public class Event extends ActionBarActivity {
-
-
     TextView titleView, descriptionView, participantsView, dateView, timeView, addressView;
 
     @Override
@@ -22,10 +20,7 @@ public class Event extends ActionBarActivity {
         dateView = (TextView) findViewById(R.id.dateView);
         timeView = (TextView) findViewById(R.id.timeView);
         addressView = (TextView) findViewById(R.id.addressView);
-
-
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
