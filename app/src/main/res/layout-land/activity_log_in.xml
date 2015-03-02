@@ -9,11 +9,11 @@
     <ImageView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:src="@drawable/logo_with_text_shera"
         android:layout_marginTop="20dp"
         android:layout_marginLeft="40dp"
         android:layout_marginRight="40dp"
-        android:layout_marginBottom="150dp"/>
+        android:layout_marginBottom="150dp"
+        android:src="@drawable/logo_with_text_shera"/>
 
     <com.facebook.widget.LoginButton
         android:id="@+id/fb_login_button"

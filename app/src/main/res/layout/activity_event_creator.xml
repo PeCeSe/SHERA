@@ -53,6 +53,12 @@
         android:layout_height="wrap_content"
         android:hint="@string/participants"/>
 
+    <CheckBox
+        android:id="@+id/adultCheck"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/adult" />
+
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -71,6 +77,13 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/pickTime"/>
+
+        <Spinner
+            android:id="@+id/cat_spinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:entries="@array/category_array"
+            android:prompt="@string/category_prompt" />
 
     </LinearLayout>
 

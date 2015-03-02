@@ -7,14 +7,15 @@ import java.util.Calendar;
  */
 public class EventObject {
 
-    private String name, description, address;
+    private String name, description, address, userID;
     private int maxParticipants, numParticipants, category;
     private Calendar calendar;
     private boolean adult;
 
-    private final static int CASUAL = 10, FAMILY = 20, HOBBY = 30, SPORTS = 40, CULTURAL = 50;
+    private final static int CASUAL = 1, FAMILY = 2, HOBBY = 3, SPORTS = 4, CULTURAL = 5;
 
-    public EventObject(String n, String d, String a, int max, int cat, Calendar cal, boolean b){
+    public EventObject(String u, String n, String d, String a, int max, int cat, Calendar cal, boolean b){
+        userID = u;
         name = n;
         description = d;
         address = a;
@@ -25,7 +26,8 @@ public class EventObject {
         adult = b;
     }
 
-    public EventObject(String n, String d, String a, int max, int num, int cat, Calendar cal, boolean b){
+    public EventObject(String u, String n, String d, String a, int max, int num, int cat, Calendar cal, boolean b){
+        userID = u;
         name = n;
         description = d;
         address = a;
@@ -36,15 +38,12 @@ public class EventObject {
         adult = b;
     }
 
-    public String getCategoryString(){
-        switch (category){
-            case 10: return "Casual";
-            case 20: return "Family";
-            case 30: return "Hobby";
-            case 40: return "Sports";
-            case 50: return "Cultural";
-        }
-        return null;
+    public String getUserID() {
+        return userID;
+    }
+
+    public void setUserID(String s){
+        userID = s;
     }
 
     public String getName(){
