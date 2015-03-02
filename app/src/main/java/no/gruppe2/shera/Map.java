@@ -16,7 +16,7 @@ public class Map extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
 
-        //setSession();
+        setSession();
     }
 
     public void setSession(){

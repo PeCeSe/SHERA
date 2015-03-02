@@ -7,6 +7,7 @@ import android.app.TimePickerDialog;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.text.format.DateFormat;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -17,6 +18,7 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.TimePicker;
+import android.widget.Toast;
 
 import com.facebook.Request;
 import com.facebook.Response;
@@ -133,7 +135,17 @@ public class EventCreator extends ActionBarActivity {
                 addressInput.getText().toString(), Integer.parseInt(participantsInput.getText().toString()),
                 (catSpinner.getSelectedItemPosition()+1), cal, adultCheck.isChecked());
 
-        db.pushToDB(eventObject,ref);
+
+        try {
+            db.pushToDB(eventObject, ref);
+
+            Toast.makeText(getBaseContext(), getResources().getString(R.string.event_created), Toast.LENGTH_SHORT).show();
+
+            finish();
+        }
+        catch (Exception e){
+            Log.d("createEventObject()", "Failed to send object to database: " + e);
+        }
     }
 
     public void showTimePickerDialog(View v) {
