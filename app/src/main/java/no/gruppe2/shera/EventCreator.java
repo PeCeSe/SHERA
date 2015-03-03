@@ -46,6 +46,8 @@ public class EventCreator extends ActionBarActivity {
     DialogFragment dateFragment;
     DialogFragment timeFragment;
 
+    EventObject eventObject;
+
     public static Calendar cal;
     private static final String DATE_FORMAT = "dd-MM-yyyy";
     private static final String TIME_FORMAT = "kk:mm";
@@ -100,9 +102,8 @@ public class EventCreator extends ActionBarActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
         if (id == R.id.saveEvent) {
-            createEventObject();
+            saveEvent();
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -118,10 +119,9 @@ public class EventCreator extends ActionBarActivity {
             Request request = Request.newMeRequest(session, new Request.GraphUserCallback() {
                 @Override
                 public void onCompleted(GraphUser user, Response response) {
-                    // If the response is successful
                     if (session == Session.getActiveSession()) {
                         if (user != null) {
-                            userID = user.getId();//user id
+                            userID = user.getId();
                         }
                     }
                 }
@@ -130,22 +130,48 @@ public class EventCreator extends ActionBarActivity {
         }
     }
 
-    public void createEventObject(){
-        EventObject eventObject = new EventObject(userID, nameInput.getText().toString(),descriptionInput.getText().toString(),
-                addressInput.getText().toString(), Integer.parseInt(participantsInput.getText().toString()),
-                (catSpinner.getSelectedItemPosition()+1), cal, adultCheck.isChecked());
-
-
-        try {
-            db.pushToDB(eventObject, ref);
-
-            Toast.makeText(getBaseContext(), getResources().getString(R.string.event_created), Toast.LENGTH_SHORT).show();
-
+    public void saveEvent() {
+        if (validateInput()) {
+            createEventObject();
+            writeObjectToDatabase();
+            showToast(getResources().getString(R.string.event_created));
             finish();
         }
-        catch (Exception e){
+    }
+
+    public boolean validateInput() {
+        if (nameInput.getText().length() < 1) {
+            writeErrorMessage("STRING");
+        } else if (descriptionInput.getText().length() < 1) {
+            writeErrorMessage("STRING");
+        } else if (addressInput.getText().length() < 1) {
+            writeErrorMessage("STRING");
+        } else if (participantsInput.getText().toString().length() < 1) {
+            writeErrorMessage("STRING");
+        }
+        return false;
+    }
+
+    private void writeErrorMessage(String s) {
+
+    }
+
+    public void createEventObject(){
+        eventObject = new EventObject(userID, nameInput.getText().toString(), descriptionInput.getText().toString(),
+                addressInput.getText().toString(), Integer.parseInt(participantsInput.getText().toString()),
+                (catSpinner.getSelectedItemPosition()+1), cal, adultCheck.isChecked());
+    }
+
+    public void writeObjectToDatabase() {
+        try {
+            db.pushToDB(eventObject, ref);
+        } catch (Exception e) {
             Log.d("createEventObject()", "Failed to send object to database: " + e);
         }
+    }
+
+    public void showToast(String s) {
+        Toast.makeText(getBaseContext(), s, Toast.LENGTH_SHORT).show();
     }
 
     public void showTimePickerDialog(View v) {
@@ -169,13 +195,11 @@ public class EventCreator extends ActionBarActivity {
 
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
-            // Use the current date as the default date in the picker
             final Calendar c = Calendar.getInstance();
             int year = c.get(Calendar.YEAR);
             int month = c.get(Calendar.MONTH);
             int day = c.get(Calendar.DAY_OF_MONTH);
 
-            // Create a new instance of DatePickerDialog and return it
             return new DatePickerDialog(getActivity(), this, year, month, day);
         }
 
@@ -192,12 +216,10 @@ public class EventCreator extends ActionBarActivity {
 
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
-            // Use the current time as the default values for the picker
             final Calendar c = Calendar.getInstance();
             int hour = c.get(Calendar.HOUR_OF_DAY);
             int minute = c.get(Calendar.MINUTE);
 
-            // Create a new instance of TimePickerDialog and return it
             return new TimePickerDialog(getActivity(), this, hour, minute,
                     DateFormat.is24HourFormat(getActivity()));
         }
