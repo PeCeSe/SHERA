@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/ScrollViewEventCreator"
+    android:id="@+id/ScrollViewEventCreatorLand"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent">
 
@@ -31,7 +31,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:hint="@string/description"
-            android:inputType="textMultiLine"
             android:textStyle="italic"
             android:paddingBottom="25dp"
             android:layout_below="@+id/nameInputField"
