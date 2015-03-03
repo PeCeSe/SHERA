@@ -33,7 +33,7 @@ import java.util.Calendar;
 public class EventCreator extends ActionBarActivity {
 
     EditText nameInput, descriptionInput, addressInput, participantsInput;
-    TextView timeView, dateView;
+    TextView timeView, dateView, errorView;
     static Button pickDateIn, pickTimeIn;
     CheckBox adultCheck;
     Spinner catSpinner;
@@ -56,6 +56,7 @@ public class EventCreator extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_event_creator);
+
         db=new DBHandler();
         Firebase.setAndroidContext(this);
         ref=new Firebase("https://shera.firebaseio.com/");
@@ -72,6 +73,8 @@ public class EventCreator extends ActionBarActivity {
         catSpinner = (Spinner) findViewById(R.id.cat_spinner);
 
         cal = Calendar.getInstance();
+
+        Log.d("Calendar:", cal.toString());
 
         final Session session = Session.getActiveSession();
         findUserID(session);
@@ -136,24 +139,40 @@ public class EventCreator extends ActionBarActivity {
             writeObjectToDatabase();
             showToast(getResources().getString(R.string.event_created));
             finish();
-        }
+        } else
+            return;
     }
 
     public boolean validateInput() {
         if (nameInput.getText().length() < 1) {
-            writeErrorMessage("STRING");
+            writeErrorMessage(getResources().getString(R.string.name_error));
+            return false;
         } else if (descriptionInput.getText().length() < 1) {
-            writeErrorMessage("STRING");
+            writeErrorMessage(getResources().getString(R.string.description_error));
+            return false;
         } else if (addressInput.getText().length() < 1) {
-            writeErrorMessage("STRING");
+            writeErrorMessage(getResources().getString(R.string.address_error));
+            return false;
         } else if (participantsInput.getText().toString().length() < 1) {
-            writeErrorMessage("STRING");
+            writeErrorMessage(getResources().getString(R.string.participants_error));
+            return false;
+        } else if (Integer.parseInt(participantsInput.getText().toString()) < 1) {
+            writeErrorMessage(getResources().getString(R.string.participants_num_error));
+            return false;
         }
-        return false;
+        Calendar c = Calendar.getInstance();
+        if (!cal.after(c)) {
+            writeErrorMessage(getResources().getString(R.string.calendar_error));
+            return false;
+        }
+        return true;
+
     }
 
     private void writeErrorMessage(String s) {
-
+        errorView = (TextView) findViewById(R.id.error_display_message);
+        errorView.setVisibility(View.VISIBLE);
+        errorView.setText(s);
     }
 
     public void createEventObject(){
