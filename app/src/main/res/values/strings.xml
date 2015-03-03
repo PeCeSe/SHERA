@@ -32,6 +32,14 @@
     <string name="category_prompt">Choose a category</string>
     <string name="event_created">The event was created</string>
 
+
+    <string name="name_error">Name can not be blank. </string>
+    <string name="description_error">Description can not be blank. </string>
+    <string name="address_error">Address can not be blank. </string>
+    <string name="participants_error">Number of participants can not be blank. </string>
+    <string name="participants_num_error">Number of participants must be one or more. </string>
+    <string name="calendar_error">Event can not be in the past.</string>
+
     <string name="facebook_api_key">817450594983198</string>
     <string name="google_maps_api_key">AIzaSyAqgAXUSBCKpSTTZcpj-ftEnO5gwDTd5dM</string>
 
@@ -44,5 +52,8 @@
         <item>Sports</item>
         <item>Cultural</item>
     </string-array>
+
+
+    <color name="red">#FF0000</color>
 
 </resources>
