@@ -7,18 +7,22 @@ import java.util.Calendar;
  */
 public class EventObject {
 
-    private String name, description, address, userID;
+    private String name, description, address, userID, eventID;
     private int maxParticipants, numParticipants, category;
     private Calendar calendar;
     private boolean adult;
+    private double longitude, latitude;
 
     private final static int CASUAL = 1, FAMILY = 2, HOBBY = 3, SPORTS = 4, CULTURAL = 5;
 
     public EventObject(String u, String n, String d, String a, int max, int cat, Calendar cal, boolean b){
+        eventID = "";
         userID = u;
         name = n;
         description = d;
         address = a;
+        latitude = 0;
+        longitude = 0;
         maxParticipants = max;
         numParticipants = 0;
         category = cat;
@@ -26,16 +30,27 @@ public class EventObject {
         adult = b;
     }
 
-    public EventObject(String u, String n, String d, String a, int max, int num, int cat, Calendar cal, boolean b){
+    public EventObject(String e, String u, String n, String d, String a, double lat, double lon, int max, int num, int cat, Calendar cal, boolean b) {
+        eventID = e;
         userID = u;
         name = n;
         description = d;
         address = a;
+        latitude = lat;
+        longitude = lon;
         maxParticipants = max;
         numParticipants = num;
         category = cat;
         calendar = cal;
         adult = b;
+    }
+
+    public String getEventID() {
+        return eventID;
+    }
+
+    public void setEventID(String s) {
+        eventID = s;
     }
 
     public String getUserID() {
@@ -68,6 +83,22 @@ public class EventObject {
 
     public void setAddress(String s){
         address = s;
+    }
+
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(double la) {
+        latitude = la;
+    }
+
+    public double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(double lo) {
+        longitude = lo;
     }
 
     public int getMaxParticipants(){
