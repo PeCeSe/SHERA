@@ -1,12 +1,10 @@
 package no.gruppe2.shera;
 
-import android.util.Log;
-
 import com.firebase.client.ChildEventListener;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
-import com.google.gson.Gson;
+import com.firebase.client.ValueEventListener;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -19,31 +17,44 @@ import java.util.LinkedList;
 
 public class DBHandler {
 
-    private Firebase ref, event;
-    private Gson gson = new Gson();
+    private Firebase ref, event, id;
     public LinkedList<EventObject> list = new LinkedList<>();
     private EventObject eo;
     private HashMap<String, Object> map;
+    private Calendar cal;
+    private long numChildren;
 
-    public void pushToDB(Firebase r) {
+    public void pushToDB(EventObject e, Firebase r) {
         ref = r;
         event = ref.child("Events");
-        Calendar cal = new GregorianCalendar();
-
-        EventObject eo = new EventObject("123", "JALL", "JÅSS",
-                "JÅSSEVEIEN1", 123,
-                1, cal, true);
-        Firebase id = event.push();
-        //Log.d("ID", "" + id);
+        eo = e;
+        id = event.push();
+        String s = id.toString();
+        eo.setEventID(s);
         id.setValue(eo);
     }
 
-    public EventObject convertToObject(String obj) {
-        return gson.fromJson(obj, EventObject.class);
+    public void updateEventDB(EventObject e) {
+        eo = e;
+        id = new Firebase(eo.getEventID());
+        id.setValue(eo);
     }
 
-    public String convertToJson(EventObject eo) {
-        return gson.toJson(eo);
+    public long getNumChildren(Firebase r) {
+        ref = r;
+        numChildren = 0;
+        ref.child("Events").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                numChildren = dataSnapshot.getChildrenCount();
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+
+            }
+        });
+        return numChildren;
     }
 
     public void getFromDB(Firebase r) {
@@ -55,20 +66,22 @@ public class DBHandler {
                 map = new HashMap<>();
                 map = (HashMap<String, Object>) dataSnapshot.getValue();
                 String time = map.get("calendar").toString();
-                Calendar cal = new GregorianCalendar();
+                cal = new GregorianCalendar();
                 cal.setTimeInMillis(Long.parseLong(time));
 
-                eo = new EventObject(map.get("userID").toString(),
+                eo = new EventObject(map.get("eventID").toString(),
+                        map.get("userID").toString(),
                         map.get("name").toString(),
                         map.get("description").toString(),
                         map.get("address").toString(),
+                        Double.parseDouble(map.get("latitude").toString()),
+                        Double.parseDouble(map.get("longitude").toString()),
                         Integer.parseInt(map.get("maxParticipants").toString()),
                         Integer.parseInt(map.get("numParticipants").toString()),
                         Integer.parseInt(map.get("category").toString()),
                         cal,
                         Boolean.parseBoolean(map.get("adult").toString()));
                 list.add(eo);
-                Log.d("ID:", eo.getUserID() + "");
             }
 
             @Override
