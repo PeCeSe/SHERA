@@ -1,5 +1,7 @@
 package no.gruppe2.shera;
 
+import android.util.Log;
+
 import com.firebase.client.ChildEventListener;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
@@ -37,6 +39,7 @@ public class DBHandler {
     public void updateEventDB(EventObject e) {
         eo = e;
         id = new Firebase(eo.getEventID());
+        Log.d("Eo.getName()", eo.getName());
         id.setValue(eo);
     }
 
@@ -70,7 +73,7 @@ public class DBHandler {
                 cal.setTimeInMillis(Long.parseLong(time));
 
                 eo = new EventObject(map.get("eventID").toString(),
-                        map.get("userID").toString(),
+                        Long.parseLong(map.get("userID").toString()),
                         map.get("name").toString(),
                         map.get("description").toString(),
                         map.get("address").toString(),

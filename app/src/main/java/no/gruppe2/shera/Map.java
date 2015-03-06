@@ -14,6 +14,9 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+
 public class Map extends ActionBarActivity {
 
     Session session;
@@ -96,7 +99,16 @@ public class Map extends ActionBarActivity {
             return true;
         }
         else if(id == R.id.new_event_option){
+
+            Calendar cal = new GregorianCalendar();
+
+            EventObject e = new EventObject("https://shera.firebaseio.com/Events/-JjjFZaCeWQP57Z7-qTp"
+                    , 3456789, "Grilling", "Grilling i st.HansHaugen", "StHansHaugen", 59, 10, 50, 4, 3, cal, true);
+
             Intent i = new Intent(this, EventCreator.class);
+            Bundle b = new Bundle();
+            b.putParcelable("EO", e);
+            i.putExtra("EventObject", e);
             startActivity(i);
         }
         else if(id == R.id.events_option){
