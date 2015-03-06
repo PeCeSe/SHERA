@@ -4,6 +4,9 @@ import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.app.TimePickerDialog;
+import android.content.Intent;
+import android.location.Address;
+import android.location.Geocoder;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.text.format.DateFormat;
@@ -25,9 +28,11 @@ import com.facebook.Response;
 import com.facebook.Session;
 import com.facebook.model.GraphUser;
 import com.firebase.client.Firebase;
+import com.google.android.gms.maps.model.LatLng;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.List;
 
 
 public class EventCreator extends ActionBarActivity {
@@ -41,7 +46,8 @@ public class EventCreator extends ActionBarActivity {
     private DBHandler db;
     private Firebase ref;
 
-    private String userID;
+    private long userID;
+    private double lat, lng;
 
     DialogFragment dateFragment;
     DialogFragment timeFragment;
@@ -74,11 +80,16 @@ public class EventCreator extends ActionBarActivity {
 
         cal = Calendar.getInstance();
 
-        Log.d("Calendar:", cal.toString());
-
         final Session session = Session.getActiveSession();
         findUserID(session);
 
+        if (fromMap()) {
+            getAddress(lat, lng);
+        } else if (incomingEvent()) {
+            setFields();
+        } else {
+
+        }
 
         pickDateIn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -92,6 +103,75 @@ public class EventCreator extends ActionBarActivity {
                 showTimePickerDialog(arg0);
             }
         });
+    }
+
+    public boolean incomingEvent() {
+        Intent i = getIntent();
+        //  Bundle extras = i.getExtras();
+        if (i != null) {
+            eventObject = (EventObject) i.getParcelableExtra("EventObject");
+            if (eventObject == null) {
+                Log.d("BÆSJ", "får ikke inn et objekt");
+                return false;
+            }
+            return true;
+        }
+        return false;
+    }
+
+
+    private void setFields() {
+        nameInput.setText(eventObject.getName());
+        descriptionInput.setText(eventObject.getDescription());
+        addressInput.setText(eventObject.getAddress());
+        participantsInput.setText(eventObject.getMaxParticipants() + "");
+        pickDateIn.setText(String.format("%02d", eventObject.getCalendar().get(Calendar.DAY_OF_MONTH)) + "-"
+                + (String.format("%02d", eventObject.getCalendar().get(Calendar.MONTH) + 1)) + "-"
+                + eventObject.getCalendar().get(Calendar.YEAR));
+        pickTimeIn.setText(eventObject.getCalendar().get(Calendar.HOUR_OF_DAY) + ":" + eventObject.getCalendar().get(Calendar.MINUTE));
+        Log.d("tid", eventObject.getCalendar().toString());
+        if (eventObject.isAdult()) {
+            adultCheck.setChecked(true);
+        }
+        catSpinner.setSelection(eventObject.getCategory() - 1);
+    }
+
+    private boolean fromMap() {
+        Bundle extras = getIntent().getExtras();
+        if (extras != null) {
+            lat = extras.getDouble("Lat", 200);
+            lng = extras.getDouble("Long", 200);
+            if (lat == 200 || lng == 200) {
+                return false;
+            }
+            return true;
+        }
+        return false;
+    }
+
+    private List<Address> getAddress(double lat, double lng) {
+        try {
+            Geocoder geocoder;
+            List<Address> addresses;
+            geocoder = new Geocoder(this);
+            if (lat != 0 || lng != 0) {
+                addresses = geocoder.getFromLocation(lat,
+                        lng, 1);
+                String address = addresses.get(0).getAddressLine(0);
+                String city = addresses.get(0).getAddressLine(1);
+                String country = addresses.get(0).getAddressLine(2);
+                String s = address + " " + city;
+                addressInput.setText(s);
+                return addresses;
+            } else {
+                Toast.makeText(this, "latitude and longitude are null",
+                        Toast.LENGTH_LONG).show();
+                return null;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
 
@@ -111,7 +191,8 @@ public class EventCreator extends ActionBarActivity {
         }
         return super.onOptionsItemSelected(item);
     }
-    public void showDatePickerDialog(View v) {
+
+    private void showDatePickerDialog(View v) {
         dateFragment = new DatePickerFragment();
         dateFragment.show(getFragmentManager(), "datePicker");
 
@@ -124,7 +205,7 @@ public class EventCreator extends ActionBarActivity {
                 public void onCompleted(GraphUser user, Response response) {
                     if (session == Session.getActiveSession()) {
                         if (user != null) {
-                            userID = user.getId();
+                            userID = Long.parseLong(user.getId());
                         }
                     }
                 }
@@ -133,17 +214,26 @@ public class EventCreator extends ActionBarActivity {
         }
     }
 
-    public void saveEvent() {
-        if (validateInput()) {
-            createEventObject();
-            writeObjectToDatabase();
-            showToast(getResources().getString(R.string.event_created));
-            finish();
-        } else
-            return;
+    private void saveEvent() {
+        if (eventObject != null) {
+            if (validateInput()) {
+                updateEventObject();
+                updateObjectInDatabase();
+                finish();
+            } else
+                return;
+        } else {
+            if (validateInput()) {
+                createEventObject();
+                writeObjectToDatabase();
+                showToast(getResources().getString(R.string.event_created));
+                finish();
+            } else
+                return;
+        }
     }
 
-    public boolean validateInput() {
+    private boolean validateInput() {
         if (nameInput.getText().length() < 1) {
             writeErrorMessage(getResources().getString(R.string.name_error));
             return false;
@@ -160,6 +250,12 @@ public class EventCreator extends ActionBarActivity {
             writeErrorMessage(getResources().getString(R.string.participants_num_error));
             return false;
         }
+        if (eventObject != null) {
+            if (Integer.parseInt(participantsInput.getText().toString()) < eventObject.getNumParticipants()) {
+                writeErrorMessage(getResources().getString(R.string.max_less_than_num_error) + "(" +
+                        eventObject.getNumParticipants() + ")");
+            }
+        }
         Calendar c = Calendar.getInstance();
         if (!cal.after(c)) {
             writeErrorMessage(getResources().getString(R.string.calendar_error));
@@ -175,13 +271,62 @@ public class EventCreator extends ActionBarActivity {
         errorView.setText(s);
     }
 
-    public void createEventObject(){
-        eventObject = new EventObject(userID, nameInput.getText().toString(), descriptionInput.getText().toString(),
-                addressInput.getText().toString(), Integer.parseInt(participantsInput.getText().toString()),
-                (catSpinner.getSelectedItemPosition()+1), cal, adultCheck.isChecked());
+    private void createEventObject() {
+        eventObject = new EventObject(
+                userID,
+                nameInput.getText().toString(),
+                descriptionInput.getText().toString(),
+                addressInput.getText().toString(),
+                lat, lng,
+                Integer.parseInt(participantsInput.getText().toString()),
+                (catSpinner.getSelectedItemPosition() + 1),
+                cal,
+                adultCheck.isChecked());
     }
 
-    public void writeObjectToDatabase() {
+    private void updateEventObject() {
+        eventObject.setName(nameInput.getText().toString());
+        eventObject.setDescription(descriptionInput.getText().toString());
+        eventObject.setAddress(addressInput.getText().toString());
+
+        /*Need to make changes so we can construct an Address-object,
+        then call to getLocationFromAddress(address)*/
+
+        eventObject.setMaxParticipants(Integer.parseInt(participantsInput.getText().toString()));
+        eventObject.setCategory(catSpinner.getSelectedItemPosition() + 1);
+        if (cal != null) {
+            eventObject.setCalendar(cal);
+        }
+        eventObject.setAdult(adultCheck.isChecked());
+
+    }
+
+    public LatLng getLocationFromAddress(String strAddress) {
+
+        Geocoder coder = new Geocoder(this);
+        List<Address> address;
+        LatLng p1 = null;
+
+        try {
+            address = coder.getFromLocationName(strAddress, 5);
+            if (address == null) {
+                return null;
+            }
+            Address location = address.get(0);
+            location.getLatitude();
+            location.getLongitude();
+
+            p1 = new LatLng(location.getLatitude(), location.getLongitude());
+
+        } catch (Exception ex) {
+
+            ex.printStackTrace();
+        }
+
+        return p1;
+    }
+
+    private void writeObjectToDatabase() {
         try {
             db.pushToDB(eventObject, ref);
         } catch (Exception e) {
@@ -189,11 +334,19 @@ public class EventCreator extends ActionBarActivity {
         }
     }
 
-    public void showToast(String s) {
+    private void updateObjectInDatabase() {
+        try {
+            db.updateEventDB(eventObject);
+        } catch (Exception e) {
+            Log.d("createEventObject()", "Failed to update object in database: " + e);
+        }
+    }
+
+    private void showToast(String s) {
         Toast.makeText(getBaseContext(), s, Toast.LENGTH_SHORT).show();
     }
 
-    public void showTimePickerDialog(View v) {
+    private void showTimePickerDialog(View v) {
         timeFragment = new TimePickerFragment();
         timeFragment.show(getFragmentManager(), "timePicker");
     }
