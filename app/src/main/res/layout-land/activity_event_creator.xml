@@ -56,11 +56,40 @@
             android:singleLine="true"
             android:textStyle="italic"
             android:paddingTop="20dp"
+            android:nextFocusDown="@+id/postalCodeInputField"
             android:layout_below="@+id/descriptionInputField"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
             android:layout_alignRight="@+id/centerPoint"
             android:layout_alignEnd="@+id/centerPoint" />
+
+        <EditText
+            android:id="@+id/postalCodeInputField"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:hint="@string/postal_code"
+            android:inputType="number"
+            android:singleLine="true"
+            android:textStyle="italic"
+            android:paddingTop="20dp"
+            android:nextFocusDown="@+id/postalAddressInputField"
+            android:layout_below="@+id/addressInputField"
+            android:layout_toRightOf="@+id/timeText"
+            android:layout_toEndOf="@+id/timeText" />
+
+        <EditText
+            android:id="@+id/postalAddressInputField"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:hint="@string/postal_address"
+            android:singleLine="true"
+            android:textStyle="italic"
+            android:paddingTop="20dp"
+            android:layout_below="@+id/addressInputField"
+            android:layout_alignRight="@+id/centerPoint"
+            android:layout_alignEnd="@+id/centerPoint"
+            android:layout_toRightOf="@+id/postalCodeInputField"
+            android:layout_toEndOf="@+id/postalCodeInputField" />
 
         <EditText
             android:id="@+id/participantsInputField"
@@ -71,7 +100,7 @@
             android:singleLine="true"
             android:textStyle="italic"
             android:paddingTop="20dp"
-            android:layout_below="@+id/addressInputField"
+            android:layout_below="@+id/postalAddressInputField"
             android:layout_toRightOf="@+id/timeText"
             android:layout_toStartOf="@+id/pickTimeButton"
             android:layout_alignRight="@+id/centerPoint"
@@ -86,7 +115,7 @@
             android:layout_alignRight="@+id/pickTimeButton"
             android:layout_alignEnd="@+id/pickTimeButton"
             android:layout_toEndOf="@+id/centerPoint"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="10dp"
             android:layout_alignLeft="@+id/pickTimeButton"
             android:layout_alignStart="@+id/pickTimeButton" />
 
@@ -110,13 +139,13 @@
 
         <Button
             android:id="@+id/pickTimeButton"
-            android:layout_width="wrap_content"
+            android:layout_width="95dp"
             android:layout_height="wrap_content"
             android:text="@string/pickTime"
             android:layout_below="@+id/cat_spinner"
             android:layout_toRightOf="@+id/centerPoint"
             android:layout_toEndOf="@+id/centerPoint"
-            android:layout_marginLeft="20dp"
+            android:layout_marginLeft="25dp"
             android:layout_marginTop="20dp" />
 
         <TextView
@@ -131,8 +160,8 @@
             android:layout_height="wrap_content"
             android:text="@string/pickDate"
             android:layout_alignBaseline="@+id/pickTimeButton"
-            android:layout_alignParentRight="true"
-            android:layout_marginRight="20dp" />
+            android:layout_toRightOf="@+id/pickTimeButton"
+            android:layout_marginLeft="30dp" />
 
         <TextView
             android:id="@+id/centerPoint"
