@@ -13,6 +13,8 @@
     <string name="name">Name</string>
     <string name="description">Description</string>
     <string name="address">Address</string>
+    <string name="postal_code">Postal code</string>
+    <string name="postal_address">Postal address</string>
     <string name="participants">Number of participants</string>
     <string name="pickDate">Pick date</string>
     <string name="pickTime">Pick time</string>
@@ -33,6 +35,8 @@
     <string name="event_created">The event was created</string>
     <string name="pin_new_event">New event</string>
     <string name="pin_creation_info">Click the pin to create new event!</string>
+    <string name="drawer_open">Open navigation drawer</string>
+    <string name="drawer_close">Close navigation drawer</string>
 
     <string name="name_error">Name can not be blank. </string>
     <string name="description_error">Description can not be blank. </string>
