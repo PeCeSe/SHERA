@@ -48,7 +48,7 @@
             android:layout_alignLeft="@+id/nameInputField"
             android:layout_alignStart="@+id/nameInputField" />
 
-        <EditText
+        <AutoCompleteTextView
             android:id="@+id/addressInputField"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
