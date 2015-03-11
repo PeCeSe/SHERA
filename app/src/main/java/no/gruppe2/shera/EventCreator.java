@@ -150,8 +150,9 @@ public class EventCreator extends ActionBarActivity {
                     if (array[i].equals(s))
                         out = list.get(i);
                 }
-                String outS = "LATITUDE: " + out.getLatitude() + "\n" + "LONGITUDE: " + out.getLongitude();
-                Toast.makeText(getApplicationContext(), outS, Toast.LENGTH_LONG).show();
+                lat = out.getLatitude();
+                lng = out.getLongitude();
+
                 Log.d("LATITUDE::", out.getLatitude() + "");
                 Log.d("LONGITUDE::", out.getLongitude() + "");
             }
@@ -177,7 +178,6 @@ public class EventCreator extends ActionBarActivity {
         if (i != null) {
             eventObject = (EventObject) i.getParcelableExtra("EventObject");
             if (eventObject == null) {
-                Log.d("BÆSJ", "får ikke inn et objekt");
                 return false;
             }
             return true;
