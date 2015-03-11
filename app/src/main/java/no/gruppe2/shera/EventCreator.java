@@ -9,11 +9,16 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.DatePicker;
@@ -28,17 +33,18 @@ import com.facebook.Response;
 import com.facebook.Session;
 import com.facebook.model.GraphUser;
 import com.firebase.client.Firebase;
-import com.google.android.gms.maps.model.LatLng;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
 
 public class EventCreator extends ActionBarActivity {
 
-    EditText nameInput, descriptionInput, addressInput, participantsInput;
+    EditText nameInput, descriptionInput, participantsInput;
     TextView timeView, dateView, errorView;
+    AutoCompleteTextView addressInput;
     static Button pickDateIn, pickTimeIn;
     CheckBox adultCheck;
     Spinner catSpinner;
@@ -53,6 +59,10 @@ public class EventCreator extends ActionBarActivity {
     DialogFragment timeFragment;
 
     EventObject eventObject;
+
+    private ArrayAdapter<String> adapter;
+    private ArrayList<Address> list;
+    private String[] array;
 
     public static Calendar cal;
     private static final String DATE_FORMAT = "dd-MM-yyyy";
@@ -69,7 +79,7 @@ public class EventCreator extends ActionBarActivity {
 
         nameInput = (EditText) findViewById(R.id.nameInputField);
         descriptionInput = (EditText) findViewById(R.id.descriptionInputField);
-        addressInput = (EditText) findViewById(R.id.addressInputField);
+        addressInput = (AutoCompleteTextView) findViewById(R.id.addressInputField);
         participantsInput = (EditText) findViewById(R.id.participantsInputField);
         pickDateIn = (Button) findViewById(R.id.pickDateButton);
         pickTimeIn = (Button) findViewById(R.id.pickTimeButton);
@@ -86,10 +96,66 @@ public class EventCreator extends ActionBarActivity {
         if (fromMap()) {
             getAddress(lat, lng);
         } else if (incomingEvent()) {
-            setFields();
+            //setFields();
         } else {
 
         }
+
+        addressInput.setThreshold(3);
+        addressInput.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (s.toString().length() > 3) {
+                    list = getLocationFromAddress(s.toString());
+                    Address loc;
+                    if (list != null) {
+                        array = new String[list.size()];
+                        for (int i = 0; i < list.size(); i++) {
+                            loc = list.get(i);
+                            String in = "";
+                            if (loc.getAddressLine(0) != null) {
+                                in += loc.getAddressLine(0).toString();
+                            }
+                            if (loc.getAddressLine(1) != null) {
+                                in += " " + loc.getAddressLine(1);
+                            }
+                            if (loc.getAddressLine(2) != null) {
+                                in += " " + loc.getAddressLine(2);
+                            }
+                            array[i] = in;
+                            Log.d("ARRAY::", array[i]);
+                        }
+                        adapter = new ArrayAdapter<String>(getBaseContext(), android.R.layout.simple_spinner_dropdown_item, array);
+                        addressInput.setAdapter(adapter);
+                    }
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+        addressInput.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                String s = addressInput.getText().toString();
+                Address out = null;
+                for (int i = 0; i < array.length; i++) {
+                    if (array[i].equals(s))
+                        out = list.get(i);
+                }
+                String outS = "LATITUDE: " + out.getLatitude() + "\n" + "LONGITUDE: " + out.getLongitude();
+                Toast.makeText(getApplicationContext(), outS, Toast.LENGTH_LONG).show();
+                Log.d("LATITUDE::", out.getLatitude() + "");
+                Log.d("LONGITUDE::", out.getLongitude() + "");
+            }
+        });
 
         pickDateIn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -301,29 +367,26 @@ public class EventCreator extends ActionBarActivity {
 
     }
 
-    public LatLng getLocationFromAddress(String strAddress) {
-
+    public ArrayList<Address> getLocationFromAddress(String strAddress) {
+        List<Address> result;
+        ArrayList<Address> list = new ArrayList<>();
         Geocoder coder = new Geocoder(this);
-        List<Address> address;
-        LatLng p1 = null;
-
         try {
-            address = coder.getFromLocationName(strAddress, 5);
-            if (address == null) {
+            result = coder.getFromLocationName(strAddress, 5);
+            if (result == null)
                 return null;
+            else if (result.size() == 0)
+                return null;
+            else {
+                for (int i = 0; i < result.size(); i++) {
+                    list = (ArrayList) result;
+                }
             }
-            Address location = address.get(0);
-            location.getLatitude();
-            location.getLongitude();
-
-            p1 = new LatLng(location.getLatitude(), location.getLongitude());
-
-        } catch (Exception ex) {
-
-            ex.printStackTrace();
+        } catch (Exception e) {
+            Log.d("EXC::", e.toString());
         }
 
-        return p1;
+        return list;
     }
 
     private void writeObjectToDatabase() {
