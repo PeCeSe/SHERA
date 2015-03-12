@@ -1,13 +1,13 @@
 package no.gruppe2.shera;
 
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
+import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
 //This class is going to contain a listfragment
 
-public class Events extends FragmentActivity {
+public class Events extends ActionBarActivity {
 
     private EventList eventListFragment;
 
@@ -16,8 +16,8 @@ public class Events extends FragmentActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_events);
 
-        if	(findViewById(R.id.fragment_container)	!=	null)	{
-            if	(savedInstanceState	!=	null)	{
+        if (findViewById(R.id.fragment_container) != null) {
+            if (savedInstanceState != null) {
                 return;
             }
             eventListFragment = new EventList();
@@ -52,7 +52,7 @@ public class Events extends FragmentActivity {
     protected void onResume() {
         super.onResume();
 
-        if	(findViewById(R.id.fragment_container)	!=	null)	{
+        if (findViewById(R.id.fragment_container) != null) {
             eventListFragment = new EventList();
             getFragmentManager().beginTransaction().add(R.id.fragment_container, eventListFragment).commit();
         }

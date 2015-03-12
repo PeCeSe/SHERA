@@ -48,7 +48,7 @@
             android:layout_alignRight="@+id/centerPoint"
             android:layout_alignEnd="@+id/centerPoint" />
 
-        <EditText
+        <AutoCompleteTextView
             android:id="@+id/addressInputField"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
