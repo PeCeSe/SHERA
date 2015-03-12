@@ -24,7 +24,7 @@ public class DBHandler {
     private EventObject eo;
     private HashMap<String, Object> map;
     private Calendar cal;
-    private long numChildren;
+    public long numChildren;
 
     public void pushToDB(EventObject e, Firebase r) {
         ref = r;
@@ -45,24 +45,27 @@ public class DBHandler {
 
     public long getNumChildren(Firebase r) {
         ref = r;
-        numChildren = 0;
-        ref.child("Events").addValueEventListener(new ValueEventListener() {
+        event = ref.child("Events");
+        event.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 numChildren = dataSnapshot.getChildrenCount();
+                Log.d("SNAP:", dataSnapshot.getValue() + "\n" + numChildren);
             }
 
             @Override
             public void onCancelled(FirebaseError firebaseError) {
-
+                Log.d("The read failed: ", firebaseError.getMessage());
             }
         });
         return numChildren;
     }
 
-    public void getFromDB(Firebase r) {
+    public LinkedList<EventObject> getFromDB(Firebase r) {
         ref = r;
+        //long numChild = getNumChildren(ref);
         event = ref.child("Events");
+
         event.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
@@ -107,5 +110,6 @@ public class DBHandler {
 
             }
         });
+        return list;
     }
 }
