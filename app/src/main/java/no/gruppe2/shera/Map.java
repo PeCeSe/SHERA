@@ -38,7 +38,12 @@ public class Map extends ActionBarActivity {
         map.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
             @Override
             public void onMapLongClick(LatLng latLng) {
-                createMarker(latLng.latitude, latLng.longitude);
+                if (marker == null) {
+                    createMarker(latLng.latitude, latLng.longitude);
+                } else {
+                    marker.remove();
+                    createMarker(latLng.latitude, latLng.longitude);
+                }
             }
         });
     }
