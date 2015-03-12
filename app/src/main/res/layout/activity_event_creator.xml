@@ -65,34 +65,6 @@
             android:layout_alignParentStart="true" />
 
         <EditText
-            android:id="@+id/postalCodeInputField"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:hint="@string/postal_code"
-            android:inputType="number"
-            android:singleLine="true"
-            android:textStyle="italic"
-            android:paddingTop="15dp"
-            android:nextFocusDown="@+id/postalAddressInputField"
-            android:layout_below="@+id/addressInputField"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true" />
-
-        <EditText
-            android:id="@+id/postalAddressInputField"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:hint="@string/postal_address"
-            android:singleLine="true"
-            android:textStyle="italic"
-            android:paddingTop="15dp"
-            android:layout_below="@+id/addressInputField"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentEnd="true"
-            android:layout_toEndOf="@+id/cat_spinner"
-            android:layout_toRightOf="@+id/postalCodeInputField" />
-
-        <EditText
             android:id="@+id/participantsInputField"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -101,7 +73,7 @@
             android:singleLine="true"
             android:textStyle="italic"
             android:paddingTop="15dp"
-            android:layout_below="@+id/postalAddressInputField"
+            android:layout_below="@+id/addressInputField"
             android:layout_alignParentRight="true"
             android:layout_alignParentEnd="true"
             android:layout_alignParentLeft="true"
