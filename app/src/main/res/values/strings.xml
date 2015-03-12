@@ -33,6 +33,9 @@
     <string name="event_created">The event was created</string>
     <string name="pin_new_event">New event</string>
     <string name="pin_creation_info">Click the pin to create new event!</string>
+    <string name="drawer_open">Open navigation drawer</string>
+    <string name="drawer_close">Close navigation drawer</string>
+    <string name="main_menu">Menu</string>
 
     <string name="name_error">Name can not be blank. </string>
     <string name="description_error">Description can not be blank. </string>
@@ -45,8 +48,6 @@
     <string name="facebook_api_key">817450594983198</string>
     <string name="google_maps_api_key">AIzaSyAqgAXUSBCKpSTTZcpj-ftEnO5gwDTd5dM</string>
 
-
-
     <string-array name="category_array">
         <item>Casual</item>
         <item>Family</item>
@@ -54,7 +55,6 @@
         <item>Sports</item>
         <item>Cultural</item>
     </string-array>
-
 
     <color name="red">#FF0000</color>
 

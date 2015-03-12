@@ -1,10 +1,18 @@
 package no.gruppe2.shera;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
 
 import com.facebook.Session;
 import com.google.android.gms.maps.GoogleMap;
@@ -14,11 +22,13 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import java.util.Calendar;
-import java.util.GregorianCalendar;
+public class Map extends ActionBarActivity
+        implements NavigationDrawerFragment.NavigationDrawerCallbacks {
 
-public class Map extends ActionBarActivity {
-
+    // Fragment managing the behaviors, interactions and presentation of the navigation drawer.
+    private NavigationDrawerFragment mNavigationDrawerFragment;
+    // Used to store the last screen title. For use in {@link #restoreActionBar()}.
+    private CharSequence mTitle;
     Session session;
     private GoogleMap map;
     Marker marker;
@@ -29,11 +39,110 @@ public class Map extends ActionBarActivity {
         setContentView(R.layout.activity_map);
 
         setSession();
-
         setNewMarkerListener();
-
         map.setMyLocationEnabled(true);
         map.getUiSettings().setZoomControlsEnabled(true);
+
+        mNavigationDrawerFragment = (NavigationDrawerFragment)
+                getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
+        mTitle = getTitle();
+
+        // Set up the drawer
+        mNavigationDrawerFragment.setUp(
+                R.id.navigation_drawer,
+                (DrawerLayout) findViewById(R.id.drawer_layout));
+    }
+
+    public void onNavigationDrawerItemSelected(int position) {
+        // update the main content by replacing fragments
+        FragmentManager fragmentManager = getSupportFragmentManager();
+
+        switch (position) {
+
+            case 0: {
+                Intent i = new Intent(this, EventCreator.class);
+                startActivity(i);
+                break;
+            }
+            case 1: {
+                Intent i = new Intent(this, Events.class);
+                startActivity(i);
+                break;
+            }
+            case 2: {
+                //  Intent i = new Intent(this, Settings.class);
+                // startActivity(i);
+                break;
+            }
+            case 3: {
+                session.close();
+                finish();
+                break;
+            }
+            case 4: {
+                fragmentManager.beginTransaction()
+                        .replace(R.id.content_frame, MapsFragment.newInstance(position))
+                        .commit();
+                break;
+            }
+        }
+    }
+
+    public void onSectionAttached(int number) {
+        switch (number) {
+            case 0:
+                mTitle = getString(R.string.create_event_string);
+                break;
+            case 1:
+                mTitle = getString(R.string.title_activity_events);
+                break;
+            case 2:
+                mTitle = getString(R.string.action_settings);
+                break;
+            case 3:
+                mTitle = getString(R.string.logout);
+                break;
+            case 4:
+                mTitle = getString(R.string.title_activity_map);
+                break;
+        }
+    }
+
+    public void restoreActionBar() {
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setDisplayShowTitleEnabled(true);
+        actionBar.setTitle(mTitle);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        if (!mNavigationDrawerFragment.isDrawerOpen()) {
+            // Only show items in the action bar relevant to this screen
+            // if the drawer is not showing. Otherwise, let the drawer
+            // decide what to show in the action bar.
+            getMenuInflater().inflate(R.menu.menu_map, menu);
+            restoreActionBar();
+            return true;
+        }
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+/*       int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_settings) {
+            return true;
+        }
+        else if(id == R.id.logout_option){
+            session.close();
+            finish();
+        }*/
+        return super.onOptionsItemSelected(item);
     }
 
     private void setNewMarkerListener() {
@@ -80,50 +189,32 @@ public class Map extends ActionBarActivity {
         );
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_map, menu);
-        return true;
-    }
+    // A placeholder fragment containing a map view.
+    public static class MapsFragment extends Fragment {
+        // The fragment argument representing the section number for this fragment.
+        private static final String ARG_SECTION_NUMBER = "section_number";
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-        else if(id == R.id.new_event_option){
-
-            Calendar cal = new GregorianCalendar();
-
-            EventObject e = new EventObject("https://shera.firebaseio.com/Events/-JjjFZaCeWQP57Z7-qTp"
-                    , 3456789, "Grilling", "Grilling i st.HansHaugen", "StHansHaugen", 59, 10, 50, 4, 3, cal, true);
-
-            Intent i = new Intent(this, EventCreator.class);
-            Bundle b = new Bundle();
-            b.putParcelable("EO", e);
-            i.putExtra("EventObject", e);
-            startActivity(i);
-        }
-        else if(id == R.id.events_option){
-            Intent i = new Intent(this, Events.class);
-            startActivity(i);
-        }
-        else if(id == R.id.event_option){
-            Intent i = new Intent(this, Event.class);
-            startActivity(i);
-        }
-        else if(id == R.id.logout_option){
-            session.close();
-            finish();
+        // Returns a new instance of this fragment for the given section number.
+        public static MapsFragment newInstance(int sectionNumber) {
+            MapsFragment fragment = new MapsFragment();
+            Bundle args = new Bundle();
+            args.putInt(ARG_SECTION_NUMBER, sectionNumber);
+            fragment.setArguments(args);
+            return fragment;
         }
 
-        return super.onOptionsItemSelected(item);
+        @Override
+        public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                                 Bundle savedInstanceState) {
+            View rootView = inflater.inflate(R.layout.fragment_map, container, false);
+            return rootView;
+        }
+
+        @Override
+        public void onAttach(Activity activity) {
+            super.onAttach(activity);
+            ((Map) activity).onSectionAttached(
+                    getArguments().getInt(ARG_SECTION_NUMBER));
+        }
     }
 }
