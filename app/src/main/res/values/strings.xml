@@ -13,8 +13,6 @@
     <string name="name">Name</string>
     <string name="description">Description</string>
     <string name="address">Address</string>
-    <string name="postal_code">Postal code</string>
-    <string name="postal_address">Postal address</string>
     <string name="participants">Number of participants</string>
     <string name="pickDate">Pick date</string>
     <string name="pickTime">Pick time</string>
