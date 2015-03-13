@@ -30,13 +30,15 @@
     <string name="sports">Sports</string>
     <string name="cultural">Cultural</string>
     <string name="category_prompt">Choose a category</string>
-    <string name="event_created">The event was created</string>
+    <string name="event_saved">The event was saved</string>
     <string name="pin_new_event">New event</string>
-    <string name="pin_creation_info">Click the pin to create new event!</string>
+    <string name="pin_creation_info">Click here to create new event!</string>
     <string name="drawer_open">Open navigation drawer</string>
     <string name="drawer_close">Close navigation drawer</string>
     <string name="main_menu">Menu</string>
     <string name="edit">Edit</string>
+    <string name="join">Join</string>
+    <string name="unjoin">Unjoin</string>
 
     <string name="name_error">Name can not be blank. </string>
     <string name="description_error">Description can not be blank. </string>

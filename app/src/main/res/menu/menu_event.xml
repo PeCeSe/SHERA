@@ -7,5 +7,20 @@
         android:id="@+id/change_button"
         android:title="@string/edit"
         android:orderInCategory="100"
-        app:showAsAction="always" />
+        app:showAsAction="always"
+        android:visible="false" />
+
+    <item
+        android:id="@+id/join_button"
+        android:title="@string/join"
+        android:orderInCategory="100"
+        app:showAsAction="always"
+        android:visible="false" />
+
+    <item
+        android:id="@+id/unjoin_button"
+        android:title="@string/unjoin"
+        android:orderInCategory="100"
+        app:showAsAction="always"
+        android:visible="false" />
 </menu>

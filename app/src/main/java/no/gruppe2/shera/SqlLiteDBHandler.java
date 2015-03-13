@@ -43,6 +43,7 @@ public class SqlLiteDBHandler extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
         values.put(KEY_EVENT_ID, eventID);
         values.put(KEY_OWN_EVENT, 0);
+        db.insert(TABLE_EVENTS, null, values);
         db.close();
     }
 
@@ -51,6 +52,7 @@ public class SqlLiteDBHandler extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
         values.put(KEY_EVENT_ID, eventID);
         values.put(KEY_OWN_EVENT, 1);
+        db.insert(TABLE_EVENTS, null, values);
         db.close();
     }
 

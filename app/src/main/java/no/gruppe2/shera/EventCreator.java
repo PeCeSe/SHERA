@@ -60,6 +60,8 @@ public class EventCreator extends ActionBarActivity {
 
     EventObject eventObject;
 
+    SqlLiteDBHandler sqldb;
+
     private ArrayAdapter<String> adapter;
     private ArrayList<Address> list;
     private String[] array;
@@ -76,6 +78,8 @@ public class EventCreator extends ActionBarActivity {
         db = new DBHandler();
         Firebase.setAndroidContext(this);
         ref = new Firebase("https://shera.firebaseio.com/");
+
+        sqldb = new SqlLiteDBHandler(this);
 
         nameInput = (EditText) findViewById(R.id.nameInputField);
         descriptionInput = (EditText) findViewById(R.id.descriptionInputField);
@@ -230,8 +234,6 @@ public class EventCreator extends ActionBarActivity {
                 addressInput.setText(s);
                 return addresses;
             } else {
-                Toast.makeText(this, "latitude and longitude are null",
-                        Toast.LENGTH_LONG).show();
                 return null;
             }
         } catch (Exception e) {
@@ -285,6 +287,7 @@ public class EventCreator extends ActionBarActivity {
             if (validateInput()) {
                 updateEventObject();
                 updateObjectInDatabase();
+                showToast(getResources().getString(R.string.event_saved));
                 finish();
             } else
                 return;
@@ -292,7 +295,8 @@ public class EventCreator extends ActionBarActivity {
             if (validateInput()) {
                 createEventObject();
                 writeObjectToDatabase();
-                showToast(getResources().getString(R.string.event_created));
+                sqldb.eventCreated(eventObject.getEventID());
+                showToast(getResources().getString(R.string.event_saved));
                 finish();
             } else
                 return;
@@ -354,10 +358,6 @@ public class EventCreator extends ActionBarActivity {
         eventObject.setName(nameInput.getText().toString());
         eventObject.setDescription(descriptionInput.getText().toString());
         eventObject.setAddress(addressInput.getText().toString());
-
-        /*Need to make changes so we can construct an Address-object,
-        then call to getLocationFromAddress(address)*/
-
         eventObject.setMaxParticipants(Integer.parseInt(participantsInput.getText().toString()));
         eventObject.setCategory(catSpinner.getSelectedItemPosition() + 1);
         if (cal != null) {
