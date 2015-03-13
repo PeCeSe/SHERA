@@ -18,7 +18,7 @@ public class EventObject implements Parcelable {
     private Calendar calendar;
     private boolean adult;
     private double longitude, latitude;
-    private ArrayList<Long> participants;
+    private ArrayList<Long> participants = new ArrayList<>();
 
     private final static int CASUAL = 1, FAMILY = 2, HOBBY = 3, SPORTS = 4, CULTURAL = 5;
 
@@ -35,7 +35,6 @@ public class EventObject implements Parcelable {
         category = cat;
         calendar = cal;
         adult = b;
-        participants = null;
     }
 
     public EventObject(String e, long u, String n, String d, String a, double lat, double lon, int max, int num, int cat, Calendar cal, boolean b, ArrayList list) {
