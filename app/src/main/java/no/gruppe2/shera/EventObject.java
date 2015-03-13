@@ -3,6 +3,7 @@ package no.gruppe2.shera;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
@@ -17,6 +18,7 @@ public class EventObject implements Parcelable {
     private Calendar calendar;
     private boolean adult;
     private double longitude, latitude;
+    private ArrayList<Long> participants;
 
     private final static int CASUAL = 1, FAMILY = 2, HOBBY = 3, SPORTS = 4, CULTURAL = 5;
 
@@ -33,9 +35,10 @@ public class EventObject implements Parcelable {
         category = cat;
         calendar = cal;
         adult = b;
+        participants = null;
     }
 
-    public EventObject(String e, long u, String n, String d, String a, double lat, double lon, int max, int num, int cat, Calendar cal, boolean b) {
+    public EventObject(String e, long u, String n, String d, String a, double lat, double lon, int max, int num, int cat, Calendar cal, boolean b, ArrayList list) {
         eventID = e;
         userID = u;
         name = n;
@@ -48,6 +51,7 @@ public class EventObject implements Parcelable {
         category = cat;
         calendar = cal;
         adult = b;
+        participants = list;
     }
 
     public String getEventID() {
@@ -149,6 +153,28 @@ public class EventObject implements Parcelable {
     public void setCalendarWithMillis(long l) {
         calendar = new GregorianCalendar();
         calendar.setTimeInMillis(l);
+    }
+
+    public void setParticipantsList(ArrayList list) {
+        participants = list;
+    }
+
+    public ArrayList getParticipantsList() {
+        return participants;
+    }
+
+    public void addParticipantToList(long id) {
+        participants.add(id);
+        numParticipants++;
+    }
+
+    public boolean removePartisipantFromList(long id) {
+        if (participants.contains(id)) {
+            participants.remove(id);
+            numParticipants--;
+            return true;
+        }
+        return false;
     }
 
 

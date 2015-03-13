@@ -2,7 +2,6 @@ package no.gruppe2.shera;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.location.*;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -19,7 +18,6 @@ import android.view.ViewGroup;
 import com.facebook.Request;
 import com.facebook.Response;
 import com.facebook.Session;
-
 import com.facebook.model.GraphUser;
 import com.firebase.client.ChildEventListener;
 import com.firebase.client.DataSnapshot;
@@ -28,7 +26,6 @@ import com.firebase.client.FirebaseError;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -84,19 +81,8 @@ public class Map extends ActionBarActivity
         ref = new Firebase("https://shera.firebaseio.com/");
         event = ref.child("Events");
 
-/*
-        Calendar calendar = new GregorianCalendar();
-        LinkedList<Long> listetest = new LinkedList<>();
-        listetest.add(Long.parseLong("123"));
-        listetest.add(Long.parseLong("123"));
-        listetest.add(Long.parseLong("123"));
-        listetest.add(Long.parseLong("123"));
-        //public EventObject(long u, String n, String d, String a, double la, double lo, int max, int cat, Calendar cal, boolean b) {
-        eo = new EventObject(123456,"N","D","A",60,13,15,1,calendar,true);
-        //db.pushToDB(eo,ref);
-
         arrayList = new ArrayList<>();
-*/
+
         event.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
@@ -122,7 +108,10 @@ public class Map extends ActionBarActivity
                         Integer.parseInt(hash.get("numParticipants").toString()),
                         Integer.parseInt(hash.get("category").toString()),
                         cal,
-                        Boolean.parseBoolean(hash.get("adult").toString()));
+                        Boolean.parseBoolean(hash.get("adult").toString()),
+                        arrayList);
+
+                Log.d("LIST::", eo.getParticipantsList() + "");
 
                 Marker m = map.addMarker(new MarkerOptions()
                         .position(new LatLng(eo.getLatitude(), eo.getLongitude()))
