@@ -54,8 +54,8 @@ public class Event extends ActionBarActivity {
         dateView.setText(String.format("%02d", eo.getCalendar().get(Calendar.DAY_OF_MONTH)) + "-"
                 + (String.format("%02d", eo.getCalendar().get(Calendar.MONTH) + 1)) + "-"
                 + eo.getCalendar().get(Calendar.YEAR));
-        timeView.setText(eo.getCalendar().get(Calendar.HOUR_OF_DAY) + ":"
-                + eo.getCalendar().get(Calendar.MINUTE));
+        timeView.setText(String.format("%02d", eo.getCalendar().get(Calendar.HOUR_OF_DAY)) + ":"
+                + String.format("%02d", eo.getCalendar().get(Calendar.MINUTE)));
         addressView.setText(eo.getAddress());
     }
 
