@@ -8,6 +8,7 @@ import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
@@ -71,6 +72,7 @@ public class DBHandler {
                 String time = map.get("calendar").toString();
                 cal = new GregorianCalendar();
                 cal.setTimeInMillis(Long.parseLong(time));
+                ArrayList<Long> listetest = new ArrayList<Long>();
 
                 eo = new EventObject(map.get("eventID").toString(),
                         Long.parseLong(map.get("userID").toString()),
@@ -83,7 +85,8 @@ public class DBHandler {
                         Integer.parseInt(map.get("numParticipants").toString()),
                         Integer.parseInt(map.get("category").toString()),
                         cal,
-                        Boolean.parseBoolean(map.get("adult").toString()));
+                        Boolean.parseBoolean(map.get("adult").toString()),
+                        listetest);
                 list.add(eo);
             }
 
