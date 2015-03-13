@@ -2,25 +2,42 @@ package no.gruppe2.shera;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.location.*;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.facebook.Request;
+import com.facebook.Response;
 import com.facebook.Session;
+
+import com.facebook.model.GraphUser;
+import com.firebase.client.ChildEventListener;
+import com.firebase.client.DataSnapshot;
+import com.firebase.client.Firebase;
+import com.firebase.client.FirebaseError;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.LinkedList;
 
 public class Map extends ActionBarActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks {
@@ -34,15 +51,110 @@ public class Map extends ActionBarActivity
     private GoogleMap map;
     Marker marker;
 
+    private Firebase ref, event;
+    private DBHandler db = new DBHandler();
+    private LinkedList<EventObject> list = new LinkedList<>();
+    private ArrayList<Long> arrayList;
+    private HashMap<String, Object> hash = new HashMap<>();
+    private HashMap<String, EventObject> markerMap;
+    private Calendar cal;
+    public long numChildren;
+    private EventObject eo;
+    private String userID;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Firebase.setAndroidContext(this);
         setContentView(R.layout.activity_map);
 
         setSession();
+        findUserID(session);
+
         setNewMarkerListener();
+
         map.setMyLocationEnabled(true);
         map.getUiSettings().setZoomControlsEnabled(true);
+
+        map.getUiSettings().setZoomControlsEnabled(true);
+        map = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
+
+        markerMap = new HashMap<>();
+
+        ref = new Firebase("https://shera.firebaseio.com/");
+        event = ref.child("Events");
+
+/*
+        Calendar calendar = new GregorianCalendar();
+        LinkedList<Long> listetest = new LinkedList<>();
+        listetest.add(Long.parseLong("123"));
+        listetest.add(Long.parseLong("123"));
+        listetest.add(Long.parseLong("123"));
+        listetest.add(Long.parseLong("123"));
+        //public EventObject(long u, String n, String d, String a, double la, double lo, int max, int cat, Calendar cal, boolean b) {
+        eo = new EventObject(123456,"N","D","A",60,13,15,1,calendar,true);
+        //db.pushToDB(eo,ref);
+
+        arrayList = new ArrayList<>();
+*/
+        event.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                hash = new HashMap<>();
+                hash = (HashMap<String, Object>) dataSnapshot.getValue();
+                String time = hash.get("calendar").toString();
+                cal = new GregorianCalendar();
+                cal.setTimeInMillis(Long.parseLong(time));
+                //Log.d("LIST::",""+hash.get("participantsList").toString());
+                if (hash.get("participantsList") == null)
+                    arrayList = null;
+                else
+                    arrayList = (ArrayList<Long>) hash.get("participantsList");
+
+                eo = new EventObject(hash.get("eventID").toString(),
+                        Long.parseLong(hash.get("userID").toString()),
+                        hash.get("name").toString(),
+                        hash.get("description").toString(),
+                        hash.get("address").toString(),
+                        Double.parseDouble(hash.get("latitude").toString()),
+                        Double.parseDouble(hash.get("longitude").toString()),
+                        Integer.parseInt(hash.get("maxParticipants").toString()),
+                        Integer.parseInt(hash.get("numParticipants").toString()),
+                        Integer.parseInt(hash.get("category").toString()),
+                        cal,
+                        Boolean.parseBoolean(hash.get("adult").toString()));
+
+                Marker m = map.addMarker(new MarkerOptions()
+                        .position(new LatLng(eo.getLatitude(), eo.getLongitude()))
+                        .title(eo.getName())
+                        .snippet(eo.getDescription()));
+                markerMap.put(m.getId(), eo);
+
+
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+
+            }
+        });
+
+        setInfoWindowListener();
 
         mNavigationDrawerFragment = (NavigationDrawerFragment)
                 getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
@@ -52,6 +164,22 @@ public class Map extends ActionBarActivity
         mNavigationDrawerFragment.setUp(
                 R.id.navigation_drawer,
                 (DrawerLayout) findViewById(R.id.drawer_layout));
+    }
+
+    private void findUserID(final Session session) {
+        if (session != null && session.isOpened()) {
+            Request request = Request.newMeRequest(session, new Request.GraphUserCallback() {
+                @Override
+                public void onCompleted(GraphUser user, Response response) {
+                    if (session == Session.getActiveSession()) {
+                        if (user != null) {
+                            userID = user.getId();
+                        }
+                    }
+                }
+            });
+            Request.executeBatchAsync(request);
+        }
     }
 
     public void onNavigationDrawerItemSelected(int position) {
@@ -182,18 +310,6 @@ public class Map extends ActionBarActivity
                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_VIOLET)));
 
         marker.showInfoWindow();
-        map.setOnMarkerClickListener(
-                new GoogleMap.OnMarkerClickListener() {
-                    @Override
-                    public boolean onMarkerClick(Marker marker) {
-                        Intent i = new Intent(getBaseContext(), EventCreator.class);
-                        i.putExtra("Lat", marker.getPosition().latitude);
-                        i.putExtra("Long", marker.getPosition().longitude);
-                        startActivity(i);
-                        return false;
-                    }
-                }
-        );
     }
 
     // A placeholder fragment containing a map view.
@@ -223,5 +339,28 @@ public class Map extends ActionBarActivity
             ((Map) activity).onSectionAttached(
                     getArguments().getInt(ARG_SECTION_NUMBER));
         }
+    }
+
+    public void setInfoWindowListener() {
+        map.setOnInfoWindowClickListener(
+                new GoogleMap.OnInfoWindowClickListener() {
+                    @Override
+                    public void onInfoWindowClick(Marker marker) {
+                        if (markerMap.containsKey(marker.getId())) {
+                            EventObject eventObject = markerMap.get(marker.getId());
+                            Intent i = new Intent(getBaseContext(), Event.class);
+                            i.putExtra("EventObject", eventObject);
+                            i.putExtra("userID", userID);
+                            startActivity(i);
+                        } else {
+                            marker.remove();
+                            Intent i = new Intent(getBaseContext(), EventCreator.class);
+                            i.putExtra("Lat", marker.getPosition().latitude);
+                            i.putExtra("Long", marker.getPosition().longitude);
+                            startActivity(i);
+                        }
+                    }
+                }
+        );
     }
 }
