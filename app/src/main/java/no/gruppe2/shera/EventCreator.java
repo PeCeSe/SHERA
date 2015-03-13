@@ -73,9 +73,9 @@ public class EventCreator extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_event_creator);
 
-        db=new DBHandler();
+        db = new DBHandler();
         Firebase.setAndroidContext(this);
-        ref=new Firebase("https://shera.firebaseio.com/");
+        ref = new Firebase("https://shera.firebaseio.com/");
 
         nameInput = (EditText) findViewById(R.id.nameInputField);
         descriptionInput = (EditText) findViewById(R.id.descriptionInputField);
@@ -96,7 +96,7 @@ public class EventCreator extends ActionBarActivity {
         if (fromMap()) {
             getAddress(lat, lng);
         } else if (incomingEvent()) {
-            //setFields();
+            setFields();
         } else {
 
         }
@@ -264,7 +264,7 @@ public class EventCreator extends ActionBarActivity {
 
     }
 
-    private void findUserID(final Session session){
+    private void findUserID(final Session session) {
         if (session != null && session.isOpened()) {
             Request request = Request.newMeRequest(session, new Request.GraphUserCallback() {
                 @Override
@@ -419,6 +419,7 @@ public class EventCreator extends ActionBarActivity {
         String dateForButton = dateFormat.format(cal.getTime());
         pickDateIn.setText(dateForButton);
     }
+
     private static void updateTimeButtonText() {
         SimpleDateFormat timeFormat = new SimpleDateFormat(TIME_FORMAT);
         String timeForButton = timeFormat.format(cal.getTime());
