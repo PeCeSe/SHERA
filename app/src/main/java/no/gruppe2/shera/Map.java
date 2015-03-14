@@ -2,13 +2,15 @@ package no.gruppe2.shera;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.location.Criteria;
+import android.location.Location;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -23,6 +25,7 @@ import com.firebase.client.ChildEventListener;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
@@ -116,15 +119,18 @@ public class Map extends ActionBarActivity
                         Boolean.parseBoolean(hash.get("adult").toString()),
                         arrayList);
 
-                Log.d("LIST::", eo.getParticipantsList() + "");
 
                 list.add(eo);
 
-                Marker m = map.addMarker(new MarkerOptions()
-                        .position(new LatLng(eo.getLatitude(), eo.getLongitude()))
-                        .title(eo.getName())
-                        .snippet(eo.getDescription()));
-                markerMap.put(m.getId(), eo);
+
+                Calendar today = Calendar.getInstance();
+                if (today.before(eo.getCalendar())) {
+                    Marker m = map.addMarker(new MarkerOptions()
+                            .position(new LatLng(eo.getLatitude(), eo.getLongitude()))
+                            .title(eo.getName())
+                            .snippet(eo.getDescription()));
+                    markerMap.put(m.getId(), eo);
+                }
 
 
             }
@@ -160,6 +166,20 @@ public class Map extends ActionBarActivity
         mNavigationDrawerFragment.setUp(
                 R.id.navigation_drawer,
                 (DrawerLayout) findViewById(R.id.drawer_layout));
+
+        centerMapOnMyLocation();
+    }
+
+    private void centerMapOnMyLocation() {
+
+        LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+        Criteria criteria = new Criteria();
+
+        Location location = locationManager.getLastKnownLocation(locationManager.getBestProvider(criteria, false));
+        if (location != null) {
+            map.animateCamera(CameraUpdateFactory.newLatLngZoom(
+                    new LatLng(location.getLatitude(), location.getLongitude()), 14));
+        }
     }
 
     private void findUserID(final Session session) {
