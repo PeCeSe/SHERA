@@ -198,6 +198,7 @@ public class EventObject implements Parcelable {
         dest.writeInt(category);
         dest.writeString(calendar.getTimeInMillis() + "");
         dest.writeByte((byte) (adult ? 1 : 0));
+        dest.writeList(participants);
     }
 
     private void readFromParcel(Parcel in) {
@@ -214,6 +215,7 @@ public class EventObject implements Parcelable {
         String s = in.readString();
         setCalendarWithMillis(Long.parseLong(s));
         adult = in.readByte() != 0;
+        in.readList(participants, null);
     }
 
     public EventObject(Parcel in) {

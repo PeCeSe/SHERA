@@ -35,6 +35,7 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.ListIterator;
 
 public class Map extends ActionBarActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks {
@@ -59,6 +60,8 @@ public class Map extends ActionBarActivity
     private EventObject eo;
     private String userID;
 
+    private SqlLiteDBHandler sqldb;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -67,6 +70,8 @@ public class Map extends ActionBarActivity
 
         setSession();
         findUserID(session);
+
+        sqldb = new SqlLiteDBHandler(this);
 
         setNewMarkerListener();
 
@@ -112,6 +117,8 @@ public class Map extends ActionBarActivity
                         arrayList);
 
                 Log.d("LIST::", eo.getParticipantsList() + "");
+
+                list.add(eo);
 
                 Marker m = map.addMarker(new MarkerOptions()
                         .position(new LatLng(eo.getLatitude(), eo.getLongitude()))
@@ -183,8 +190,28 @@ public class Map extends ActionBarActivity
                 break;
             }
             case 1: {
-                Intent i = new Intent(this, Events.class);
-                startActivity(i);
+
+                Intent intent = new Intent(this, Events.class);
+
+                ArrayList<EventObject> eoList = new ArrayList<>();
+
+                ListIterator<EventObject> itObject = list.listIterator();
+
+                ArrayList<String> localEvents = sqldb.getAllEvents();
+
+                while (itObject.hasNext()) {
+
+                    EventObject eventObject = itObject.next();
+                    for (int i = 0; i < localEvents.size(); i++) {
+                        if (eventObject.getEventID().equals(localEvents.get((i)))) {
+                            eoList.add(eventObject);
+                        }
+                    }
+
+                }
+
+                intent.putParcelableArrayListExtra("EventObjects", eoList);
+                startActivity(intent);
                 break;
             }
             case 2: {

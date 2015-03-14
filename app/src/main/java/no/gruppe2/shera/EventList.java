@@ -1,6 +1,7 @@
 package no.gruppe2.shera;
 
 import android.app.ListFragment;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,8 +10,8 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -20,9 +21,10 @@ import java.util.List;
 public class EventList extends ListFragment{
 
 
-    private List<String> fruits;
+    private List<String> events;
     ArrayAdapter<String> adapter;
     private ListView l;
+    private ArrayList<EventObject> eventObjects;
 
     @Override
     public View onCreateView(LayoutInflater inflater,	ViewGroup container, Bundle savedInstanceState) {
@@ -33,26 +35,33 @@ public class EventList extends ListFragment{
     public void	onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-
-        //Fruits is temporary
-        fruits = new LinkedList<String>();
-
-        fruits.add("apple");
-        fruits.add("pear");
-        fruits.add("orange");
-        fruits.add("banana");
-        fruits.add("pineapple");
+        Intent intent = getActivity().getIntent();
+        if (intent != null) {
+            eventObjects = intent.getParcelableArrayListExtra("EventObjects");
+        } else
+            eventObjects = new ArrayList<>();
 
 
-        adapter = new ArrayAdapter<String>(getActivity().getBaseContext(),
-                android.R.layout.simple_list_item_1, fruits);
+        events = new LinkedList<>();
+
+        if (eventObjects != null) {
+            for (int i = 0; i < eventObjects.size(); i++) {
+                events.add(eventObjects.get(i).getName());
+            }
+        }
+
+
+        adapter = new ArrayAdapter<>(getActivity().getBaseContext(),
+                android.R.layout.simple_list_item_1, events);
 
         l = (ListView) getActivity().findViewById(R.id.listview);
         l.setAdapter(adapter);
 
         l.setOnItemClickListener(new OnItemClickListener(){
             public void onItemClick(AdapterView<?> arg0,View arg1,int arg2,	long arg3) {
-                Toast.makeText(getActivity().getBaseContext(), "Du trykket " + arg2, Toast.LENGTH_SHORT).show();
+                Intent intent1 = new Intent(getActivity().getBaseContext(), Event.class);
+                intent1.putExtra("EventObject", eventObjects.get(arg2));
+                startActivity(intent1);
             }
         });
     }
