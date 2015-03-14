@@ -1,13 +1,14 @@
 package no.gruppe2.shera;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
 
-import com.facebook.Session;
 import com.firebase.client.Firebase;
 
 import java.util.Calendar;
@@ -29,7 +30,10 @@ public class Event extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_event);
 
-        Session session = Session.openActiveSessionFromCache(this);
+        SharedPreferences prefs = this.getSharedPreferences(
+                "com.Gruppe2.SHERA", Context.MODE_PRIVATE);
+
+        userID = prefs.getString("userID", null);
 
         sqldb = new SqlLiteDBHandler(this);
 
@@ -39,7 +43,6 @@ public class Event extends ActionBarActivity {
 
         Intent i = getIntent();
         eo = i.getParcelableExtra("EventObject");
-        userID = i.getStringExtra("userID");
 
         titleView = (TextView) findViewById(R.id.titleView);
         descriptionView = (TextView) findViewById(R.id.descriptionView);
