@@ -88,6 +88,22 @@ public class SqlLiteDBHandler extends SQLiteOpenHelper {
         return idList;
     }
 
+    public ArrayList<String> getAllEvents() {
+        ArrayList<String> idList = new ArrayList<String>();
+        String selectQuery = "SELECT * FROM " + TABLE_EVENTS;
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor = db.rawQuery(selectQuery, null);
+
+        if (cursor.moveToFirst()) {
+            do {
+                idList.add(cursor.getString(0));
+            }
+            while (cursor.moveToNext());
+        }
+        db.close();
+        return idList;
+    }
+
     public void deleteEventID(String eventID) {
         SQLiteDatabase db = this.getWritableDatabase();
         db.delete(TABLE_EVENTS, KEY_EVENT_ID + "= ?", new String[]{

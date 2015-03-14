@@ -5,11 +5,14 @@ import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import java.util.ArrayList;
+
 //This class is going to contain a listfragment
 
 public class Events extends ActionBarActivity {
 
     private EventList eventListFragment;
+    ArrayList<EventObject> eventObjects;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
