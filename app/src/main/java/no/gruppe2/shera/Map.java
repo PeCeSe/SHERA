@@ -1,7 +1,9 @@
 package no.gruppe2.shera;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
@@ -386,7 +388,6 @@ public class Map extends ActionBarActivity
                             EventObject eventObject = markerMap.get(marker.getId());
                             Intent i = new Intent(getBaseContext(), Event.class);
                             i.putExtra("EventObject", eventObject);
-                            i.putExtra("userID", userID);
                             startActivity(i);
                         } else {
                             marker.remove();
@@ -398,5 +399,14 @@ public class Map extends ActionBarActivity
                     }
                 }
         );
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        SharedPreferences prefs = this.getSharedPreferences(
+                "com.Gruppe2.SHERA", Context.MODE_PRIVATE);
+
+        prefs.edit().putString("userID", userID).apply();
     }
 }
