@@ -1,4 +1,4 @@
-package no.gruppe2.shera;
+package no.gruppe2.shera.view;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -8,8 +8,10 @@ import com.facebook.Session;
 import com.facebook.SessionState;
 import com.facebook.UiLifecycleHelper;
 
+import no.gruppe2.shera.R;
 
-public class LogIn extends FragmentActivity {
+
+public class LogInView extends FragmentActivity {
 
     private UiLifecycleHelper uiHelper;
 
@@ -23,47 +25,47 @@ public class LogIn extends FragmentActivity {
         setContentView(R.layout.activity_log_in);
     }
 
-    private Session.StatusCallback statusCallback = new Session.StatusCallback(){
+    private Session.StatusCallback statusCallback = new Session.StatusCallback() {
         @Override
-        public void call(Session session, SessionState state, Exception exception){
-            if(state.isOpened()) {
+        public void call(Session session, SessionState state, Exception exception) {
+            if (state.isOpened()) {
                 logInFb(session);
             }
         }
     };
 
     @Override
-    public void onResume(){
+    public void onResume() {
         super.onResume();
         uiHelper.onResume();
     }
 
     @Override
-    public void onPause(){
+    public void onPause() {
         super.onPause();
         uiHelper.onPause();
     }
 
     @Override
-    public void onDestroy(){
+    public void onDestroy() {
         super.onDestroy();
         uiHelper.onDestroy();
     }
 
     @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data){
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         uiHelper.onActivityResult(requestCode, resultCode, data);
     }
 
     @Override
-    public void onSaveInstanceState(Bundle savedState){
+    public void onSaveInstanceState(Bundle savedState) {
         super.onSaveInstanceState(savedState);
         uiHelper.onSaveInstanceState(savedState);
     }
 
-    public void logInFb(Session session){
-        Intent i = new Intent(this, Map.class);
+    public void logInFb(Session session) {
+        Intent i = new Intent(this, MapView.class);
         i.putExtra("fb_session", session);
         startActivity(i);
     }

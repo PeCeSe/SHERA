@@ -1,4 +1,4 @@
-package no.gruppe2.shera;
+package no.gruppe2.shera.fragments;
 
 import android.app.Activity;
 import android.content.SharedPreferences;
@@ -19,6 +19,8 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+
+import no.gruppe2.shera.R;
 
 // Fragment used for managing interactions for and presentation of a navigation drawer.
 public class NavigationDrawerFragment extends Fragment {
@@ -41,8 +43,7 @@ public class NavigationDrawerFragment extends Fragment {
     private View mFragmentContainerView;
 
     private int mCurrentSelectedPosition = 5;
-    private boolean mFromSavedInstanceState;
-    private boolean mUserLearnedDrawer;
+    private boolean mFromSavedInstanceState, mUserLearnedDrawer;
 
     public NavigationDrawerFragment() {
     }

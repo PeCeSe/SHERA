@@ -1,4 +1,4 @@
-package no.gruppe2.shera;
+package no.gruppe2.shera.view;
 
 import android.app.DatePickerDialog;
 import android.app.Dialog;
@@ -39,8 +39,14 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
+import no.gruppe2.shera.R;
+import no.gruppe2.shera.dto.Event;
+import no.gruppe2.shera.helpers.HelpMethods;
+import no.gruppe2.shera.service.DBHandler;
+import no.gruppe2.shera.service.SqlLiteDBHandler;
 
-public class EventCreator extends ActionBarActivity {
+
+public class EventCreatorView extends ActionBarActivity {
 
     EditText nameInput, descriptionInput, participantsInput;
     TextView timeView, dateView, errorView;
@@ -49,6 +55,7 @@ public class EventCreator extends ActionBarActivity {
     CheckBox adultCheck;
     Spinner catSpinner;
 
+    private HelpMethods help;
     private DBHandler db;
     private Firebase ref;
 
@@ -58,7 +65,7 @@ public class EventCreator extends ActionBarActivity {
     DialogFragment dateFragment;
     DialogFragment timeFragment;
 
-    EventObject eventObject;
+    Event event;
 
     SqlLiteDBHandler sqldb;
 
@@ -67,8 +74,8 @@ public class EventCreator extends ActionBarActivity {
     private String[] array;
 
     public static Calendar cal;
-    private static final String DATE_FORMAT = "dd-MM-yyyy";
-    private static final String TIME_FORMAT = "kk:mm";
+    private static final String DATE_FORMAT = "dd-MM-yyyy", TIME_FORMAT = "kk:mm";
+    private static final int TRESHOLD = 3, DEFAULTLONGLAT = 200, LISTOFLOCATIONSIZE = 5;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,8 +84,8 @@ public class EventCreator extends ActionBarActivity {
 
         db = new DBHandler();
         Firebase.setAndroidContext(this);
-        ref = new Firebase("https://shera.firebaseio.com/");
-
+        ref = new Firebase(getResources().getString(R.string.firebase_root));
+        help = new HelpMethods();
         sqldb = new SqlLiteDBHandler(this);
 
         nameInput = (EditText) findViewById(R.id.nameInputField);
@@ -98,14 +105,62 @@ public class EventCreator extends ActionBarActivity {
         findUserID(session);
 
         if (fromMap()) {
-            getAddress(lat, lng);
+            addressInput.setText(getAddress(lat, lng));
         } else if (incomingEvent()) {
+            cal = event.getCalendar();
             setFields();
         } else {
 
         }
 
-        addressInput.setThreshold(3);
+        addressInput.setThreshold(TRESHOLD);
+        setAddressFieldListener();
+        setAutoCompleteClickListener();
+
+        pickDateIn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View arg0) {
+                showDatePickerDialog(arg0);
+            }
+        });
+        pickTimeIn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View arg0) {
+                showTimePickerDialog(arg0);
+            }
+        });
+    }
+
+    public boolean incomingEvent() {
+        Intent i = getIntent();
+        if (i != null) {
+            event = (Event) i.getParcelableExtra(getResources()
+                    .getString(R.string.intent_parcelable_key));
+            if (event == null) {
+                return false;
+            }
+            return true;
+        }
+        return false;
+    }
+
+    private void setAutoCompleteClickListener() {
+        addressInput.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                String s = addressInput.getText().toString();
+                Address out = null;
+                for (int i = 0; i < array.length; i++) {
+                    if (array[i].equals(s))
+                        out = list.get(i);
+                }
+                lat = out.getLatitude();
+                lng = out.getLongitude();
+            }
+        });
+    }
+
+    private void setAddressFieldListener() {
         addressInput.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -114,7 +169,7 @@ public class EventCreator extends ActionBarActivity {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if (s.toString().length() > 3) {
+                if (s.toString().length() > TRESHOLD) {
                     list = getLocationFromAddress(s.toString());
                     Address loc;
                     if (list != null) {
@@ -134,7 +189,8 @@ public class EventCreator extends ActionBarActivity {
                             array[i] = in;
                             Log.d("ARRAY::", array[i]);
                         }
-                        adapter = new ArrayAdapter<String>(getBaseContext(), android.R.layout.simple_spinner_dropdown_item, array);
+                        adapter = new ArrayAdapter<String>(getBaseContext(),
+                                android.R.layout.simple_spinner_dropdown_item, array);
                         addressInput.setAdapter(adapter);
                     }
                 }
@@ -145,73 +201,27 @@ public class EventCreator extends ActionBarActivity {
 
             }
         });
-        addressInput.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                String s = addressInput.getText().toString();
-                Address out = null;
-                for (int i = 0; i < array.length; i++) {
-                    if (array[i].equals(s))
-                        out = list.get(i);
-                }
-                lat = out.getLatitude();
-                lng = out.getLongitude();
-
-                Log.d("LATITUDE::", out.getLatitude() + "");
-                Log.d("LONGITUDE::", out.getLongitude() + "");
-            }
-        });
-
-        pickDateIn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View arg0) {
-                showDatePickerDialog(arg0);
-            }
-        });
-        pickTimeIn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View arg0) {
-                showTimePickerDialog(arg0);
-            }
-        });
     }
-
-    public boolean incomingEvent() {
-        Intent i = getIntent();
-        //  Bundle extras = i.getExtras();
-        if (i != null) {
-            eventObject = (EventObject) i.getParcelableExtra("EventObject");
-            if (eventObject == null) {
-                return false;
-            }
-            return true;
-        }
-        return false;
-    }
-
 
     private void setFields() {
-        nameInput.setText(eventObject.getName());
-        descriptionInput.setText(eventObject.getDescription());
-        addressInput.setText(eventObject.getAddress());
-        participantsInput.setText(eventObject.getMaxParticipants() + "");
-        pickDateIn.setText(String.format("%02d", eventObject.getCalendar().get(Calendar.DAY_OF_MONTH)) + "-"
-                + (String.format("%02d", eventObject.getCalendar().get(Calendar.MONTH) + 1)) + "-"
-                + eventObject.getCalendar().get(Calendar.YEAR));
-        pickTimeIn.setText(eventObject.getCalendar().get(Calendar.HOUR_OF_DAY) + ":" + eventObject.getCalendar().get(Calendar.MINUTE));
-        Log.d("tid", eventObject.getCalendar().toString());
-        if (eventObject.isAdult()) {
+        nameInput.setText(event.getName());
+        descriptionInput.setText(event.getDescription());
+        addressInput.setText(event.getAddress());
+        participantsInput.setText(event.getMaxParticipants() + "");
+        pickDateIn.setText(help.leadingZeroesDate(event.getCalendar()));
+        pickTimeIn.setText(help.leadingZeroesTime(event.getCalendar()));
+        if (event.isAdult()) {
             adultCheck.setChecked(true);
         }
-        catSpinner.setSelection(eventObject.getCategory() - 1);
+        catSpinner.setSelection(event.getCategory() - 1);
     }
 
     private boolean fromMap() {
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
-            lat = extras.getDouble("Lat", 200);
-            lng = extras.getDouble("Long", 200);
-            if (lat == 200 || lng == 200) {
+            lat = extras.getDouble("Lat", DEFAULTLONGLAT);
+            lng = extras.getDouble("Long", DEFAULTLONGLAT);
+            if (lat == DEFAULTLONGLAT || lng == DEFAULTLONGLAT) {
                 return false;
             }
             return true;
@@ -219,7 +229,7 @@ public class EventCreator extends ActionBarActivity {
         return false;
     }
 
-    private List<Address> getAddress(double lat, double lng) {
+    private String getAddress(double lat, double lng) {
         try {
             Geocoder geocoder;
             List<Address> addresses;
@@ -227,12 +237,14 @@ public class EventCreator extends ActionBarActivity {
             if (lat != 0 || lng != 0) {
                 addresses = geocoder.getFromLocation(lat,
                         lng, 1);
-                String address = addresses.get(0).getAddressLine(0);
-                String city = addresses.get(0).getAddressLine(1);
-                String country = addresses.get(0).getAddressLine(2);
-                String s = address + " " + city;
-                addressInput.setText(s);
-                return addresses;
+                String address = "";
+                if (addresses.get(0).getAddressLine(0) != null)
+                    address += addresses.get(0).getAddressLine(0);
+                if (addresses.get(0).getAddressLine(1) != null)
+                    address += addresses.get(0).getAddressLine(1);
+                if (addresses.get(0).getAddressLine(2) != null)
+                    address += addresses.get(0).getAddressLine(2);
+                return address;
             } else {
                 return null;
             }
@@ -241,7 +253,6 @@ public class EventCreator extends ActionBarActivity {
             return null;
         }
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -283,7 +294,7 @@ public class EventCreator extends ActionBarActivity {
     }
 
     private void saveEvent() {
-        if (eventObject != null) {
+        if (event != null) {
             if (validateInput()) {
                 updateEventObject();
                 updateObjectInDatabase();
@@ -295,7 +306,7 @@ public class EventCreator extends ActionBarActivity {
             if (validateInput()) {
                 createEventObject();
                 writeObjectToDatabase();
-                sqldb.eventCreated(eventObject.getEventID());
+                sqldb.eventCreated(event.getEventID());
                 showToast(getResources().getString(R.string.event_saved));
                 finish();
             } else
@@ -320,10 +331,10 @@ public class EventCreator extends ActionBarActivity {
             writeErrorMessage(getResources().getString(R.string.participants_num_error));
             return false;
         }
-        if (eventObject != null) {
-            if (Integer.parseInt(participantsInput.getText().toString()) < eventObject.getNumParticipants()) {
+        if (event != null) {
+            if (Integer.parseInt(participantsInput.getText().toString()) < event.getNumParticipants()) {
                 writeErrorMessage(getResources().getString(R.string.max_less_than_num_error) + "(" +
-                        eventObject.getNumParticipants() + ")");
+                        event.getNumParticipants() + ")");
             }
         }
         Calendar c = Calendar.getInstance();
@@ -342,7 +353,7 @@ public class EventCreator extends ActionBarActivity {
     }
 
     private void createEventObject() {
-        eventObject = new EventObject(
+        event = new Event(
                 userID,
                 nameInput.getText().toString(),
                 descriptionInput.getText().toString(),
@@ -355,27 +366,26 @@ public class EventCreator extends ActionBarActivity {
     }
 
     private void updateEventObject() {
-        eventObject.setName(nameInput.getText().toString());
-        eventObject.setDescription(descriptionInput.getText().toString());
-        eventObject.setAddress(addressInput.getText().toString());
-        eventObject.setMaxParticipants(Integer.parseInt(participantsInput.getText().toString()));
-        eventObject.setCategory(catSpinner.getSelectedItemPosition() + 1);
+        event.setName(nameInput.getText().toString());
+        event.setDescription(descriptionInput.getText().toString());
+        event.setAddress(addressInput.getText().toString());
+        event.setMaxParticipants(Integer.parseInt(participantsInput.getText().toString()));
+        event.setCategory(catSpinner.getSelectedItemPosition() + 1);
         if (cal != null) {
-            eventObject.setCalendar(cal);
+            event.setCalendar(cal);
         }
-        eventObject.setAdult(adultCheck.isChecked());
-
+        event.setAdult(adultCheck.isChecked());
     }
 
     public ArrayList<Address> getLocationFromAddress(String strAddress) {
         List<Address> result;
-        ArrayList<Address> list = new ArrayList<>();
+        ArrayList list = new ArrayList<>();
         Geocoder coder = new Geocoder(this);
         try {
-            result = coder.getFromLocationName(strAddress, 5);
+            result = coder.getFromLocationName(strAddress, LISTOFLOCATIONSIZE);
             if (result == null)
                 return null;
-            else if (result.size() == 0)
+            else if (result.isEmpty())
                 return null;
             else {
                 for (int i = 0; i < result.size(); i++) {
@@ -383,7 +393,7 @@ public class EventCreator extends ActionBarActivity {
                 }
             }
         } catch (Exception e) {
-            Log.d("EXC::", e.toString());
+            showToast(getResources().getString(R.string.location_error));
         }
 
         return list;
@@ -391,17 +401,17 @@ public class EventCreator extends ActionBarActivity {
 
     private void writeObjectToDatabase() {
         try {
-            db.pushToDB(eventObject, ref);
+            db.pushToDB(event, ref);
         } catch (Exception e) {
-            Log.d("createEventObject()", "Failed to send object to database: " + e);
+            showToast(getResources().getString(R.string.write_to_db_error));
         }
     }
 
     private void updateObjectInDatabase() {
         try {
-            db.updateEventDB(eventObject);
+            db.updateEventDB(event);
         } catch (Exception e) {
-            Log.d("createEventObject()", "Failed to update object in database: " + e);
+            showToast(getResources().getString(R.string.write_to_db_error));
         }
     }
 
@@ -466,5 +476,4 @@ public class EventCreator extends ActionBarActivity {
             updateTimeButtonText();
         }
     }
-
 }

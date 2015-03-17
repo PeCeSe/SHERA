@@ -16,7 +16,7 @@
         android:layout_weight="1"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context="no.gruppe2.shera.Map"
+        tools:context="no.gruppe2.shera.view.MapView"
         android:clickable="true"
         tools:layout="@layout/fragment_map"
         android:name="com.google.android.gms.maps.MapFragment" />
@@ -28,6 +28,6 @@
         android:layout_height="match_parent"
         android:layout_gravity="start"
         tools:layout="@layout/fragment_navigation_drawer"
-        android:name="no.gruppe2.shera.NavigationDrawerFragment" />
+        android:name="no.gruppe2.shera.fragments.NavigationDrawerFragment" />
 
 </android.support.v4.widget.DrawerLayout>

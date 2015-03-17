@@ -1,6 +1,4 @@
-package no.gruppe2.shera;
-
-import android.util.Log;
+package no.gruppe2.shera.service;
 
 import com.firebase.client.ChildEventListener;
 import com.firebase.client.DataSnapshot;
@@ -14,6 +12,8 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.LinkedList;
 
+import no.gruppe2.shera.dto.Event;
+
 /**
  * Created by chris.forberg on 25.02.2015.
  */
@@ -21,13 +21,13 @@ import java.util.LinkedList;
 public class DBHandler {
 
     private Firebase ref, event, id;
-    public LinkedList<EventObject> list = new LinkedList<>();
-    private EventObject eo;
+    public LinkedList<Event> list = new LinkedList<>();
+    private Event eo;
     private HashMap<String, Object> map;
     private Calendar cal;
     public long numChildren;
 
-    public void pushToDB(EventObject e, Firebase r) {
+    public void pushToDB(Event e, Firebase r) {
         ref = r;
         event = ref.child("Events");
         eo = e;
@@ -37,10 +37,9 @@ public class DBHandler {
         id.setValue(eo);
     }
 
-    public void updateEventDB(EventObject e) {
+    public void updateEventDB(Event e) {
         eo = e;
         id = new Firebase(eo.getEventID());
-        Log.d("Eo.getName()", eo.getName());
         id.setValue(eo);
     }
 
@@ -61,7 +60,7 @@ public class DBHandler {
         return numChildren;
     }
 
-    public LinkedList<EventObject> getFromDB(Firebase r) {
+    public LinkedList<Event> getFromDB(Firebase r) {
         ref = r;
         event = ref.child("Events");
         event.addChildEventListener(new ChildEventListener() {
@@ -74,7 +73,7 @@ public class DBHandler {
                 cal.setTimeInMillis(Long.parseLong(time));
                 ArrayList<Long> listetest = new ArrayList<Long>();
 
-                eo = new EventObject(map.get("eventID").toString(),
+                eo = new Event(map.get("eventID").toString(),
                         Long.parseLong(map.get("userID").toString()),
                         map.get("name").toString(),
                         map.get("description").toString(),

@@ -1,4 +1,4 @@
-package no.gruppe2.shera;
+package no.gruppe2.shera.view;
 
 import android.content.Context;
 import android.content.Intent;
@@ -11,19 +11,25 @@ import android.widget.TextView;
 
 import com.firebase.client.Firebase;
 
-import java.util.Calendar;
 import java.util.List;
 import java.util.ListIterator;
 
-public class Event extends ActionBarActivity {
+import no.gruppe2.shera.R;
+import no.gruppe2.shera.dto.Event;
+import no.gruppe2.shera.helpers.HelpMethods;
+import no.gruppe2.shera.service.DBHandler;
+import no.gruppe2.shera.service.SqlLiteDBHandler;
+
+public class EventView extends ActionBarActivity {
     TextView titleView, descriptionView, participantsView, dateView, timeView, addressView;
     MenuItem editButton, joinButton, unjoinButton;
-    private EventObject eo;
+    private Event eo;
     private String userID;
     private SqlLiteDBHandler sqldb;
 
     private DBHandler db;
     private Firebase ref;
+    private HelpMethods help;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,18 +37,18 @@ public class Event extends ActionBarActivity {
         setContentView(R.layout.activity_event);
 
         SharedPreferences prefs = this.getSharedPreferences(
-                "com.Gruppe2.SHERA", Context.MODE_PRIVATE);
-
+                getResources().getString(R.string.shared_preferences_key), Context.MODE_PRIVATE);
+        help = new HelpMethods();
         userID = prefs.getString("userID", null);
 
         sqldb = new SqlLiteDBHandler(this);
 
         db = new DBHandler();
         Firebase.setAndroidContext(this);
-        ref = new Firebase("https://shera.firebaseio.com/");
+        ref = new Firebase(getResources().getString(R.string.firebase_root));
 
         Intent i = getIntent();
-        eo = i.getParcelableExtra("EventObject");
+        eo = i.getParcelableExtra(getResources().getString(R.string.intent_parcelable_key));
 
         titleView = (TextView) findViewById(R.id.titleView);
         descriptionView = (TextView) findViewById(R.id.descriptionView);
@@ -54,11 +60,8 @@ public class Event extends ActionBarActivity {
         titleView.setText(eo.getName());
         descriptionView.setText(eo.getDescription());
         participantsView.setText(eo.getNumParticipants() + "/" + eo.getMaxParticipants());
-        dateView.setText(String.format("%02d", eo.getCalendar().get(Calendar.DAY_OF_MONTH)) + "-"
-                + (String.format("%02d", eo.getCalendar().get(Calendar.MONTH) + 1)) + "-"
-                + eo.getCalendar().get(Calendar.YEAR));
-        timeView.setText(String.format("%02d", eo.getCalendar().get(Calendar.HOUR_OF_DAY)) + ":"
-                + String.format("%02d", eo.getCalendar().get(Calendar.MINUTE)));
+        dateView.setText(help.leadingZeroesDate(eo.getCalendar()));
+        timeView.setText(help.leadingZeroesTime(eo.getCalendar()));
         addressView.setText(eo.getAddress());
     }
 
@@ -102,8 +105,8 @@ public class Event extends ActionBarActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.change_button) {
-            Intent i = new Intent(this, EventCreator.class);
-            i.putExtra("EventObject", eo);
+            Intent i = new Intent(this, EventCreatorView.class);
+            i.putExtra(getResources().getString(R.string.intent_parcelable_key), eo);
             startActivity(i);
             return true;
         }

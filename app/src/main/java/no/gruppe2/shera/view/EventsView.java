@@ -1,18 +1,18 @@
-package no.gruppe2.shera;
+package no.gruppe2.shera.view;
 
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import java.util.ArrayList;
+import no.gruppe2.shera.R;
+import no.gruppe2.shera.fragments.EventListFragment;
 
 //This class is going to contain a listfragment
 
-public class Events extends ActionBarActivity {
+public class EventsView extends ActionBarActivity {
 
-    private EventList eventListFragment;
-    ArrayList<EventObject> eventObjects;
+    private EventListFragment eventListFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,7 +23,7 @@ public class Events extends ActionBarActivity {
             if (savedInstanceState != null) {
                 return;
             }
-            eventListFragment = new EventList();
+            eventListFragment = new EventListFragment();
             getFragmentManager().beginTransaction().add(R.id.fragment_container, eventListFragment).commit();
         }
     }
@@ -56,7 +56,7 @@ public class Events extends ActionBarActivity {
         super.onResume();
 
         if (findViewById(R.id.fragment_container) != null) {
-            eventListFragment = new EventList();
+            eventListFragment = new EventListFragment();
             getFragmentManager().beginTransaction().add(R.id.fragment_container, eventListFragment).commit();
         }
     }
