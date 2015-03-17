@@ -1,4 +1,4 @@
-package no.gruppe2.shera;
+package no.gruppe2.shera.service;
 
 import android.content.ContentValues;
 import android.content.Context;

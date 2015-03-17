@@ -1,4 +1,4 @@
-package no.gruppe2.shera;
+package no.gruppe2.shera.view;
 
 import android.app.Activity;
 import android.content.Context;
@@ -15,7 +15,6 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.view.LayoutInflater;
 import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -42,7 +41,12 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.ListIterator;
 
-public class Map extends ActionBarActivity
+import no.gruppe2.shera.R;
+import no.gruppe2.shera.dto.Event;
+import no.gruppe2.shera.fragments.NavigationDrawerFragment;
+import no.gruppe2.shera.service.SqlLiteDBHandler;
+
+public class MapView extends ActionBarActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks {
 
     // Fragment managing the behaviors, interactions and presentation of the navigation drawer.
@@ -55,15 +59,14 @@ public class Map extends ActionBarActivity
     Marker marker;
 
     private Firebase ref, event;
-    private DBHandler db = new DBHandler();
-    private LinkedList<EventObject> list = new LinkedList<>();
+    private LinkedList<Event> list = new LinkedList<>();
     private ArrayList<Long> arrayList;
     private HashMap<String, Object> hash = new HashMap<>();
-    private HashMap<String, EventObject> markerMap;
+    private HashMap<String, Event> markerMap;
     private Calendar cal;
-    public long numChildren;
-    private EventObject eo;
+    private Event eo;
     private String userID;
+    private int ZOOMLEVEL = 14;
 
     private SqlLiteDBHandler sqldb;
 
@@ -88,11 +91,26 @@ public class Map extends ActionBarActivity
 
         markerMap = new HashMap<>();
 
-        ref = new Firebase("https://shera.firebaseio.com/");
-        event = ref.child("Events");
+        ref = new Firebase(getResources().getString(R.string.firebase_root));
+        event = ref.child(getResources().getString(R.string.firebase_events));
 
         arrayList = new ArrayList<>();
+        readEventsFromFirebase();
+        setInfoWindowListener();
 
+        mNavigationDrawerFragment = (NavigationDrawerFragment)
+                getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
+        mTitle = getTitle();
+
+        // Set up the drawer
+        mNavigationDrawerFragment.setUp(
+                R.id.navigation_drawer,
+                (DrawerLayout) findViewById(R.id.drawer_layout));
+
+        centerMapOnMyLocation();
+    }
+
+    private void readEventsFromFirebase() {
         event.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
@@ -101,13 +119,12 @@ public class Map extends ActionBarActivity
                 String time = hash.get("calendar").toString();
                 cal = new GregorianCalendar();
                 cal.setTimeInMillis(Long.parseLong(time));
-                //Log.d("LIST::",""+hash.get("participantsList").toString());
                 if (hash.get("participantsList") == null)
                     arrayList = null;
                 else
                     arrayList = (ArrayList<Long>) hash.get("participantsList");
 
-                eo = new EventObject(hash.get("eventID").toString(),
+                eo = new Event(hash.get("eventID").toString(),
                         Long.parseLong(hash.get("userID").toString()),
                         hash.get("name").toString(),
                         hash.get("description").toString(),
@@ -121,20 +138,8 @@ public class Map extends ActionBarActivity
                         Boolean.parseBoolean(hash.get("adult").toString()),
                         arrayList);
 
-
                 list.add(eo);
-
-
-                Calendar today = Calendar.getInstance();
-                if (today.before(eo.getCalendar())) {
-                    Marker m = map.addMarker(new MarkerOptions()
-                            .position(new LatLng(eo.getLatitude(), eo.getLongitude()))
-                            .title(eo.getName())
-                            .snippet(eo.getDescription()));
-                    markerMap.put(m.getId(), eo);
-                }
-
-
+                addPin(eo);
             }
 
             @Override
@@ -157,19 +162,18 @@ public class Map extends ActionBarActivity
 
             }
         });
+    }
 
-        setInfoWindowListener();
+    private void addPin(Event eo) {
+        Calendar today = Calendar.getInstance();
+        if (today.before(eo.getCalendar())) {
+            Marker m = map.addMarker(new MarkerOptions()
+                    .position(new LatLng(eo.getLatitude(), eo.getLongitude()))
+                    .title(eo.getName())
+                    .snippet(eo.getDescription()));
+            markerMap.put(m.getId(), eo);
+        }
 
-        mNavigationDrawerFragment = (NavigationDrawerFragment)
-                getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
-        mTitle = getTitle();
-
-        // Set up the drawer
-        mNavigationDrawerFragment.setUp(
-                R.id.navigation_drawer,
-                (DrawerLayout) findViewById(R.id.drawer_layout));
-
-        centerMapOnMyLocation();
     }
 
     private void centerMapOnMyLocation() {
@@ -180,7 +184,7 @@ public class Map extends ActionBarActivity
         Location location = locationManager.getLastKnownLocation(locationManager.getBestProvider(criteria, false));
         if (location != null) {
             map.animateCamera(CameraUpdateFactory.newLatLngZoom(
-                    new LatLng(location.getLatitude(), location.getLongitude()), 14));
+                    new LatLng(location.getLatitude(), location.getLongitude()), ZOOMLEVEL));
         }
     }
 
@@ -207,38 +211,36 @@ public class Map extends ActionBarActivity
         switch (position) {
 
             case 0: {
-                Intent i = new Intent(this, EventCreator.class);
+                Intent i = new Intent(this, EventCreatorView.class);
                 startActivity(i);
                 break;
             }
             case 1: {
 
-                Intent intent = new Intent(this, Events.class);
+                Intent intent = new Intent(this, EventsView.class);
 
-                ArrayList<EventObject> eoList = new ArrayList<>();
+                ArrayList<Event> eoList = new ArrayList<>();
 
-                ListIterator<EventObject> itObject = list.listIterator();
+                ListIterator<Event> itObject = list.listIterator();
 
                 ArrayList<String> localEvents = sqldb.getAllEvents();
 
                 while (itObject.hasNext()) {
 
-                    EventObject eventObject = itObject.next();
+                    Event event = itObject.next();
                     for (int i = 0; i < localEvents.size(); i++) {
-                        if (eventObject.getEventID().equals(localEvents.get((i)))) {
-                            eoList.add(eventObject);
+                        if (event.getEventID().equals(localEvents.get((i)))) {
+                            eoList.add(event);
                         }
                     }
 
                 }
 
-                intent.putParcelableArrayListExtra("EventObjects", eoList);
+                intent.putParcelableArrayListExtra(getResources().getString(R.string.intent_parcelable_key), eoList);
                 startActivity(intent);
                 break;
             }
             case 2: {
-                //  Intent i = new Intent(this, Settings.class);
-                // startActivity(i);
                 break;
             }
             case 3: {
@@ -293,25 +295,6 @@ public class Map extends ActionBarActivity
         }
         return super.onCreateOptionsMenu(menu);
     }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-/*       int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-        else if(id == R.id.logout_option){
-            session.close();
-            finish();
-        }*/
-        return super.onOptionsItemSelected(item);
-    }
-
 
     private void setNewMarkerListener() {
         map = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
@@ -374,7 +357,7 @@ public class Map extends ActionBarActivity
         @Override
         public void onAttach(Activity activity) {
             super.onAttach(activity);
-            ((Map) activity).onSectionAttached(
+            ((MapView) activity).onSectionAttached(
                     getArguments().getInt(ARG_SECTION_NUMBER));
         }
     }
@@ -385,13 +368,13 @@ public class Map extends ActionBarActivity
                     @Override
                     public void onInfoWindowClick(Marker marker) {
                         if (markerMap.containsKey(marker.getId())) {
-                            EventObject eventObject = markerMap.get(marker.getId());
-                            Intent i = new Intent(getBaseContext(), Event.class);
-                            i.putExtra("EventObject", eventObject);
+                            Event event = markerMap.get(marker.getId());
+                            Intent i = new Intent(getBaseContext(), EventView.class);
+                            i.putExtra(getResources().getString(R.string.intent_parcelable_key), event);
                             startActivity(i);
                         } else {
                             marker.remove();
-                            Intent i = new Intent(getBaseContext(), EventCreator.class);
+                            Intent i = new Intent(getBaseContext(), EventCreatorView.class);
                             i.putExtra("Lat", marker.getPosition().latitude);
                             i.putExtra("Long", marker.getPosition().longitude);
                             startActivity(i);
@@ -405,7 +388,7 @@ public class Map extends ActionBarActivity
     public void onPause() {
         super.onPause();
         SharedPreferences prefs = this.getSharedPreferences(
-                "com.Gruppe2.SHERA", Context.MODE_PRIVATE);
+                getResources().getString(R.string.shared_preferences_key), Context.MODE_PRIVATE);
 
         prefs.edit().putString("userID", userID).apply();
     }

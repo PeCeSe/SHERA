@@ -1,5 +1,5 @@
 <menu xmlns:tools="http://schemas.android.com/tools"
-    tools:context="no.gruppe2.shera.Events">
+    tools:context="no.gruppe2.shera.view.EventsView">
     <!--
         <item
             android:id="@+id/action_settings"

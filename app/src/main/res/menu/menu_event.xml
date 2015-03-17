@@ -1,7 +1,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="no.gruppe2.shera.Event">
+    tools:context="no.gruppe2.shera.view.EventView">
 
     <item
         android:id="@+id/change_button"

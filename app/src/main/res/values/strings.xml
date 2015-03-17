@@ -47,18 +47,6 @@
     <string name="participants_num_error">Number of participants must be one or more. </string>
     <string name="calendar_error">Event can not be in the past.</string>
     <string name="max_less_than_num_error">Max participants can\'t be less than number of participants already attending.</string>
-
-    <string name="facebook_api_key">817450594983198</string>
-    <string name="google_maps_api_key">AIzaSyAqgAXUSBCKpSTTZcpj-ftEnO5gwDTd5dM</string>
-
-    <string-array name="category_array">
-        <item>Casual</item>
-        <item>Family</item>
-        <item>Hobby</item>
-        <item>Sports</item>
-        <item>Cultural</item>
-    </string-array>
-
-    <color name="red">#FF0000</color>
-
+    <string name="location_error">Problems retrieving the location from the address</string>
+    <string name="write_to_db_error">Problems writing to the database</string>
 </resources>
