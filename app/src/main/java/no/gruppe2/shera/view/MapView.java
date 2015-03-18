@@ -50,9 +50,9 @@ public class MapView extends ActionBarActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks {
 
     // Fragment managing the behaviors, interactions and presentation of the navigation drawer.
-    private NavigationDrawerFragment mNavigationDrawerFragment;
-    // Used to store the last screen title. For use in {@link #restoreActionBar()}.
-    private CharSequence mTitle;
+    private NavigationDrawerFragment navigationDrawerFragment;
+    // Stores the last screen title.
+    private CharSequence title;
 
     Session session;
     private GoogleMap map;
@@ -98,12 +98,11 @@ public class MapView extends ActionBarActivity
         readEventsFromFirebase();
         setInfoWindowListener();
 
-        mNavigationDrawerFragment = (NavigationDrawerFragment)
+        navigationDrawerFragment = (NavigationDrawerFragment)
                 getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
-        mTitle = getTitle();
+        title = getTitle();
 
-        // Set up the drawer
-        mNavigationDrawerFragment.setUp(
+        navigationDrawerFragment.setUp(
                 R.id.navigation_drawer,
                 (DrawerLayout) findViewById(R.id.drawer_layout));
 
@@ -205,7 +204,7 @@ public class MapView extends ActionBarActivity
     }
 
     public void onNavigationDrawerItemSelected(int position) {
-        // update the main content by replacing fragments
+        // Update the main content by replacing fragments/activities
         FragmentManager fragmentManager = getSupportFragmentManager();
 
         switch (position) {
@@ -233,7 +232,6 @@ public class MapView extends ActionBarActivity
                             eoList.add(event);
                         }
                     }
-
                 }
 
                 intent.putParcelableArrayListExtra(getResources().getString(R.string.intent_parcelable_key), eoList);
@@ -260,19 +258,19 @@ public class MapView extends ActionBarActivity
     public void onSectionAttached(int number) {
         switch (number) {
             case 0:
-                mTitle = getString(R.string.create_event_string);
+                title = getString(R.string.create_event_string);
                 break;
             case 1:
-                mTitle = getString(R.string.title_activity_events);
+                title = getString(R.string.title_activity_events);
                 break;
             case 2:
-                mTitle = getString(R.string.action_settings);
+                title = getString(R.string.action_settings);
                 break;
             case 3:
-                mTitle = getString(R.string.logout);
+                title = getString(R.string.logout);
                 break;
             case 4:
-                mTitle = getString(R.string.title_activity_map);
+                title = getString(R.string.title_activity_map);
                 break;
         }
     }
@@ -280,15 +278,17 @@ public class MapView extends ActionBarActivity
     public void restoreActionBar() {
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayShowTitleEnabled(true);
-        actionBar.setTitle(mTitle);
+        actionBar.setTitle(title);
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        if (!mNavigationDrawerFragment.isDrawerOpen()) {
-            // Only show items in the action bar relevant to this screen
-            // if the drawer is not showing. Otherwise, let the drawer
-            // decide what to show in the action bar.
+        if (!navigationDrawerFragment.isDrawerOpen()) {
+            /*
+            * Only show items in the action bar relevant to this screen
+            * if the drawer is not showing. Otherwise, let the drawer
+            * decide what to show in the action bar.
+            */
             getMenuInflater().inflate(R.menu.menu_map, menu);
             restoreActionBar();
             return true;
@@ -333,7 +333,7 @@ public class MapView extends ActionBarActivity
         marker.showInfoWindow();
     }
 
-    // A placeholder fragment containing a map view.
+    // A fragment containing the map view.
     public static class MapsFragment extends Fragment {
         // The fragment argument representing the section number for this fragment.
         private static final String ARG_SECTION_NUMBER = "section_number";
@@ -387,9 +387,8 @@ public class MapView extends ActionBarActivity
     @Override
     public void onPause() {
         super.onPause();
-        SharedPreferences prefs = this.getSharedPreferences(
+        SharedPreferences sharedPrefs = this.getSharedPreferences(
                 getResources().getString(R.string.shared_preferences_key), Context.MODE_PRIVATE);
-
-        prefs.edit().putString("userID", userID).apply();
+        sharedPrefs.edit().putString("userID", userID).apply();
     }
 }
