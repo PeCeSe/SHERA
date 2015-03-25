@@ -12,7 +12,7 @@ import java.util.GregorianCalendar;
  */
 public class Event implements Parcelable {
 
-    private String name, description, address, eventID;
+    private String name, description, address, eventID, photoSource;
     private long userID;
     private int maxParticipants, numParticipants, category;
     private Calendar calendar;
@@ -39,6 +39,7 @@ public class Event implements Parcelable {
         setCategory(eventCategory);
         setCalendar(eventDateTime);
         setAdult(eventAdult);
+        setPhotoSource("NOTSET");
     }
 
     public Event(String eventid, long userid,
@@ -47,7 +48,7 @@ public class Event implements Parcelable {
                  double eventLongitude, int eventMaxParticipants,
                  int eventNumParticipants, int eventCategory,
                  Calendar eventDateTime, boolean eventAdult,
-                 ArrayList eventParticipantsList) {
+                 ArrayList eventParticipantsList, String photoSource) {
         setEventID(eventid);
         setUserID(userid);
         setName(eventName);
@@ -61,6 +62,15 @@ public class Event implements Parcelable {
         setCalendar(eventDateTime);
         setAdult(eventAdult);
         setParticipantsList(eventParticipantsList);
+        setPhotoSource(photoSource);
+    }
+
+    public String getPhotoSource() {
+        return photoSource;
+    }
+
+    public void setPhotoSource(String s) {
+        photoSource = s;
     }
 
     public String getEventID() {
@@ -209,6 +219,7 @@ public class Event implements Parcelable {
         dest.writeString(calendar.getTimeInMillis() + "");
         dest.writeByte((byte) (adult ? 1 : 0));
         dest.writeList(participants);
+        dest.writeString(photoSource);
     }
 
     private void readFromParcel(Parcel in) {
@@ -226,6 +237,7 @@ public class Event implements Parcelable {
         setCalendarWithMillis(Long.parseLong(s));
         adult = in.readByte() != 0;
         in.readList(participants, null);
+        photoSource = in.readString();
     }
 
     public Event(Parcel in) {

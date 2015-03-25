@@ -85,7 +85,8 @@ public class DBHandler {
                         Integer.parseInt(map.get("category").toString()),
                         cal,
                         Boolean.parseBoolean(map.get("adult").toString()),
-                        listetest);
+                        listetest,
+                        map.get("photoSource").toString());
                 list.add(eo);
             }
 

@@ -135,7 +135,8 @@ public class MapView extends ActionBarActivity
                         Integer.parseInt(hash.get("category").toString()),
                         cal,
                         Boolean.parseBoolean(hash.get("adult").toString()),
-                        arrayList);
+                        arrayList,
+                        hash.get("photoSource").toString());
 
                 list.add(eo);
                 addPin(eo);
