@@ -49,4 +49,11 @@
     <string name="max_less_than_num_error">Max participants can\'t be less than number of participants already attending.</string>
     <string name="location_error">Problems retrieving the location from the address</string>
     <string name="write_to_db_error">Problems writing to the database</string>
+
+
+    <string name="show">SHOW</string>
+    <string name="find_photo">Find photo</string>
+    <string name="choose_picture">Choose picture</string>
+    <string name="loading">Loading...</string>
+    <string name="download_from_facebook">Loading images from Facebook</string>
 </resources>

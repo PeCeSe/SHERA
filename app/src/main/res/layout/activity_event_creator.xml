@@ -143,6 +143,25 @@
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true" />
 
+        <Button
+            android:id="@+id/findPhotos"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/find_photo"
+            android:layout_below="@+id/pickTimeButton" />
+
+        <GridView
+            android:id="@+id/photos"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/findPhotos"
+            android:columnWidth="90dp"
+            android:numColumns="auto_fit"
+            android:verticalSpacing="10dp"
+            android:horizontalSpacing="10dp"
+            android:stretchMode="columnWidth"
+            android:gravity="center" />
+
     </RelativeLayout>
 
 </ScrollView>

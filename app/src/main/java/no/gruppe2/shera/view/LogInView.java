@@ -3,10 +3,14 @@ package no.gruppe2.shera.view;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.util.Log;
 
 import com.facebook.Session;
 import com.facebook.SessionState;
 import com.facebook.UiLifecycleHelper;
+import com.facebook.widget.LoginButton;
+
+import java.util.Arrays;
 
 import no.gruppe2.shera.R;
 
@@ -23,11 +27,16 @@ public class LogInView extends FragmentActivity {
         uiHelper.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_log_in);
+        //(EditText) findViewById(R.id.descriptionInputField);
+        LoginButton authButton = (LoginButton) findViewById(R.id.fb_login_button);
+        authButton.setReadPermissions(Arrays.asList("user_photos"));
+        //authButton.setReadPermissions(Arrays.asList("user_friends"));
     }
 
     private Session.StatusCallback statusCallback = new Session.StatusCallback() {
         @Override
         public void call(Session session, SessionState state, Exception exception) {
+            Log.d("PERMISSION::", session.getPermissions() + "");
             if (state.isOpened()) {
                 logInFb(session);
             }

@@ -63,6 +63,7 @@ public class EventView extends ActionBarActivity {
         dateView.setText(help.leadingZeroesDate(eo.getCalendar()));
         timeView.setText(help.leadingZeroesTime(eo.getCalendar()));
         addressView.setText(eo.getAddress());
+        //Log.d("SOURCE::", eo.getPhotoSource());
     }
 
     @Override

@@ -1,12 +1,17 @@
 package no.gruppe2.shera.view;
 
+import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
+import android.app.ProgressDialog;
 import android.app.TimePickerDialog;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.location.Address;
 import android.location.Geocoder;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.text.Editable;
@@ -16,6 +21,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
@@ -23,17 +29,27 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.GridView;
+import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import com.facebook.FacebookRequestError;
+import com.facebook.HttpMethod;
 import com.facebook.Request;
 import com.facebook.Response;
 import com.facebook.Session;
+import com.facebook.model.GraphObject;
 import com.facebook.model.GraphUser;
 import com.firebase.client.Firebase;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -42,16 +58,16 @@ import java.util.List;
 import no.gruppe2.shera.R;
 import no.gruppe2.shera.dto.Event;
 import no.gruppe2.shera.helpers.HelpMethods;
+import no.gruppe2.shera.helpers.ImageAdapter;
 import no.gruppe2.shera.service.DBHandler;
 import no.gruppe2.shera.service.SqlLiteDBHandler;
-
 
 public class EventCreatorView extends ActionBarActivity {
 
     EditText nameInput, descriptionInput, participantsInput;
     TextView timeView, dateView, errorView;
     AutoCompleteTextView addressInput;
-    static Button pickDateIn, pickTimeIn;
+    static Button pickDateIn, pickTimeIn, findPhotos;
     CheckBox adultCheck;
     Spinner catSpinner;
 
@@ -77,6 +93,19 @@ public class EventCreatorView extends ActionBarActivity {
     private static final String DATE_FORMAT = "dd-MM-yyyy", TIME_FORMAT = "kk:mm";
     private static final int TRESHOLD = 3, DEFAULTLONGLAT = 200, LISTOFLOCATIONSIZE = 5;
 
+    GraphObject graphObject;
+    private ArrayList<String> myFriendsList;
+    private ArrayList<String> myPhotoSourceList, tempMyPhotoSourceList;
+    private ArrayList<Bitmap> myPhotoList;
+    private String afterPhotos, beforePhotos, sourceToObject;
+    private boolean isMorePhotos;
+    private GridView photos, gridView;
+    private ProgressDialog progress;
+    private boolean after, newList, gridViewLoadOnce;
+    private boolean stopLoadingData;
+    private Session session;
+    private long last;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -87,6 +116,16 @@ public class EventCreatorView extends ActionBarActivity {
         ref = new Firebase(getResources().getString(R.string.firebase_root));
         help = new HelpMethods();
         sqldb = new SqlLiteDBHandler(this);
+        myFriendsList = new ArrayList<>();
+        myPhotoSourceList = new ArrayList<>();
+        tempMyPhotoSourceList = new ArrayList<>();
+        myPhotoList = new ArrayList<>();
+        afterPhotos = "";
+        beforePhotos = "";
+        sourceToObject = "NOTSET";
+        isMorePhotos = true;
+        stopLoadingData = false;
+        last = 0;
 
         nameInput = (EditText) findViewById(R.id.nameInputField);
         descriptionInput = (EditText) findViewById(R.id.descriptionInputField);
@@ -98,11 +137,19 @@ public class EventCreatorView extends ActionBarActivity {
         dateView = (TextView) findViewById(R.id.dateText);
         adultCheck = (CheckBox) findViewById(R.id.adultCheck);
         catSpinner = (Spinner) findViewById(R.id.cat_spinner);
+        photos = (GridView) findViewById(R.id.photos);
+        findPhotos = (Button) findViewById(R.id.findPhotos);
 
         cal = Calendar.getInstance();
 
-        final Session session = Session.getActiveSession();
+        session = Session.getActiveSession();
         findUserID(session);
+        after = true;
+        if (myPhotoSourceList == null)
+            newList = true;
+        else
+            newList = false;
+        gridViewLoadOnce = false;
 
         if (fromMap()) {
             addressInput.setText(getAddress(lat, lng));
@@ -129,6 +176,159 @@ public class EventCreatorView extends ActionBarActivity {
                 showTimePickerDialog(arg0);
             }
         });
+
+        findPhotos.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (newList) {
+                    myPhotoList = new ArrayList<>();
+                    new DownloadImages(myPhotoSourceList).execute();
+                    newList = false;
+                } else {
+                    setGridView();
+                }
+            }
+        });
+    }
+
+    public void setGridView() {
+        gridViewLoadOnce = true;
+        newList = false;
+        gridView = new GridView(this);
+        final AlertDialog alert;
+
+        gridView.setAdapter(new ImageAdapter(this, myPhotoList));
+        gridView.setNumColumns(4);
+        gridView.setPadding(3, 3, 3, 3);
+
+        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setView(gridView);
+        builder.setTitle(R.string.choose_picture);
+
+        alert = builder.show();
+
+        gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                sourceToObject = myPhotoSourceList.get(position);
+                alert.dismiss();
+            }
+        });
+        gridView.setOnScrollListener(new AbsListView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(AbsListView view, int scrollState) {
+            }
+
+            @Override
+            public void onScroll(AbsListView view, int firstVisibleItem,
+                                 int visibleItemCount, int totalItemCount) {
+                int lastInScreen = firstVisibleItem + visibleItemCount;
+                if ((lastInScreen == totalItemCount) && isMorePhotos && !stopLoadingData && (System.currentTimeMillis() - last > 5000)) {
+                    stopLoadingData = true;
+                    last = System.currentTimeMillis();
+                    findPhotosList(session);
+                }
+            }
+        });
+    }
+
+    private void findPhotosList(Session session) {
+        Bundle params = new Bundle();
+        params.putString("after", afterPhotos);
+
+        if (isMorePhotos) {
+            //myPhotoSourceList = new ArrayList<>();
+            tempMyPhotoSourceList = new ArrayList<>();
+            new Request(session, "/me/photos", params, HttpMethod.GET,
+                    new Request.Callback() {
+                        public void onCompleted(Response response) {
+                            FacebookRequestError error = response.getError();
+                            if (error != null && response != null) {
+                                Log.e("ERROR::", error.toString());
+                            } else {
+                                graphObject = response.getGraphObject();
+                            }
+
+                            JSONArray dataArray = (JSONArray) graphObject.getProperty("data");
+                            JSONObject pages = (JSONObject) graphObject.getProperty("paging");
+                            JSONObject cursorObject = null;
+
+                            if (pages != null) {
+                                try {
+                                    cursorObject = (JSONObject) pages.get("cursors");
+                                    afterPhotos = cursorObject.getString("after");
+                                    beforePhotos = cursorObject.getString("before");
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                            if (!pages.has("next")) {
+                                isMorePhotos = false;
+                                stopLoadingData = true;
+                            }
+
+
+                            if (dataArray.length() > 0) {
+                                for (int i = 0; i < dataArray.length(); i++) {
+                                    JSONObject json = dataArray.optJSONObject(i);
+                                    myPhotoSourceList.add(findPhotoSource(json));
+                                    tempMyPhotoSourceList.add(findPhotoSource(json));
+                                }
+                            }
+                            stopLoadingData = false;
+                            new DownloadImages(tempMyPhotoSourceList).execute();
+                        }
+                    }).executeAsync();
+        }
+    }
+
+    /*
+        private void findFriendsList(Session session){
+            myFriendsList = new ArrayList<>();
+                new Request(session, "/me/friends", null, HttpMethod.GET,
+                    new Request.Callback() {
+                        public void onCompleted(Response response) {
+                            FacebookRequestError error = response.getError();
+                            if (error != null && response != null) {
+                                Log.e("ERROR::", error.toString());
+                            } else {
+                                graphObject = response.getGraphObject();
+                            }
+                            JSONArray dataArray = (JSONArray) graphObject.getProperty("data");
+
+                            if (dataArray.length() > 0) {
+                                for (int i = 0; i < dataArray.length(); i++) {
+                                    JSONObject json = dataArray.optJSONObject(i);
+                                    myFriendsList.add(findFriendsName(json));
+                                }
+                            }
+
+                            Log.d("ANTALL::", myFriendsList.size() + "");
+                            for (int i = 0; i < myFriendsList.size(); i++) {
+                                Log.d("PERSON::", myFriendsList.get(i) + "");
+                            }
+                        }
+                    }).executeAsync();
+        }
+
+        private String findFriendsName(JSONObject json){
+            String name = "";
+            try {
+                name = json.getString("name");
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            return name;
+        }
+    */
+    private String findPhotoSource(JSONObject json) {
+        String id = "";
+        try {
+            id = json.getString("source");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return id;
     }
 
     public boolean incomingEvent() {
@@ -305,6 +505,8 @@ public class EventCreatorView extends ActionBarActivity {
         } else {
             if (validateInput()) {
                 createEventObject();
+                if (!sourceToObject.equals("NOTSET"))
+                    event.setPhotoSource(sourceToObject);
                 writeObjectToDatabase();
                 sqldb.eventCreated(event.getEventID());
                 showToast(getResources().getString(R.string.event_saved));
@@ -375,6 +577,7 @@ public class EventCreatorView extends ActionBarActivity {
             event.setCalendar(cal);
         }
         event.setAdult(adultCheck.isChecked());
+        event.setPhotoSource(sourceToObject);
     }
 
     public ArrayList<Address> getLocationFromAddress(String strAddress) {
@@ -474,6 +677,67 @@ public class EventCreatorView extends ActionBarActivity {
             cal.set(Calendar.HOUR_OF_DAY, hourOfDay);
             cal.set(Calendar.MINUTE, minute);
             updateTimeButtonText();
+        }
+    }
+
+    private class DownloadImages extends AsyncTask<String, Void, Bitmap> {
+        ImageView bmImage;
+        Bitmap view;
+        ArrayList<String> strings = new ArrayList<>();
+
+        public DownloadImages(List<String> list) {
+            strings = (ArrayList) list;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            progress = new ProgressDialog(EventCreatorView.this);
+            progress.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+            //getResources().getString(R.string.firebase_root)
+            progress.setTitle(getResources().getString(R.string.loading));
+            progress.setMessage(getResources().getString(R.string.download_from_facebook));
+            progress.setCancelable(false);
+            progress.setIndeterminate(false);
+            progress.setMax(strings.size());
+            progress.setProgress(0);
+            progress.show();
+        }
+
+        protected Bitmap doInBackground(String... params) {
+            Bitmap icon = null;
+            bmImage = new ImageView(getBaseContext());
+            for (int i = 0; i < strings.size(); i++) {
+                String url = strings.get(i);
+                icon = null;
+                try {
+                    InputStream in = new java.net.URL(url).openStream();
+                    icon = Bitmap.createScaledBitmap(BitmapFactory.decodeStream(in), 115, 115, true);
+                    view = icon;
+                    myPhotoList.add(view);
+                    onProgressUpdate(i);
+                } catch (Exception e) {
+                    Log.e("Error", e.getMessage());
+                    e.printStackTrace();
+                }
+            }
+            return icon;
+        }
+
+        protected void onProgressUpdate(Integer... values) {
+            progress.setProgress(values[0]);
+        }
+
+        @Override
+        protected void onPostExecute(Bitmap result) {
+            if (gridViewLoadOnce) {
+                int currentPosition = gridView.getFirstVisiblePosition();
+                gridView.setAdapter(new ImageAdapter(EventCreatorView.this, myPhotoList));
+                gridView.setSelection(currentPosition + 4);
+            } else
+                setGridView();
+            bmImage.setImageBitmap(result);
+            progress.dismiss();
+            newList = false;
         }
     }
 }
