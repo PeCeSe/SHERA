@@ -9,7 +9,7 @@
     <FrameLayout
         android:id="@+id/content_frame"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"></FrameLayout>
 
     <fragment
         android:id="@+id/map"
@@ -28,6 +28,69 @@
         android:layout_height="match_parent"
         android:layout_gravity="start"
         tools:layout="@layout/fragment_navigation_drawer"
-        android:name="no.gruppe2.shera.fragments.NavigationDrawerFragment" />
+        android:name="no.gruppe2.shera.fragments.NavigationDrawerFragment">
+
+        <FrameLayout
+            android:id="@+id/drawer_frame"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <SeekBar
+                android:id="@+id/seekbar_top_drawer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:layout="@layout/fragment_seekbar"
+                android:layout_gravity="bottom|right"
+                android:layout_marginBottom="165dp" />
+
+        </FrameLayout>
+
+        <FrameLayout
+            android:id="@+id/drawer_frame2"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <SeekBar
+                android:id="@+id/seekbar_bottom_drawer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:layout="@layout/fragment_seekbar"
+                android:layout_gravity="bottom|left"
+                android:layout_marginBottom="120dp" />
+
+        </FrameLayout>
+
+        <FrameLayout
+            android:id="@+id/drawer_frame3"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <Spinner
+                android:id="@+id/spinner_drawer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:entries="@array/category_array"
+                android:layout_gravity="bottom"
+                android:layout_marginBottom="80dp" />
+
+        </FrameLayout>
+
+        <FrameLayout
+            android:id="@+id/drawer_frame4"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <CheckBox
+                android:id="@+id/checkbox_drawer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/title"
+                android:layout_gravity="bottom"
+                android:layout_marginBottom="30dp" />
+
+        </FrameLayout>
+
+    </fragment>
+
 
 </android.support.v4.widget.DrawerLayout>
