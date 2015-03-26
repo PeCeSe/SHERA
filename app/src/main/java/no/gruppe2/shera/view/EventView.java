@@ -49,6 +49,7 @@ public class EventView extends ActionBarActivity {
     private Event eo;
     private String userID;
     private SqlLiteDBHandler sqldb;
+    private ImageView eventImageView;
 
     private DBHandler db;
     private Firebase ref;
@@ -82,6 +83,7 @@ public class EventView extends ActionBarActivity {
         Intent i = getIntent();
         eo = i.getParcelableExtra(getResources().getString(R.string.intent_parcelable_key));
 
+        eventImageView = (ImageView) findViewById(R.id.event_picture);
         titleView = (TextView) findViewById(R.id.titleView);
         descriptionView = (TextView) findViewById(R.id.descriptionView);
         participantsView = (TextView) findViewById(R.id.participantsView);
@@ -90,6 +92,8 @@ public class EventView extends ActionBarActivity {
         addressView = (TextView) findViewById(R.id.addressView);
         gridView = (GridView) findViewById(R.id.profile_photos);
 
+        if (!eo.getPhotoSource().equals("NOTSET"))
+            new DownloadImages(eo.getPhotoSource()).execute();
         titleView.setText(eo.getName());
         descriptionView.setText(eo.getDescription());
         participantsView.setText(eo.getNumParticipants() + "/" + eo.getMaxParticipants());
@@ -294,36 +298,59 @@ public class EventView extends ActionBarActivity {
         ImageView bmImage;
         Bitmap view;
         ArrayList<String> strings = new ArrayList<>();
+        String source;
 
         public DownloadImages(List<String> list) {
             strings = (ArrayList) list;
         }
 
+        public DownloadImages(String src) {
+            source = src;
+        }
+
         @Override
         protected void onPreExecute() {
-            progress = new ProgressDialog(EventView.this);
-            progress.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-            progress.setTitle(getResources().getString(R.string.loading));
-            progress.setMessage(getResources().getString(R.string.download_friends_profile_pictures_facebook));
-            progress.setCancelable(false);
-            progress.setIndeterminate(false);
-            progress.setMax(strings.size());
-            progress.setProgress(0);
-            progress.show();
+            if (!strings.isEmpty()) {
+                progress = new ProgressDialog(EventView.this);
+                progress.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+                progress.setTitle(getResources().getString(R.string.loading));
+                progress.setMessage(getResources().getString(R.string.download_friends_profile_pictures_facebook));
+                progress.setCancelable(false);
+                progress.setIndeterminate(false);
+                progress.setMax(strings.size());
+                progress.setProgress(0);
+                progress.show();
+            }
         }
 
         protected Bitmap doInBackground(String... params) {
             Bitmap icon = null;
-            bmImage = new ImageView(getBaseContext());
-            for (int i = 0; i < strings.size(); i++) {
-                String url = strings.get(i);
+            if (!strings.isEmpty()) {
+                bmImage = new ImageView(getBaseContext());
+                for (int i = 0; i < strings.size(); i++) {
+                    String url = strings.get(i);
+                    icon = null;
+                    try {
+                        InputStream in = new java.net.URL(url).openStream();
+                        icon = BitmapFactory.decodeStream(in);
+                        view = icon;
+                        myPhotoList.add(view);
+                        onProgressUpdate(i);
+                    } catch (Exception e) {
+                        Log.e("Error", e + "");
+                        e.printStackTrace();
+                    }
+                }
+            } else {
+                String url = source;
                 icon = null;
                 try {
                     InputStream in = new java.net.URL(url).openStream();
-                    icon = BitmapFactory.decodeStream(in);
+                    //icon = BitmapFactory.decodeStream(in);
+                    Bitmap iconTemp;
+                    icon = Bitmap.createScaledBitmap(iconTemp = BitmapFactory.decodeStream(in), iconTemp.getWidth() / 2, iconTemp.getHeight() / 2, true);
                     view = icon;
                     myPhotoList.add(view);
-                    onProgressUpdate(i);
                 } catch (Exception e) {
                     Log.e("Error", e + "");
                     e.printStackTrace();
@@ -338,9 +365,14 @@ public class EventView extends ActionBarActivity {
 
         @Override
         protected void onPostExecute(Bitmap result) {
-            setGridView();
-            bmImage.setImageBitmap(result);
-            progress.dismiss();
+            if (!strings.isEmpty()) {
+                setGridView();
+                progress.dismiss();
+            } else {
+                eventImageView.setImageBitmap(result);
+                //eventImageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
+            }
+            //bmImage.setImageBitmap(result);
         }
     }
 }

@@ -70,6 +70,7 @@ public class EventCreatorView extends ActionBarActivity {
     static Button pickDateIn, pickTimeIn, findPhotos;
     CheckBox adultCheck;
     Spinner catSpinner;
+    private ImageView eventPhotoView;
 
     private HelpMethods help;
     private DBHandler db;
@@ -99,10 +100,9 @@ public class EventCreatorView extends ActionBarActivity {
     private ArrayList<Bitmap> myPhotoList;
     private String afterPhotos, beforePhotos, sourceToObject;
     private boolean isMorePhotos;
-    private GridView photos, gridView;
+    private GridView gridView;
     private ProgressDialog progress;
-    private boolean after, newList, gridViewLoadOnce;
-    private boolean stopLoadingData;
+    private boolean after, newList, gridViewLoadOnce, stopLoadingData, flag;
     private Session session;
     private long last;
 
@@ -137,8 +137,8 @@ public class EventCreatorView extends ActionBarActivity {
         dateView = (TextView) findViewById(R.id.dateText);
         adultCheck = (CheckBox) findViewById(R.id.adultCheck);
         catSpinner = (Spinner) findViewById(R.id.cat_spinner);
-        photos = (GridView) findViewById(R.id.photos);
         findPhotos = (Button) findViewById(R.id.findPhotos);
+        eventPhotoView = (ImageView) findViewById(R.id.event_photo_view);
 
         cal = Calendar.getInstance();
 
@@ -197,6 +197,9 @@ public class EventCreatorView extends ActionBarActivity {
         gridView = new GridView(this);
         final AlertDialog alert;
 
+        if (myPhotoList.size() <= 0)
+            findPhotosList(session);
+
         gridView.setAdapter(new ImageAdapter(this, myPhotoList));
         gridView.setNumColumns(4);
         gridView.setPadding(3, 3, 3, 3);
@@ -211,21 +214,27 @@ public class EventCreatorView extends ActionBarActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 sourceToObject = myPhotoSourceList.get(position);
+                findPhotos.setText(getResources().getString(R.string.change_photo));
+                new DownloadImages(sourceToObject).execute();
                 alert.dismiss();
             }
         });
         gridView.setOnScrollListener(new AbsListView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(AbsListView view, int scrollState) {
+                if (scrollState == 2)
+                    flag = true;
             }
 
             @Override
             public void onScroll(AbsListView view, int firstVisibleItem,
                                  int visibleItemCount, int totalItemCount) {
                 int lastInScreen = firstVisibleItem + visibleItemCount;
-                if ((lastInScreen == totalItemCount) && isMorePhotos && !stopLoadingData && (System.currentTimeMillis() - last > 5000)) {
+                if ((lastInScreen == totalItemCount) && isMorePhotos && !stopLoadingData &&
+                        (System.currentTimeMillis() - last > 10000) && flag) {
                     stopLoadingData = true;
                     last = System.currentTimeMillis();
+                    flag = false;
                     findPhotosList(session);
                 }
             }
@@ -645,38 +654,60 @@ public class EventCreatorView extends ActionBarActivity {
         ImageView bmImage;
         Bitmap view;
         ArrayList<String> strings = new ArrayList<>();
+        String source;
 
         public DownloadImages(List<String> list) {
             strings = (ArrayList) list;
         }
 
+        public DownloadImages(String src) {
+            source = src;
+        }
+
         @Override
         protected void onPreExecute() {
-            progress = new ProgressDialog(EventCreatorView.this);
-            progress.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-            progress.setTitle(getResources().getString(R.string.loading));
-            progress.setMessage(getResources().getString(R.string.download_from_facebook));
-            progress.setCancelable(false);
-            progress.setIndeterminate(false);
-            progress.setMax(strings.size());
-            progress.setProgress(0);
-            progress.show();
+            if (!strings.isEmpty()) {
+                progress = new ProgressDialog(EventCreatorView.this);
+                progress.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+                progress.setTitle(getResources().getString(R.string.loading));
+                progress.setMessage(getResources().getString(R.string.download_from_facebook));
+                progress.setCancelable(false);
+                progress.setIndeterminate(false);
+                progress.setMax(strings.size());
+                progress.setProgress(0);
+                progress.show();
+            }
         }
 
         protected Bitmap doInBackground(String... params) {
             Bitmap icon = null;
-            bmImage = new ImageView(getBaseContext());
-            for (int i = 0; i < strings.size(); i++) {
-                String url = strings.get(i);
+            if (!strings.isEmpty()) {
+                bmImage = new ImageView(getBaseContext());
+                for (int i = 0; i < strings.size(); i++) {
+                    String url = strings.get(i);
+                    icon = null;
+                    try {
+                        InputStream in = new java.net.URL(url).openStream();
+                        icon = Bitmap.createScaledBitmap(BitmapFactory.decodeStream(in), 115, 115, true);
+                        view = icon;
+                        myPhotoList.add(view);
+                        onProgressUpdate(i);
+                    } catch (Exception e) {
+                        Log.e("Error", e.getMessage());
+                        e.printStackTrace();
+                    }
+                }
+            } else {
+                String url = source;
                 icon = null;
                 try {
                     InputStream in = new java.net.URL(url).openStream();
-                    icon = Bitmap.createScaledBitmap(BitmapFactory.decodeStream(in), 115, 115, true);
+                    //icon = BitmapFactory.decodeStream(in);
+                    Bitmap iconTemp;
+                    icon = Bitmap.createScaledBitmap(iconTemp = BitmapFactory.decodeStream(in), iconTemp.getWidth() / 2, iconTemp.getHeight() / 2, true);
                     view = icon;
-                    myPhotoList.add(view);
-                    onProgressUpdate(i);
                 } catch (Exception e) {
-                    Log.e("Error", e.getMessage());
+                    Log.e("Error", e + "");
                     e.printStackTrace();
                 }
             }
@@ -689,15 +720,19 @@ public class EventCreatorView extends ActionBarActivity {
 
         @Override
         protected void onPostExecute(Bitmap result) {
-            if (gridViewLoadOnce) {
-                int currentPosition = gridView.getFirstVisiblePosition();
-                gridView.setAdapter(new ImageAdapter(EventCreatorView.this, myPhotoList));
-                gridView.setSelection(currentPosition + 4);
-            } else
-                setGridView();
-            bmImage.setImageBitmap(result);
-            progress.dismiss();
-            newList = false;
+            if (!strings.isEmpty()) {
+                if (gridViewLoadOnce) {
+                    int currentPosition = gridView.getFirstVisiblePosition();
+                    gridView.setAdapter(new ImageAdapter(EventCreatorView.this, myPhotoList));
+                    gridView.setSelection(currentPosition + 4);
+                } else
+                    setGridView();
+                bmImage.setImageBitmap(result);
+                progress.dismiss();
+                newList = false;
+            } else {
+                eventPhotoView.setImageBitmap(result);
+            }
         }
     }
 }
