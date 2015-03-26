@@ -3,7 +3,8 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/ScrollViewEvent"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/white">
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/activity_event"
@@ -13,14 +14,16 @@
         android:paddingLeft="@dimen/activity_horizontal_margin"
         android:paddingRight="@dimen/activity_horizontal_margin"
         android:paddingBottom="@dimen/activity_vertical_margin"
+        android:background="@color/white"
         android:orientation="vertical">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/title"
-            android:textStyle="italic|bold"
-            android:textSize="20sp" />
+            android:textStyle="italic"
+            android:textColor="@color/text_black"
+            android:textSize="17sp" />
 
         <TextView
             android:id="@+id/titleView"
@@ -34,8 +37,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/description"
-            android:textStyle="italic|bold"
-            android:textSize="20sp" />
+            android:textStyle="italic"
+            android:textColor="@color/text_black"
+            android:textSize="17sp" />
 
         <TextView
             android:id="@+id/descriptionView"
@@ -49,8 +53,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/participants"
-            android:textStyle="italic|bold"
-            android:textSize="20sp" />
+            android:textStyle="italic"
+            android:textColor="@color/text_black"
+            android:textSize="17sp" />
 
         <TextView
             android:id="@+id/participantsView"
@@ -64,8 +69,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/when"
-            android:textStyle="italic|bold"
-            android:textSize="20sp" />
+            android:textStyle="italic"
+            android:textColor="@color/text_black"
+            android:textSize="17sp" />
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -111,8 +117,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/where"
-            android:textStyle="italic|bold"
-            android:textSize="20sp" />
+            android:textStyle="italic"
+            android:textColor="@color/text_black"
+            android:textSize="17sp" />
 
         <TextView
             android:id="@+id/addressView"
