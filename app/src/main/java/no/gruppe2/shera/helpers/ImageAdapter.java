@@ -1,9 +1,7 @@
 package no.gruppe2.shera.helpers;
 
-import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -16,14 +14,10 @@ import java.util.ArrayList;
  */
 public class ImageAdapter extends BaseAdapter {
     private Context mContext;
-    private Bitmap[] myPhotos;
     private ArrayList<Bitmap> photoList;
-    private Activity activity;
-    private static LayoutInflater inflater = null;
 
     public ImageAdapter(Context c, ArrayList<Bitmap> a) {
         mContext = c;
-        //myPhotos =  v;
         photoList = a;
     }
 
