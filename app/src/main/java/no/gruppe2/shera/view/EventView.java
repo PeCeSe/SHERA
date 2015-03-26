@@ -1,22 +1,45 @@
 package no.gruppe2.shera.view;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.GridView;
+import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.facebook.FacebookRequestError;
+import com.facebook.HttpMethod;
+import com.facebook.Request;
+import com.facebook.Response;
+import com.facebook.Session;
+import com.facebook.model.GraphObject;
 import com.firebase.client.Firebase;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
 
 import no.gruppe2.shera.R;
 import no.gruppe2.shera.dto.Event;
 import no.gruppe2.shera.helpers.HelpMethods;
+import no.gruppe2.shera.helpers.ImageAdapter;
 import no.gruppe2.shera.service.DBHandler;
 import no.gruppe2.shera.service.SqlLiteDBHandler;
 
@@ -30,6 +53,15 @@ public class EventView extends ActionBarActivity {
     private DBHandler db;
     private Firebase ref;
     private HelpMethods help;
+
+    private ArrayList<String> myFriendsListName;
+    private ArrayList<String> myFriendsPhotosToShow, namesToShow;
+    private ArrayList<Bitmap> myPhotoList;
+    private ArrayList<Long> myFriendsListID, participantsFromObject;
+    private GraphObject graphObject;
+    private GridView gridView;
+    private Session session;
+    private ProgressDialog progress;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,6 +88,7 @@ public class EventView extends ActionBarActivity {
         dateView = (TextView) findViewById(R.id.dateView);
         timeView = (TextView) findViewById(R.id.timeView);
         addressView = (TextView) findViewById(R.id.addressView);
+        gridView = (GridView) findViewById(R.id.profile_photos);
 
         titleView.setText(eo.getName());
         descriptionView.setText(eo.getDescription());
@@ -63,7 +96,15 @@ public class EventView extends ActionBarActivity {
         dateView.setText(help.leadingZeroesDate(eo.getCalendar()));
         timeView.setText(help.leadingZeroesTime(eo.getCalendar()));
         addressView.setText(eo.getAddress());
-        //Log.d("SOURCE::", eo.getPhotoSource());
+
+        myFriendsListID = new ArrayList<>();
+        myFriendsListName = new ArrayList<>();
+        myFriendsPhotosToShow = new ArrayList<>();
+        myPhotoList = new ArrayList<>();
+        namesToShow = new ArrayList<>();
+        participantsFromObject = eo.getParticipantsList();
+        session = Session.getActiveSession();
+        findFriendsList(session);
     }
 
     @Override
@@ -123,6 +164,105 @@ public class EventView extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    public void setGridView() {
+        gridView.setAdapter(new ImageAdapter(this, myPhotoList));
+        gridView.setNumColumns(4);
+        gridView.setPadding(3, 3, 3, 3);
+
+        gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                showToast(namesToShow.get(position));
+            }
+        });
+
+    }
+
+    private void findFriendsList(Session session) {
+        new Request(session, "/me/friends", null, HttpMethod.GET,
+                new Request.Callback() {
+                    public void onCompleted(Response response) {
+                        FacebookRequestError error = response.getError();
+                        if (error != null && response != null) {
+                            Log.e("ERROR::", error.toString());
+                        } else {
+                            graphObject = response.getGraphObject();
+                        }
+                        JSONArray dataArray = (JSONArray) graphObject.getProperty("data");
+
+                        if (dataArray.length() > 0) {
+                            for (int i = 0; i < dataArray.length(); i++) {
+                                JSONObject json = dataArray.optJSONObject(i);
+                                myFriendsListName.add(findFriendsName(json));
+                                myFriendsListID.add(findFriendsID(json));
+                            }
+                        }
+                    }
+                }
+        ).executeAsync();
+
+        //myFriendsList = new ArrayList<>();
+        new Request(session, "/me/taggable_friends", null, HttpMethod.GET,
+                new Request.Callback() {
+                    public void onCompleted(Response response) {
+                        FacebookRequestError error = response.getError();
+                        if (error != null && response != null) {
+                            Log.e("ERROR::", error.toString());
+                        } else {
+                            graphObject = response.getGraphObject();
+                        }
+                        JSONArray dataArray = (JSONArray) graphObject.getProperty("data");
+
+                        if (dataArray.length() > 0) {
+                            for (int i = 0; i < dataArray.length(); i++) {
+                                JSONObject json = dataArray.optJSONObject(i);
+                                String name = findFriendsName(json);
+
+                                for (int k = 0; k < myFriendsListName.size(); k++) {
+                                    if (name.equals(myFriendsListName.get(k))) {
+                                        if (participantsFromObject.contains(myFriendsListID.get(k))) {
+                                            try {
+                                                JSONObject obj = (JSONObject) json.get("picture");
+                                                JSONObject arr = (JSONObject) obj.get("data");
+                                                String s = arr.getString("url");
+                                                myFriendsPhotosToShow.add(s);
+                                                namesToShow.add(name);
+
+                                            } catch (JSONException e) {
+                                                e.printStackTrace();
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        if (!myFriendsPhotosToShow.isEmpty())
+                            new DownloadImages(myFriendsPhotosToShow).execute();
+                    }
+                }
+        ).executeAsync();
+    }
+
+    private String findFriendsName(JSONObject json) {
+        String name = "";
+        try {
+            name = json.getString("name");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return name;
+    }
+
+    private long findFriendsID(JSONObject json) {
+        long id = 0;
+        try {
+            id = Long.parseLong(json.getString("id"));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return id;
+    }
+
     private void joinEvent() {
         eo.addParticipantToList(Long.parseLong(userID));
 
@@ -144,5 +284,63 @@ public class EventView extends ActionBarActivity {
         joinButton.setVisible(true);
         unjoinButton.setVisible(false);
 
+    }
+
+    private void showToast(String s) {
+        Toast.makeText(getBaseContext(), s, Toast.LENGTH_SHORT).show();
+    }
+
+    private class DownloadImages extends AsyncTask<String, Void, Bitmap> {
+        ImageView bmImage;
+        Bitmap view;
+        ArrayList<String> strings = new ArrayList<>();
+
+        public DownloadImages(List<String> list) {
+            strings = (ArrayList) list;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            progress = new ProgressDialog(EventView.this);
+            progress.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+            progress.setTitle(getResources().getString(R.string.loading));
+            progress.setMessage(getResources().getString(R.string.download_friends_profile_pictures_facebook));
+            progress.setCancelable(false);
+            progress.setIndeterminate(false);
+            progress.setMax(strings.size());
+            progress.setProgress(0);
+            progress.show();
+        }
+
+        protected Bitmap doInBackground(String... params) {
+            Bitmap icon = null;
+            bmImage = new ImageView(getBaseContext());
+            for (int i = 0; i < strings.size(); i++) {
+                String url = strings.get(i);
+                icon = null;
+                try {
+                    InputStream in = new java.net.URL(url).openStream();
+                    icon = BitmapFactory.decodeStream(in);
+                    view = icon;
+                    myPhotoList.add(view);
+                    onProgressUpdate(i);
+                } catch (Exception e) {
+                    Log.e("Error", e + "");
+                    e.printStackTrace();
+                }
+            }
+            return icon;
+        }
+
+        protected void onProgressUpdate(Integer... values) {
+            progress.setProgress(values[0]);
+        }
+
+        @Override
+        protected void onPostExecute(Bitmap result) {
+            setGridView();
+            bmImage.setImageBitmap(result);
+            progress.dismiss();
+        }
     }
 }

@@ -282,45 +282,6 @@ public class EventCreatorView extends ActionBarActivity {
         }
     }
 
-    /*
-        private void findFriendsList(Session session){
-            myFriendsList = new ArrayList<>();
-                new Request(session, "/me/friends", null, HttpMethod.GET,
-                    new Request.Callback() {
-                        public void onCompleted(Response response) {
-                            FacebookRequestError error = response.getError();
-                            if (error != null && response != null) {
-                                Log.e("ERROR::", error.toString());
-                            } else {
-                                graphObject = response.getGraphObject();
-                            }
-                            JSONArray dataArray = (JSONArray) graphObject.getProperty("data");
-
-                            if (dataArray.length() > 0) {
-                                for (int i = 0; i < dataArray.length(); i++) {
-                                    JSONObject json = dataArray.optJSONObject(i);
-                                    myFriendsList.add(findFriendsName(json));
-                                }
-                            }
-
-                            Log.d("ANTALL::", myFriendsList.size() + "");
-                            for (int i = 0; i < myFriendsList.size(); i++) {
-                                Log.d("PERSON::", myFriendsList.get(i) + "");
-                            }
-                        }
-                    }).executeAsync();
-        }
-
-        private String findFriendsName(JSONObject json){
-            String name = "";
-            try {
-                name = json.getString("name");
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-            return name;
-        }
-    */
     private String findPhotoSource(JSONObject json) {
         String id = "";
         try {
@@ -693,7 +654,6 @@ public class EventCreatorView extends ActionBarActivity {
         protected void onPreExecute() {
             progress = new ProgressDialog(EventCreatorView.this);
             progress.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-            //getResources().getString(R.string.firebase_root)
             progress.setTitle(getResources().getString(R.string.loading));
             progress.setMessage(getResources().getString(R.string.download_from_facebook));
             progress.setCancelable(false);
