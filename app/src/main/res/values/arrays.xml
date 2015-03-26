@@ -7,4 +7,13 @@
         <item>Sports</item>
         <item>Cultural</item>
     </string-array>
+
+    <string-array name="drawer_category_array">
+        <item>All</item>
+        <item>Casual</item>
+        <item>Family</item>
+        <item>Hobby</item>
+        <item>Sports</item>
+        <item>Cultural</item>
+    </string-array>
 </resources>

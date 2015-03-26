@@ -17,6 +17,11 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.SeekBar;
+import android.widget.Spinner;
 
 import com.facebook.Request;
 import com.facebook.Response;
@@ -40,6 +45,7 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.ListIterator;
+import java.util.concurrent.TimeUnit;
 
 import no.gruppe2.shera.R;
 import no.gruppe2.shera.dto.Event;
@@ -57,16 +63,21 @@ public class MapView extends ActionBarActivity
     Session session;
     private GoogleMap map;
     Marker marker;
+    private SeekBar timeSeekBar, radiusSeekBar;
+    private CheckBox adultCheck;
+    private Spinner categorySpinner;
 
     private Firebase ref, event;
     private LinkedList<Event> list = new LinkedList<>();
     private ArrayList<Long> arrayList;
     private HashMap<String, Object> hash = new HashMap<>();
     private HashMap<String, Event> markerMap;
+    private HashMap<String, Marker> markerEventMap;
     private Calendar cal;
     private Event eo;
     private String userID;
-    private int ZOOMLEVEL = 14;
+    private final int ZOOMLEVEL = 14, THREE_WEEKS = 21;
+    private int dateSeekBarProgress;
 
     private SqlLiteDBHandler sqldb;
 
@@ -90,6 +101,7 @@ public class MapView extends ActionBarActivity
         map = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
 
         markerMap = new HashMap<>();
+        markerEventMap = new HashMap<>();
 
         ref = new Firebase(getResources().getString(R.string.firebase_root));
         event = ref.child(getResources().getString(R.string.firebase_events));
@@ -97,6 +109,14 @@ public class MapView extends ActionBarActivity
         arrayList = new ArrayList<>();
         readEventsFromFirebase();
         setInfoWindowListener();
+
+        dateSeekBarProgress = THREE_WEEKS;
+
+        timeSeekBar = (SeekBar) findViewById(R.id.drawer_time_seekbar);
+        radiusSeekBar = (SeekBar) findViewById(R.id.drawer_radius_seekbar);
+        adultCheck = (CheckBox) findViewById(R.id.drawer_checkbox_adult);
+        categorySpinner = (Spinner) findViewById(R.id.drawer_category_spinner);
+
 
         navigationDrawerFragment = (NavigationDrawerFragment)
                 getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
@@ -107,6 +127,148 @@ public class MapView extends ActionBarActivity
                 (DrawerLayout) findViewById(R.id.drawer_layout));
 
         centerMapOnMyLocation();
+
+        setListeners();
+
+
+    }
+
+    private void setListeners() {
+
+        adultCheck.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (adultCheck.isChecked()) {
+                    showAdultEvents();
+                } else {
+                    hideAdultEvents();
+                }
+            }
+        });
+
+        categorySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                String s = getBaseContext().getResources().getStringArray(R.array.drawer_category_array)[position];
+
+                showSelectedCategory(position);
+
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+        timeSeekBar.setMax(THREE_WEEKS);
+        timeSeekBar.setProgress(THREE_WEEKS);
+
+        timeSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                dateSeekBarProgress = progress;
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                showSelectedCategory(categorySpinner.getSelectedItemPosition());
+            }
+        });
+    }
+
+    private void showSelectedCategory(int position) {
+        Calendar maxDate = new GregorianCalendar();
+        maxDate = Calendar.getInstance();
+        long daysInMillis = TimeUnit.MILLISECONDS.convert(dateSeekBarProgress, TimeUnit.DAYS);
+        maxDate.setTimeInMillis(maxDate.getTimeInMillis() + daysInMillis);
+        if (position > 0) {
+            ListIterator<Event> iterator = list.listIterator();
+            while (iterator.hasNext()) {
+                Event event = iterator.next();
+                if (dateSeekBarProgress >= THREE_WEEKS || !(event.getCalendar().after(maxDate))) {
+                    if (event.getCategory() == position) {
+                        if (event.isAdult() && adultCheck.isChecked()) {
+                            if (!markerEventMap.containsKey(event.getEventID())) {
+                                addPin(event);
+                            }
+                        } else if (!event.isAdult()) {
+                            if (!markerEventMap.containsKey(event.getEventID())) {
+                                addPin(event);
+                            }
+                        }
+                    } else {
+                        if (markerEventMap.containsKey(event.getEventID())) {
+                            removePin(event);
+                        }
+                    }
+                } else {
+                    if (markerEventMap.containsKey(event.getEventID())) {
+                        removePin(event);
+                    }
+                }
+            }
+        } else {
+            ListIterator<Event> iterator = list.listIterator();
+            while (iterator.hasNext()) {
+                Event event = iterator.next();
+                if (dateSeekBarProgress >= THREE_WEEKS || !(event.getCalendar().after(maxDate))) {
+                    if (event.isAdult() && adultCheck.isChecked()) {
+                        if (!markerEventMap.containsKey(event.getEventID())) {
+                            addPin(event);
+                        }
+                    } else if (!event.isAdult()) {
+                        if (!markerEventMap.containsKey(event.getEventID())) {
+                            addPin(event);
+                        }
+                    }
+                } else {
+                    if (markerEventMap.containsKey(event.getEventID())) {
+                        removePin(event);
+                    }
+                }
+            }
+        }
+    }
+
+    private void removePin(Event eo) {
+        Marker marker = markerEventMap.get(eo.getEventID());
+        markerMap.remove(marker.getId());
+        markerEventMap.remove(eo.getEventID());
+        marker.remove();
+    }
+
+    private void hideAdultEvents() {
+        ListIterator<Event> iterator = list.listIterator();
+        while (iterator.hasNext()) {
+            Event event = iterator.next();
+            if (event.isAdult()) {
+                if (markerEventMap.containsKey(event.getEventID())) {
+                    removePin(event);
+                }
+            }
+        }
+    }
+
+    private void showAdultEvents() {
+        ListIterator<Event> iterator = list.listIterator();
+        while (iterator.hasNext()) {
+            Event event = iterator.next();
+            if (event.isAdult()) {
+                if (categorySpinner.getSelectedItemPosition() == 0) {
+                    if (!markerMap.containsKey(event.getEventID())) {
+                        addPin(event);
+                    }
+                } else {
+                    showSelectedCategory(categorySpinner.getSelectedItemPosition());
+                }
+            }
+        }
     }
 
     private void readEventsFromFirebase() {
@@ -139,7 +301,10 @@ public class MapView extends ActionBarActivity
                         hash.get("photoSource").toString());
 
                 list.add(eo);
-                addPin(eo);
+                if (!adultCheck.isChecked() && !eo.isAdult())
+                    addPin(eo);
+                else if (adultCheck.isChecked())
+                    addPin(eo);
             }
 
             @Override
@@ -172,6 +337,7 @@ public class MapView extends ActionBarActivity
                     .title(eo.getName())
                     .snippet(eo.getDescription()));
             markerMap.put(m.getId(), eo);
+            markerEventMap.put(eo.getEventID(), m);
         }
 
     }

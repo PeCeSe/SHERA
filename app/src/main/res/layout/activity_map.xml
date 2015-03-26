@@ -36,12 +36,13 @@
             android:layout_height="match_parent">
 
             <SeekBar
-                android:id="@+id/seekbar_top_drawer"
+                android:id="@+id/drawer_radius_seekbar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 tools:layout="@layout/fragment_seekbar"
                 android:layout_gravity="bottom|right"
                 android:layout_marginBottom="165dp" />
+
 
         </FrameLayout>
 
@@ -51,12 +52,13 @@
             android:layout_height="match_parent">
 
             <SeekBar
-                android:id="@+id/seekbar_bottom_drawer"
+                android:id="@+id/drawer_time_seekbar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                tools:layout="@layout/fragment_seekbar"
                 android:layout_gravity="bottom|left"
+                tools:layout="@layout/fragment_seekbar"
                 android:layout_marginBottom="120dp" />
+
 
         </FrameLayout>
 
@@ -66,10 +68,10 @@
             android:layout_height="match_parent">
 
             <Spinner
-                android:id="@+id/spinner_drawer"
+                android:id="@+id/drawer_category_spinner"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:entries="@array/category_array"
+                android:entries="@array/drawer_category_array"
                 android:layout_gravity="bottom"
                 android:layout_marginBottom="80dp" />
 
@@ -81,7 +83,7 @@
             android:layout_height="match_parent">
 
             <CheckBox
-                android:id="@+id/checkbox_drawer"
+                android:id="@+id/drawer_checkbox_adult"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/title"
