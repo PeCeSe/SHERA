@@ -112,4 +112,9 @@ public class DBHandler {
         });
         return list;
     }
+
+    public void removeEvent(Event e) {
+        id = new Firebase(e.getEventID());
+        id.removeValue();
+    }
 }

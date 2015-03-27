@@ -372,12 +372,75 @@ public class MapView extends ActionBarActivity
 
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                hash = new HashMap<>();
+                hash = (HashMap<String, Object>) dataSnapshot.getValue();
+                String time = hash.get("calendar").toString();
+                cal = new GregorianCalendar();
+                cal.setTimeInMillis(Long.parseLong(time));
+                if (hash.get("participantsList") == null)
+                    arrayList = null;
+                else
+                    arrayList = (ArrayList<Long>) hash.get("participantsList");
 
+                eo = new Event(hash.get("eventID").toString(),
+                        Long.parseLong(hash.get("userID").toString()),
+                        hash.get("name").toString(),
+                        hash.get("description").toString(),
+                        hash.get("address").toString(),
+                        Double.parseDouble(hash.get("latitude").toString()),
+                        Double.parseDouble(hash.get("longitude").toString()),
+                        Integer.parseInt(hash.get("maxParticipants").toString()),
+                        Integer.parseInt(hash.get("numParticipants").toString()),
+                        Integer.parseInt(hash.get("category").toString()),
+                        cal,
+                        Boolean.parseBoolean(hash.get("adult").toString()),
+                        arrayList,
+                        hash.get("photoSource").toString());
+
+                for (int i = 0; i < list.size(); i++) {
+                    if (list.get(i).getEventID().equals(eo.getEventID())) {
+                        list.set(i, eo);
+                        break;
+                    }
+                }
+                updateMarkers();
             }
 
             @Override
             public void onChildRemoved(DataSnapshot dataSnapshot) {
+                hash = new HashMap<>();
+                hash = (HashMap<String, Object>) dataSnapshot.getValue();
+                String time = hash.get("calendar").toString();
+                cal = new GregorianCalendar();
+                cal.setTimeInMillis(Long.parseLong(time));
+                if (hash.get("participantsList") == null)
+                    arrayList = null;
+                else
+                    arrayList = (ArrayList<Long>) hash.get("participantsList");
 
+                eo = new Event(hash.get("eventID").toString(),
+                        Long.parseLong(hash.get("userID").toString()),
+                        hash.get("name").toString(),
+                        hash.get("description").toString(),
+                        hash.get("address").toString(),
+                        Double.parseDouble(hash.get("latitude").toString()),
+                        Double.parseDouble(hash.get("longitude").toString()),
+                        Integer.parseInt(hash.get("maxParticipants").toString()),
+                        Integer.parseInt(hash.get("numParticipants").toString()),
+                        Integer.parseInt(hash.get("category").toString()),
+                        cal,
+                        Boolean.parseBoolean(hash.get("adult").toString()),
+                        arrayList,
+                        hash.get("photoSource").toString());
+
+                for (int i = 0; i < list.size(); i++) {
+                    if (list.get(i).getEventID().equals(eo.getEventID())) {
+                        if (markerEventMap.containsKey(eo.getEventID()))
+                            removePin(eo);
+                        list.remove(i);
+                        break;
+                    }
+                }
             }
 
             @Override

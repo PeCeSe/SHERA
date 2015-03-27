@@ -23,4 +23,11 @@
         android:orderInCategory="100"
         app:showAsAction="always"
         android:visible="false" />
+
+    <item
+        android:id="@+id/delete_button"
+        android:title="@string/delete"
+        android:orderInCategory="100"
+        app:showAsAction="always"
+        android:visible="false" />
 </menu>
