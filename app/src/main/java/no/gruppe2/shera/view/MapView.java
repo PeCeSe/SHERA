@@ -8,11 +8,14 @@ import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.SearchView;
 import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -503,8 +506,63 @@ public class MapView extends ActionBarActivity
             */
             getMenuInflater().inflate(R.menu.menu_map, menu);
             restoreActionBar();
+
+            MenuItem searchItem = menu.findItem(R.id.action_search);
+            SearchView searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
+
+            searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+                @Override
+                public boolean onQueryTextSubmit(String s) {
+                    return false;
+                }
+
+                @Override
+                public boolean onQueryTextChange(String s) {
+                    Calendar maxDate = new GregorianCalendar();
+                    maxDate = Calendar.getInstance();
+                    long daysInMillis = TimeUnit.MILLISECONDS.convert(dateSeekBarProgress, TimeUnit.DAYS);
+                    maxDate.setTimeInMillis(maxDate.getTimeInMillis() + daysInMillis);
+
+                    if (s.length() > 0) {
+                        ListIterator<Event> iterator = list.listIterator();
+                        while (iterator.hasNext()) {
+                            Event e = iterator.next();
+                            if (!e.getName().toLowerCase().contains(s.toLowerCase()) &&
+                                    !e.getAddress().toLowerCase().contains(s.toLowerCase()) &&
+                                    !e.getDescription().toLowerCase().contains(s.toLowerCase())) {
+
+                                if (markerEventMap.containsKey(e.getEventID())) {
+                                    removePin(e);
+                                }
+
+                            } else if (e.getName().toLowerCase().contains(s.toLowerCase()) ||
+                                    e.getAddress().toLowerCase().contains(s.toLowerCase()) ||
+                                    e.getDescription().toLowerCase().contains(s.toLowerCase())) {
+
+                                if (!markerEventMap.containsKey(e.getEventID())) {
+                                    if (dateSeekBarProgress >= THREE_WEEKS || !(e.getCalendar().after(maxDate))) {
+                                        if (((radiusSeekBarProgress < TEN_KILOMETRES) && isEventInsideCircle(e)) || circle == null) {
+                                            if ((e.getCategory() == categorySpinner.getSelectedItemPosition()) || categorySpinner.getSelectedItemPosition() <= 0) {
+                                                if ((e.isAdult() && adultCheck.isChecked()) || !e.isAdult()) {
+                                                    addPin(e);
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        updateMarkers();
+                    }
+                    return false;
+                }
+            });
+
             return true;
         }
+
+
         return super.onCreateOptionsMenu(menu);
     }
 
