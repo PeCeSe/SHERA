@@ -4,9 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.location.Criteria;
 import android.location.Location;
-import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -35,6 +33,8 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.Circle;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -76,8 +76,10 @@ public class MapView extends ActionBarActivity
     private Calendar cal;
     private Event eo;
     private String userID;
-    private final int ZOOMLEVEL = 14, THREE_WEEKS = 21;
-    private int dateSeekBarProgress;
+    private final int ZOOMLEVEL = 14, THREE_WEEKS = 22, TEN_KILOMETRES = 11;
+    private int dateSeekBarProgress, radiusSeekBarProgress;
+
+    private Circle circle;
 
     private SqlLiteDBHandler sqldb;
 
@@ -111,6 +113,7 @@ public class MapView extends ActionBarActivity
         setInfoWindowListener();
 
         dateSeekBarProgress = THREE_WEEKS;
+        radiusSeekBarProgress = TEN_KILOMETRES;
 
         timeSeekBar = (SeekBar) findViewById(R.id.drawer_time_seekbar);
         radiusSeekBar = (SeekBar) findViewById(R.id.drawer_radius_seekbar);
@@ -129,8 +132,6 @@ public class MapView extends ActionBarActivity
         centerMapOnMyLocation();
 
         setListeners();
-
-
     }
 
     private void setListeners() {
@@ -138,11 +139,7 @@ public class MapView extends ActionBarActivity
         adultCheck.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (adultCheck.isChecked()) {
-                    showAdultEvents();
-                } else {
-                    hideAdultEvents();
-                }
+                updateMarkers();
             }
         });
 
@@ -151,7 +148,7 @@ public class MapView extends ActionBarActivity
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 String s = getBaseContext().getResources().getStringArray(R.array.drawer_category_array)[position];
 
-                showSelectedCategory(position);
+                updateMarkers();
 
             }
 
@@ -177,29 +174,82 @@ public class MapView extends ActionBarActivity
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                showSelectedCategory(categorySpinner.getSelectedItemPosition());
+                updateMarkers();
+            }
+        });
+
+        radiusSeekBar.setMax(TEN_KILOMETRES);
+        radiusSeekBar.setProgress(TEN_KILOMETRES);
+
+        radiusSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                radiusSeekBarProgress = progress;
+
+                if (radiusSeekBarProgress < TEN_KILOMETRES) {
+                    if (circle != null) {
+                        circle.setRadius(radiusSeekBarProgress * 500);
+                    }
+                } else {
+                    if (circle != null) {
+                        circle.remove();
+                        circle = null;
+                    }
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+                Location location = map.getMyLocation();
+
+                if (location != null) {
+                    if (circle == null) {
+                        circle = map.addCircle(new CircleOptions()
+                                .center(new LatLng(location.getLatitude(), location.getLongitude()))
+                                .radius(radiusSeekBarProgress * 500)
+                                .strokeColor(getBaseContext().getResources().getColor(R.color.radius_green))
+                                .strokeWidth(2)
+                                .fillColor(getBaseContext().getResources().getColor(R.color.transparent_green)));
+                    }
+                }
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                updateMarkers();
             }
         });
     }
 
-    private void showSelectedCategory(int position) {
+    private void updateMarkers() {
         Calendar maxDate = new GregorianCalendar();
         maxDate = Calendar.getInstance();
         long daysInMillis = TimeUnit.MILLISECONDS.convert(dateSeekBarProgress, TimeUnit.DAYS);
         maxDate.setTimeInMillis(maxDate.getTimeInMillis() + daysInMillis);
-        if (position > 0) {
+        if (categorySpinner.getSelectedItemPosition() > 0) {
             ListIterator<Event> iterator = list.listIterator();
             while (iterator.hasNext()) {
                 Event event = iterator.next();
                 if (dateSeekBarProgress >= THREE_WEEKS || !(event.getCalendar().after(maxDate))) {
-                    if (event.getCategory() == position) {
-                        if (event.isAdult() && adultCheck.isChecked()) {
-                            if (!markerEventMap.containsKey(event.getEventID())) {
-                                addPin(event);
+                    if (((radiusSeekBarProgress < TEN_KILOMETRES) && isEventInsideCircle(event)) || circle == null) {
+                        if (event.getCategory() == categorySpinner.getSelectedItemPosition()) {
+                            if (event.isAdult() && adultCheck.isChecked()) {
+                                if (!markerEventMap.containsKey(event.getEventID())) {
+                                    addPin(event);
+                                }
+                            } else if (!event.isAdult()) {
+                                if (!markerEventMap.containsKey(event.getEventID())) {
+                                    addPin(event);
+                                }
+                            } else if (event.isAdult() && !adultCheck.isChecked()) {
+                                if (markerEventMap.containsKey(event.getEventID())) {
+                                    removePin(event);
+                                }
                             }
-                        } else if (!event.isAdult()) {
-                            if (!markerEventMap.containsKey(event.getEventID())) {
-                                addPin(event);
+                        } else {
+                            if (markerEventMap.containsKey(event.getEventID())) {
+                                removePin(event);
                             }
                         }
                     } else {
@@ -218,13 +268,23 @@ public class MapView extends ActionBarActivity
             while (iterator.hasNext()) {
                 Event event = iterator.next();
                 if (dateSeekBarProgress >= THREE_WEEKS || !(event.getCalendar().after(maxDate))) {
-                    if (event.isAdult() && adultCheck.isChecked()) {
-                        if (!markerEventMap.containsKey(event.getEventID())) {
-                            addPin(event);
+                    if (((radiusSeekBarProgress < TEN_KILOMETRES) && isEventInsideCircle(event)) || circle == null) {
+                        if (event.isAdult() && adultCheck.isChecked()) {
+                            if (!markerEventMap.containsKey(event.getEventID())) {
+                                addPin(event);
+                            }
+                        } else if (!event.isAdult()) {
+                            if (!markerEventMap.containsKey(event.getEventID())) {
+                                addPin(event);
+                            }
+                        } else if (event.isAdult() && !adultCheck.isChecked()) {
+                            if (markerEventMap.containsKey(event.getEventID())) {
+                                removePin(event);
+                            }
                         }
-                    } else if (!event.isAdult()) {
-                        if (!markerEventMap.containsKey(event.getEventID())) {
-                            addPin(event);
+                    } else {
+                        if (markerEventMap.containsKey(event.getEventID())) {
+                            removePin(event);
                         }
                     }
                 } else {
@@ -236,39 +296,39 @@ public class MapView extends ActionBarActivity
         }
     }
 
+    private boolean isEventInsideCircle(Event event) {
+        float[] distance = new float[2];
+
+        if (circle != null) {
+            Location.distanceBetween(event.getLatitude(), event.getLongitude(),
+                    circle.getCenter().latitude, circle.getCenter().longitude, distance);
+
+            if (distance[0] < circle.getRadius()) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private void addPin(Event eo) {
+        Calendar today = Calendar.getInstance();
+        if (today.before(eo.getCalendar())) {
+            Marker m = map.addMarker(new MarkerOptions()
+                    .position(new LatLng(eo.getLatitude(), eo.getLongitude()))
+                    .title(eo.getName())
+                    .snippet(eo.getDescription()));
+            markerMap.put(m.getId(), eo);
+            markerEventMap.put(eo.getEventID(), m);
+        }
+    }
+
     private void removePin(Event eo) {
         Marker marker = markerEventMap.get(eo.getEventID());
         markerMap.remove(marker.getId());
         markerEventMap.remove(eo.getEventID());
         marker.remove();
-    }
-
-    private void hideAdultEvents() {
-        ListIterator<Event> iterator = list.listIterator();
-        while (iterator.hasNext()) {
-            Event event = iterator.next();
-            if (event.isAdult()) {
-                if (markerEventMap.containsKey(event.getEventID())) {
-                    removePin(event);
-                }
-            }
-        }
-    }
-
-    private void showAdultEvents() {
-        ListIterator<Event> iterator = list.listIterator();
-        while (iterator.hasNext()) {
-            Event event = iterator.next();
-            if (event.isAdult()) {
-                if (categorySpinner.getSelectedItemPosition() == 0) {
-                    if (!markerMap.containsKey(event.getEventID())) {
-                        addPin(event);
-                    }
-                } else {
-                    showSelectedCategory(categorySpinner.getSelectedItemPosition());
-                }
-            }
-        }
     }
 
     private void readEventsFromFirebase() {
@@ -329,25 +389,10 @@ public class MapView extends ActionBarActivity
         });
     }
 
-    private void addPin(Event eo) {
-        Calendar today = Calendar.getInstance();
-        if (today.before(eo.getCalendar())) {
-            Marker m = map.addMarker(new MarkerOptions()
-                    .position(new LatLng(eo.getLatitude(), eo.getLongitude()))
-                    .title(eo.getName())
-                    .snippet(eo.getDescription()));
-            markerMap.put(m.getId(), eo);
-            markerEventMap.put(eo.getEventID(), m);
-        }
-
-    }
-
     private void centerMapOnMyLocation() {
 
-        LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-        Criteria criteria = new Criteria();
+        Location location = map.getMyLocation();
 
-        Location location = locationManager.getLastKnownLocation(locationManager.getBestProvider(criteria, false));
         if (location != null) {
             map.animateCamera(CameraUpdateFactory.newLatLngZoom(
                     new LatLng(location.getLatitude(), location.getLongitude()), ZOOMLEVEL));

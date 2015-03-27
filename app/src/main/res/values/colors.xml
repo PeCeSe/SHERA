@@ -14,4 +14,8 @@
     <color name="light_red">#FF7263</color>
     <color name="light_orange">#FFB463</color>
     <color name="light_yellow">#ECFEAA</color>
+
+    <color name="transparent_green">#1a7bff00</color>
+    <color name="radius_green">#e69bff00</color>
+    <color name="transparent">#00000000</color>
 </resources>
