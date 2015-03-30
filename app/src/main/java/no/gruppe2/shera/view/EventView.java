@@ -1,7 +1,9 @@
 package no.gruppe2.shera.view;
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -45,7 +47,7 @@ import no.gruppe2.shera.service.SqlLiteDBHandler;
 
 public class EventView extends ActionBarActivity {
     TextView titleView, descriptionView, participantsView, dateView, timeView, addressView;
-    MenuItem editButton, joinButton, unjoinButton;
+    MenuItem editButton, joinButton, unjoinButton, deleteButton;
     private Event eo;
     private String userID;
     private SqlLiteDBHandler sqldb;
@@ -118,11 +120,13 @@ public class EventView extends ActionBarActivity {
         editButton = menu.findItem(R.id.change_button);
         joinButton = menu.findItem(R.id.join_button);
         unjoinButton = menu.findItem(R.id.unjoin_button);
+        deleteButton = menu.findItem(R.id.delete_button);
         boolean found = false;
         if (userID != null) {
             if (userID.equals(eo.getUserID() + "")) {
                 if (!editButton.isVisible()) {
                     editButton.setVisible(true);
+                    deleteButton.setVisible(true);
                 }
             } else {
                 List<String> events = sqldb.getJoinedEvents();
@@ -163,6 +167,29 @@ public class EventView extends ActionBarActivity {
         if (id == R.id.unjoin_button) {
             unjoinEvent();
             return true;
+        }
+        if (id == R.id.delete_button) {
+            DialogInterface.OnClickListener dialogClickListener =
+                    new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            switch (which) {
+                                case DialogInterface.BUTTON_POSITIVE:
+                                    //no is clicked
+                                    break;
+                                case DialogInterface.BUTTON_NEGATIVE:
+                                    //yes is clicked
+                                    db.removeEvent(eo);
+                                    sqldb.deleteEventID(eo.getEventID());
+                                    finish();
+                                    break;
+                            }
+                        }
+                    };
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setMessage(getResources().getString(R.string.are_you_sure))
+                    .setPositiveButton(getResources().getString(R.string.no), dialogClickListener)
+                    .setNegativeButton(getResources().getString(R.string.yes), dialogClickListener).show();
         }
 
         return super.onOptionsItemSelected(item);
