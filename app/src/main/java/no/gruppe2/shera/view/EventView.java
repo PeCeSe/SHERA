@@ -47,7 +47,7 @@ import no.gruppe2.shera.service.SqlLiteDBHandler;
 
 public class EventView extends ActionBarActivity {
     TextView titleView, descriptionView, participantsView, dateView, timeView, addressView;
-    MenuItem editButton, joinButton, unjoinButton, deleteButton;
+    MenuItem editButton, joinButton, unjoinButton, deleteButton, chatButton;
     private Event eo;
     private String userID;
     private SqlLiteDBHandler sqldb;
@@ -121,12 +121,14 @@ public class EventView extends ActionBarActivity {
         joinButton = menu.findItem(R.id.join_button);
         unjoinButton = menu.findItem(R.id.unjoin_button);
         deleteButton = menu.findItem(R.id.delete_button);
+        chatButton = menu.findItem(R.id.chat_button);
         boolean found = false;
         if (userID != null) {
             if (userID.equals(eo.getUserID() + "")) {
                 if (!editButton.isVisible()) {
                     editButton.setVisible(true);
                     deleteButton.setVisible(true);
+                    chatButton.setVisible(true);
                 }
             } else {
                 List<String> events = sqldb.getJoinedEvents();
@@ -135,6 +137,7 @@ public class EventView extends ActionBarActivity {
                     String s = iterator.next();
                     if (s.equals(eo.getEventID())) {
                         unjoinButton.setVisible(true);
+                        chatButton.setVisible(true);
                         found = true;
                     }
                 }
@@ -160,12 +163,20 @@ public class EventView extends ActionBarActivity {
             startActivity(i);
             return true;
         }
+        if(id == R.id.chat_button){
+            Intent i = new Intent(this, ChatView.class);
+            i.putExtra(getResources().getString(R.string.intent_parcelable_key), eo);
+            startActivity(i);
+            return true;
+        }
         if (id == R.id.join_button) {
             joinEvent();
+            chatButton.setVisible(true);
             return true;
         }
         if (id == R.id.unjoin_button) {
             unjoinEvent();
+            chatButton.setVisible(false);
             return true;
         }
         if (id == R.id.delete_button) {

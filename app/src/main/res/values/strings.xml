@@ -63,4 +63,7 @@
     <string name="download_friends_profile_pictures_facebook">Loading profile pictures from Facebook</string>
     <string name="change_photo">Change photo</string>
     <string name="are_you_sure">Are you sure you want to delete?</string>
+    <string name="title_activity_chat">Chat</string>
+    <string name="chat">Chat</string>
+    <string name="chat_send">Send</string>
 </resources>
