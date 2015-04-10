@@ -4,6 +4,13 @@
     tools:context="no.gruppe2.shera.view.EventView">
 
     <item
+        android:id="@+id/chat_button"
+        android:title="@string/chat"
+        android:orderInCategory="100"
+        app:showAsAction="always"
+        android:visible="false" />
+
+    <item
         android:id="@+id/change_button"
         android:title="@string/edit"
         android:orderInCategory="100"

@@ -6,15 +6,24 @@ import java.util.Calendar;
  * Created by chris.forberg on 07.04.2015.
  */
 public class Chat {
-    private String userName, message;
+    private String userName, message, eventID;
     private long userID;
     private Calendar dateTime;
 
-    public Chat(Calendar calendar, long userID, String name, String message) {
+    public Chat(Calendar calendar, long userID, String userName, String message, String eventID) {
         setDateTime(calendar);
         setUserID(userID);
-        setUserName(name);
+        setUserName(userName);
         setMessage(message);
+        setEventID(eventID);
+    }
+
+    public String getEventID(){
+        return eventID;
+    }
+
+    public void setEventID(String ID){
+        eventID = ID;
     }
 
     public Calendar getDateTime() {

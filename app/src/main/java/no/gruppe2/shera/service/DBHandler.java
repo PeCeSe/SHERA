@@ -12,6 +12,7 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.LinkedList;
 
+import no.gruppe2.shera.dto.Chat;
 import no.gruppe2.shera.dto.Event;
 
 /**
@@ -20,7 +21,7 @@ import no.gruppe2.shera.dto.Event;
 
 public class DBHandler {
 
-    private Firebase ref, event, id;
+    private Firebase ref, event, id, chat, chatID;
     public LinkedList<Event> list = new LinkedList<>();
     private Event eo;
     private HashMap<String, Object> map;
@@ -35,6 +36,13 @@ public class DBHandler {
         String s = id.toString();
         eo.setEventID(s);
         id.setValue(eo);
+    }
+
+    public void pushChatMessageToDB(Chat c, Firebase r){
+        ref = r;
+        chat = ref.child("Chat");
+        chatID = chat.push();
+        chatID.setValue(c);
     }
 
     public void updateEventDB(Event e) {

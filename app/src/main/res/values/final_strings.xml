@@ -4,7 +4,7 @@
     <string name="google_maps_api_key">AIzaSyAqgAXUSBCKpSTTZcpj-ftEnO5gwDTd5dM</string>
     <string name="firebase_root">https://shera.firebaseio.com/</string>
     <string name="firebase_events">Events</string>
-    <string name="chat_root">https://shera-chat.firebaseio.com</string>
+    <string name="chat_root">https://shera.firebaseio.com/Chat</string>
     <string name="shared_preferences_key">com.Gruppe2.SHERA</string>
     <string name="intent_parcelable_key">Event</string>
 </resources>
