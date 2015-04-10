@@ -59,6 +59,7 @@ import no.gruppe2.shera.R;
 import no.gruppe2.shera.dto.Event;
 import no.gruppe2.shera.helpers.HelpMethods;
 import no.gruppe2.shera.helpers.ImageAdapter;
+import no.gruppe2.shera.helpers.Validator;
 import no.gruppe2.shera.service.DBHandler;
 import no.gruppe2.shera.service.SqlLiteDBHandler;
 
@@ -487,30 +488,32 @@ public class EventCreatorView extends ActionBarActivity {
     }
 
     private boolean validateInput() {
-        if (nameInput.getText().length() < 1) {
+        Validator validator = new Validator();
+        if (!validator.isNotEmpty(nameInput.getText().toString())) {
             writeErrorMessage(getResources().getString(R.string.name_error));
             return false;
-        } else if (descriptionInput.getText().length() < 1) {
+        } else if (!validator.isNotEmpty(descriptionInput.getText().toString())) {
             writeErrorMessage(getResources().getString(R.string.description_error));
             return false;
-        } else if (addressInput.getText().length() < 1) {
+        } else if (!validator.isNotEmpty(addressInput.getText().toString())) {
             writeErrorMessage(getResources().getString(R.string.address_error));
             return false;
-        } else if (participantsInput.getText().toString().length() < 1) {
+        } else if (!validator.isNotEmpty(participantsInput.getText().toString().toString())) {
             writeErrorMessage(getResources().getString(R.string.participants_error));
             return false;
-        } else if (Integer.parseInt(participantsInput.getText().toString()) < 1) {
-            writeErrorMessage(getResources().getString(R.string.participants_num_error));
-            return false;
+        } else if (!validator.isNotEmpty(participantsInput.getText().toString())) {
+            if (!validator.isNotEmpty(Integer.parseInt(participantsInput.getText().toString()))) {
+                writeErrorMessage(getResources().getString(R.string.participants_num_error));
+                return false;
+            }
         }
         if (event != null) {
-            if (Integer.parseInt(participantsInput.getText().toString()) < event.getNumParticipants()) {
+            if (validator.isMaxLargerThanNum(Integer.parseInt(participantsInput.getText().toString()), event.getNumParticipants())) {
                 writeErrorMessage(getResources().getString(R.string.max_less_than_num_error) + "(" +
                         event.getNumParticipants() + ")");
             }
         }
-        Calendar c = Calendar.getInstance();
-        if (!cal.after(c)) {
+        if (!validator.isDateInFuture(cal)) {
             writeErrorMessage(getResources().getString(R.string.calendar_error));
             return false;
         }
