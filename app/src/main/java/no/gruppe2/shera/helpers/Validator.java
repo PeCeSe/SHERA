@@ -30,9 +30,9 @@ public class Validator {
     public boolean isDateInFuture(Calendar cal) {
         Calendar c = Calendar.getInstance();
         if (cal.after(c)) {
-            return false;
-        } else {
             return true;
+        } else {
+            return false;
         }
     }
 }
