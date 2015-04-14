@@ -115,7 +115,7 @@ public class EventCreatorView extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_event_creator);
 
-        db = new DBHandler();
+        db = new DBHandler(this);
         Firebase.setAndroidContext(this);
         ref = new Firebase(getResources().getString(R.string.firebase_root));
         help = new HelpMethods();
