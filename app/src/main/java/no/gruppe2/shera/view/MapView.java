@@ -512,7 +512,15 @@ public class MapView extends ActionBarActivity
                     }
                 }
 
+                ArrayList<Event> fullList = new ArrayList<>();
+                ListIterator iterator = list.listIterator();
+                while (iterator.hasNext()) {
+                    Event e = (Event) iterator.next();
+                    fullList.add(e);
+                }
+
                 intent.putParcelableArrayListExtra(getResources().getString(R.string.intent_parcelable_key), eoList);
+                intent.putParcelableArrayListExtra("Events", fullList);
                 startActivity(intent);
                 break;
             }
