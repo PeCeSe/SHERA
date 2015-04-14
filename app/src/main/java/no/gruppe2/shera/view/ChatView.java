@@ -60,7 +60,7 @@ public class ChatView extends ActionBarActivity {
         Firebase.setAndroidContext(this);
         i = getIntent();
         eo = i.getParcelableExtra(getResources().getString(R.string.intent_parcelable_key));
-        db = new DBHandler();
+        db = new DBHandler(this);
         ref = new Firebase(getResources().getString(R.string.firebase_root));
         chatRef = ref.child("Chat");
         queryRef = chatRef.orderByChild("eventID").equalTo(eo.getEventID());

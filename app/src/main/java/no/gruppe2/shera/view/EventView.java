@@ -78,7 +78,7 @@ public class EventView extends ActionBarActivity {
 
         sqldb = new SqlLiteDBHandler(this);
 
-        db = new DBHandler();
+        db = new DBHandler(this);
         Firebase.setAndroidContext(this);
         ref = new Firebase(getResources().getString(R.string.firebase_root));
 

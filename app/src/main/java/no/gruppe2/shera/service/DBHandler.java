@@ -1,9 +1,12 @@
 package no.gruppe2.shera.service;
 
+import android.content.Context;
+
 import com.firebase.client.ChildEventListener;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
+import com.firebase.client.Query;
 import com.firebase.client.ValueEventListener;
 
 import java.util.ArrayList;
@@ -12,6 +15,7 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.LinkedList;
 
+import no.gruppe2.shera.R;
 import no.gruppe2.shera.dto.Chat;
 import no.gruppe2.shera.dto.Event;
 
@@ -21,12 +25,19 @@ import no.gruppe2.shera.dto.Event;
 
 public class DBHandler {
 
-    private Firebase ref, event, id, chat, chatID;
+    private Firebase ref, event, id, chat, chatID, chatRef;
     public LinkedList<Event> list = new LinkedList<>();
     private Event eo;
     private HashMap<String, Object> map;
     private Calendar cal;
     public long numChildren;
+    private Query queryRef;
+    private Context c;
+    private Chat message;
+
+    public DBHandler(Context context) {
+        c = context;
+    }
 
     public void pushToDB(Event e, Firebase r) {
         ref = r;
@@ -124,5 +135,42 @@ public class DBHandler {
     public void removeEvent(Event e) {
         id = new Firebase(e.getEventID());
         id.removeValue();
+        deleteChat(e);
+    }
+
+    public void deleteChat(Event e) {
+        ref = new Firebase(c.getResources().getString(R.string.firebase_root));
+        chatRef = ref.child("Chat");
+        queryRef = chatRef.orderByChild("eventID").equalTo(e.getEventID());
+
+        queryRef.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                if (dataSnapshot != null) {
+                    id = chatRef.child(dataSnapshot.getKey());
+                    id.removeValue();
+                }
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+
+            }
+        });
     }
 }
