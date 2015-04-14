@@ -3,7 +3,6 @@ package no.gruppe2.shera.view;
 import android.app.ActionBar;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBarActivity;
 import android.view.MenuItem;
 import android.view.View;
@@ -41,7 +40,7 @@ public class ChatView extends ActionBarActivity {
     private Button send;
     private Event eo;
     private ActionBar actionBar;
-    private Intent intent, i;
+    private Intent i;
     private DBHandler db;
     private Chat message;
     private Calendar cal;
@@ -61,8 +60,6 @@ public class ChatView extends ActionBarActivity {
         Firebase.setAndroidContext(this);
         i = getIntent();
         eo = i.getParcelableExtra(getResources().getString(R.string.intent_parcelable_key));
-        intent = NavUtils.getParentActivityIntent(this);
-        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP|Intent.FLAG_ACTIVITY_SINGLE_TOP);
         db = new DBHandler();
         ref = new Firebase(getResources().getString(R.string.firebase_root));
         chatRef = ref.child("Chat");
@@ -85,13 +82,12 @@ public class ChatView extends ActionBarActivity {
             public void onClick(View v) {
                 cal = new GregorianCalendar().getInstance();
                 session = Session.getActiveSession();
-                if(!input.getText().equals("")) {
+                if (!input.getText().equals("")) {
                     message = new Chat(cal, userID,
                             userName, input.getText().toString(),
                             eo.getEventID());
-                        db.pushChatMessageToDB(message, ref);
-                }
-                else{
+                    db.pushChatMessageToDB(message, ref);
+                } else {
                     //ERROR MESSAGE
                 }
 
@@ -99,6 +95,7 @@ public class ChatView extends ActionBarActivity {
         });
 
     }
+
     @Override
     public void onStop() {
         super.onStop();
@@ -108,14 +105,14 @@ public class ChatView extends ActionBarActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                NavUtils.navigateUpTo(this, intent);
+                finish();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
 
-    private void readChatMessage(){
+    private void readChatMessage() {
         queryRef.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
@@ -127,10 +124,10 @@ public class ChatView extends ActionBarActivity {
                         map.get("userName").toString(),
                         map.get("message").toString(), map.get("eventID").toString());
                 chatList.add(message);
-                view.append(help.leadingZeroesDate(message.getDateTime())+" "+
-                        help.leadingZeroesTime(message.getDateTime())+" "+
-                        message.getUserName()+"\n"+
-                        message.getMessage()+"\n");
+                view.append(help.leadingZeroesDate(message.getDateTime()) + " " +
+                        help.leadingZeroesTime(message.getDateTime()) + " " +
+                        message.getUserName() + "\n" +
+                        message.getMessage() + "\n");
             }
 
             @Override

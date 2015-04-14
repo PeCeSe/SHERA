@@ -66,4 +66,5 @@
     <string name="title_activity_chat">Chat</string>
     <string name="chat">Chat</string>
     <string name="chat_send">Send</string>
+    <string name="abort_photo_download">Cancel</string>
 </resources>

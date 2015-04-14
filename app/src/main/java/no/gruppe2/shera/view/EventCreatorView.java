@@ -6,6 +6,7 @@ import android.app.Dialog;
 import android.app.DialogFragment;
 import android.app.ProgressDialog;
 import android.app.TimePickerDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -107,6 +108,8 @@ public class EventCreatorView extends ActionBarActivity {
     private Session session;
     private long last;
 
+    private AlertDialog alert;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -196,7 +199,6 @@ public class EventCreatorView extends ActionBarActivity {
         gridViewLoadOnce = true;
         newList = false;
         gridView = new GridView(this);
-        final AlertDialog alert;
 
         if (myPhotoList.size() <= 0)
             findPhotosList(session);
@@ -234,7 +236,6 @@ public class EventCreatorView extends ActionBarActivity {
                 if ((lastInScreen == totalItemCount) && isMorePhotos && !stopLoadingData &&
                         (System.currentTimeMillis() - last > 10000) && flag) {
                     stopLoadingData = true;
-                    last = System.currentTimeMillis();
                     flag = false;
                     findPhotosList(session);
                 }
@@ -434,6 +435,11 @@ public class EventCreatorView extends ActionBarActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
+
+        if (id == android.R.id.home) {
+            finish();
+            return true;
+        }
 
         if (id == R.id.saveEvent) {
             saveEvent();
@@ -674,7 +680,15 @@ public class EventCreatorView extends ActionBarActivity {
                 progress.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
                 progress.setTitle(getResources().getString(R.string.loading));
                 progress.setMessage(getResources().getString(R.string.download_from_facebook));
-                progress.setCancelable(false);
+                progress.setCancelable(true);
+                progress.setButton(DialogInterface.BUTTON_NEGATIVE, getResources().getString(R.string.abort_photo_download), new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                        if (myPhotoList.size() < 25)
+                            alert.dismiss();
+                    }
+                });
                 progress.setIndeterminate(false);
                 progress.setMax(strings.size());
                 progress.setProgress(0);
@@ -705,7 +719,6 @@ public class EventCreatorView extends ActionBarActivity {
                 icon = null;
                 try {
                     InputStream in = new java.net.URL(url).openStream();
-                    //icon = BitmapFactory.decodeStream(in);
                     Bitmap iconTemp;
                     icon = Bitmap.createScaledBitmap(iconTemp = BitmapFactory.decodeStream(in), iconTemp.getWidth() / 2, iconTemp.getHeight() / 2, true);
                     view = icon;
@@ -736,6 +749,7 @@ public class EventCreatorView extends ActionBarActivity {
             } else {
                 eventPhotoView.setImageBitmap(result);
             }
+            last = System.currentTimeMillis();
         }
     }
 }

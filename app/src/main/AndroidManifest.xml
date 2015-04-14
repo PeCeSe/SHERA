@@ -73,10 +73,10 @@
         <activity
             android:name=".view.EventView"
             android:label="@string/title_activity_event"
-            android:parentActivityName=".view.MapView">
+            android:parentActivityName=".view.EventsView">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".view.MapView" />
+                android:value=".view.EventsView" />
         </activity>
         <activity
             android:name=".view.ChatView"

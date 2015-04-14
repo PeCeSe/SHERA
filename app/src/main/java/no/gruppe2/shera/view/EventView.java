@@ -156,6 +156,11 @@ public class EventView extends ActionBarActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
+        if (id == android.R.id.home) {
+            finish();
+            return true;
+        }
+
         //noinspection SimplifiableIfStatement
         if (id == R.id.change_button) {
             Intent i = new Intent(this, EventCreatorView.class);
@@ -163,7 +168,7 @@ public class EventView extends ActionBarActivity {
             startActivity(i);
             return true;
         }
-        if(id == R.id.chat_button){
+        if (id == R.id.chat_button) {
             Intent i = new Intent(this, ChatView.class);
             i.putExtra(getResources().getString(R.string.intent_parcelable_key), eo);
             startActivity(i);
@@ -384,11 +389,9 @@ public class EventView extends ActionBarActivity {
                 icon = null;
                 try {
                     InputStream in = new java.net.URL(url).openStream();
-                    //icon = BitmapFactory.decodeStream(in);
                     Bitmap iconTemp;
                     icon = Bitmap.createScaledBitmap(iconTemp = BitmapFactory.decodeStream(in), iconTemp.getWidth() / 2, iconTemp.getHeight() / 2, true);
                     view = icon;
-                    myPhotoList.add(view);
                 } catch (Exception e) {
                     Log.e("Error", e + "");
                     e.printStackTrace();
@@ -408,9 +411,7 @@ public class EventView extends ActionBarActivity {
                 progress.dismiss();
             } else {
                 eventImageView.setImageBitmap(result);
-                //eventImageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
             }
-            //bmImage.setImageBitmap(result);
         }
     }
 }
