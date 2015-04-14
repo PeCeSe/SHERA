@@ -8,6 +8,9 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ListIterator;
+
+import no.gruppe2.shera.dto.Event;
 
 /**
  * Created by pernille.sethre on 13.03.2015.
@@ -112,7 +115,6 @@ public class SqlLiteDBHandler extends SQLiteOpenHelper {
     }
 
     public int countOwnEvents() {
-        //Counts how many contacts are in the database
         String countQuery = "SELECT * FROM " + TABLE_EVENTS + " WHERE " + KEY_OWN_EVENT + " = 1";
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery(countQuery, null);
@@ -122,13 +124,43 @@ public class SqlLiteDBHandler extends SQLiteOpenHelper {
     }
 
     public int countJoinedEvents() {
-        //Counts how many contacts are in the database
         String countQuery = "SELECT * FROM " + TABLE_EVENTS + " WHERE " + KEY_OWN_EVENT + " = 0";
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery(countQuery, null);
         cursor.close();
         db.close();
         return cursor.getCount();
+    }
+
+    public void updateSqlLite(ArrayList<Event> events, String userID) {
+
+        ArrayList<String> arrayList = getAllEvents();
+
+        if (!arrayList.isEmpty()) {
+            for (int i = 0; i < arrayList.size(); i++) {
+                deleteEventID(arrayList.get(i));
+            }
+        }
+
+        ListIterator<Event> eventIterator = events.listIterator();
+
+        while (eventIterator.hasNext()) {
+            Event e = eventIterator.next();
+
+            if (e.getUserID() == Long.parseLong(userID)) {
+                eventCreated(e.getEventID());
+            } else {
+                ListIterator<Long> userIterator = e.getParticipantsList().listIterator();
+
+                while (userIterator.hasNext()) {
+                    Long eventUserID = userIterator.next();
+                    if (eventUserID == Long.parseLong(userID)) {
+                        eventJoined(e.getEventID());
+                    }
+                }
+            }
+        }
+
     }
 
 }

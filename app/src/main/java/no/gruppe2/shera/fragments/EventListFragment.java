@@ -3,6 +3,7 @@ package no.gruppe2.shera.fragments;
 import android.app.ListFragment;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -42,8 +43,11 @@ public class EventListFragment extends ListFragment {
         if (intent != null) {
             events = intent.getParcelableArrayListExtra(getResources()
                     .getString(R.string.intent_parcelable_key));
-        } else
+        } else {
             events = new ArrayList<>();
+            Log.d("Intent", "Intent var null fuck");
+        }
+
 
         eventsName = new LinkedList<>();
 
@@ -67,5 +71,11 @@ public class EventListFragment extends ListFragment {
                 startActivity(intent1);
             }
         });
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Log.d("Fragment.onDestroy", "Destroyed");
     }
 }

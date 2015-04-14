@@ -43,6 +43,7 @@
     <string name="yes">Yes</string>
     <string name="no">No</string>
     <string name="delete">Delete</string>
+    <string name="update">Update</string>
 
     <string name="name_error">Name can not be blank. </string>
     <string name="description_error">Description can not be blank. </string>
