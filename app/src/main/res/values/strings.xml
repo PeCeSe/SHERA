@@ -43,6 +43,8 @@
     <string name="yes">Yes</string>
     <string name="no">No</string>
     <string name="delete">Delete</string>
+    <string name="chat_hint">Type here</string>
+    <string name="event_banner_image">Event banner image</string>
 
     <string name="name_error">Name can not be blank. </string>
     <string name="description_error">Description can not be blank. </string>

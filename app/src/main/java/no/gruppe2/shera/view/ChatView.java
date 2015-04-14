@@ -8,6 +8,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.facebook.Request;
@@ -37,6 +38,7 @@ import no.gruppe2.shera.service.DBHandler;
 public class ChatView extends ActionBarActivity {
     private TextView view;
     private EditText input;
+    private ScrollView scroll;
     private Button send;
     private Event eo;
     private ActionBar actionBar;
@@ -90,10 +92,9 @@ public class ChatView extends ActionBarActivity {
                 } else {
                     //ERROR MESSAGE
                 }
-
+                input.setText("");
             }
         });
-
     }
 
     @Override
@@ -128,6 +129,14 @@ public class ChatView extends ActionBarActivity {
                         help.leadingZeroesTime(message.getDateTime()) + " " +
                         message.getUserName() + "\n" +
                         message.getMessage() + "\n");
+
+                scroll = ((ScrollView) findViewById(R.id.scrollViewChat));
+                scroll.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        scroll.fullScroll(ScrollView.FOCUS_DOWN);
+                    }
+                });
             }
 
             @Override
