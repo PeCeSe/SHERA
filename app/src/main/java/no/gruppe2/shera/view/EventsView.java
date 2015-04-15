@@ -5,10 +5,12 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.ListIterator;
 
 import no.gruppe2.shera.R;
@@ -22,9 +24,10 @@ public class EventsView extends ActionBarActivity {
 
     private EventListFragment eventListFragment;
     private SqlLiteDBHandler sqlLiteDBHandler;
-    private ArrayList<Event> events;
+    private static ArrayList<Event> events;
     private String userID;
     private SqlLiteDBHandler sqldb;
+    private boolean first = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,44 +77,55 @@ public class EventsView extends ActionBarActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.update_option) {
-            sqlLiteDBHandler.updateSqlLite(events, userID);
-
-
-            Intent intent = new Intent(this, EventsView.class);
-
-            ArrayList<Event> eoList = new ArrayList<>();
-
-            ListIterator<Event> itObject = events.listIterator();
-
-            ArrayList<String> localEvents = sqldb.getAllEvents();
-
-            while (itObject.hasNext()) {
-
-                Event event = itObject.next();
-                for (int i = 0; i < localEvents.size(); i++) {
-                    if (event.getEventID().equals(localEvents.get((i)))) {
-                        eoList.add(event);
-                    }
-                }
-            }
-
-            ArrayList<Event> fullList = new ArrayList<>();
-            ListIterator iterator = events.listIterator();
-            while (iterator.hasNext()) {
-                Event e = (Event) iterator.next();
-                fullList.add(e);
-            }
-
-            intent.putParcelableArrayListExtra(getResources().getString(R.string.intent_parcelable_key), eoList);
-            intent.putParcelableArrayListExtra("Events", fullList);
-
-            finish();
-            startActivity(intent);
-            //recreate();
+            updateList();
             return true;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    public static void newList(LinkedList<Event> list) {
+        events = new ArrayList<>();
+        for (int i = 0; i < list.size(); i++) {
+            events.add(list.get(i));
+        }
+    }
+
+    public void updateList() {
+        sqlLiteDBHandler.updateSqlLite(events, userID);
+
+        Intent intent = new Intent(this, EventsView.class);
+
+        ArrayList<Event> eoList = new ArrayList<>();
+
+        ListIterator<Event> itObject = events.listIterator();
+
+        ArrayList<String> localEvents = sqldb.getAllEvents();
+
+        while (itObject.hasNext()) {
+
+            Event event = itObject.next();
+            for (int i = 0; i < localEvents.size(); i++) {
+                if (event.getEventID().equals(localEvents.get((i)))) {
+                    eoList.add(event);
+                }
+            }
+        }
+
+        ArrayList<Event> fullList = new ArrayList<>();
+        ListIterator iterator = MapView.list.listIterator();
+        while (iterator.hasNext()) {
+            Event e = (Event) iterator.next();
+            fullList.add(e);
+        }
+
+        intent.putParcelableArrayListExtra(getResources().getString(R.string.intent_parcelable_key), eoList);
+        intent.putParcelableArrayListExtra("Events", fullList);
+
+        finish();
+        startActivity(intent);
+        //recreate();
+
     }
 
     @Override
@@ -122,5 +136,10 @@ public class EventsView extends ActionBarActivity {
             eventListFragment = new EventListFragment();
             getFragmentManager().beginTransaction().add(R.id.fragment_container, eventListFragment).commit();
         }
+        Log.d("RESUME::BEFORE", first + "");
+        if (!first)
+            updateList();
+        first = false;
+        Log.d("RESUME::AFTER", first + "");
     }
 }

@@ -1,5 +1,6 @@
 package no.gruppe2.shera.view;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -94,14 +95,7 @@ public class EventView extends ActionBarActivity {
         addressView = (TextView) findViewById(R.id.addressView);
         gridView = (GridView) findViewById(R.id.profile_photos);
 
-        if (!eo.getPhotoSource().equals("NOTSET"))
-            new DownloadImages(eo.getPhotoSource()).execute();
-        titleView.setText(eo.getName());
-        descriptionView.setText(eo.getDescription());
-        participantsView.setText(eo.getNumParticipants() + "/" + eo.getMaxParticipants());
-        dateView.setText(help.leadingZeroesDate(eo.getCalendar()));
-        timeView.setText(help.leadingZeroesTime(eo.getCalendar()));
-        addressView.setText(eo.getAddress());
+        setFields(eo);
 
         myFriendsListID = new ArrayList<>();
         myFriendsListName = new ArrayList<>();
@@ -165,7 +159,7 @@ public class EventView extends ActionBarActivity {
         if (id == R.id.change_button) {
             Intent i = new Intent(this, EventCreatorView.class);
             i.putExtra(getResources().getString(R.string.intent_parcelable_key), eo);
-            startActivity(i);
+            startActivityForResult(i, 1);
             return true;
         }
         if (id == R.id.chat_button) {
@@ -209,6 +203,27 @@ public class EventView extends ActionBarActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == 1 && resultCode == Activity.RESULT_OK) {
+            Event returEvent = (Event) data.getParcelableExtra("Event");
+            setFields(returEvent);
+        }
+    }
+
+    private void setFields(Event eo) {
+        if (!eo.getPhotoSource().equals("NOTSET"))
+            new DownloadImages(eo.getPhotoSource()).execute();
+        titleView.setText(eo.getName());
+        descriptionView.setText(eo.getDescription());
+        participantsView.setText(eo.getNumParticipants() + "/" + eo.getMaxParticipants());
+        dateView.setText(help.leadingZeroesDate(eo.getCalendar()));
+        timeView.setText(help.leadingZeroesTime(eo.getCalendar()));
+        addressView.setText(eo.getAddress());
     }
 
     public void setGridView() {

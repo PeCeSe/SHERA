@@ -150,12 +150,14 @@ public class SqlLiteDBHandler extends SQLiteOpenHelper {
             if (e.getUserID() == Long.parseLong(userID)) {
                 eventCreated(e.getEventID());
             } else {
-                ListIterator<Long> userIterator = e.getParticipantsList().listIterator();
+                if (e.getParticipantsList() != null) {
+                    ListIterator<Long> userIterator = e.getParticipantsList().listIterator();
 
-                while (userIterator.hasNext()) {
-                    Long eventUserID = userIterator.next();
-                    if (eventUserID == Long.parseLong(userID)) {
-                        eventJoined(e.getEventID());
+                    while (userIterator.hasNext()) {
+                        Long eventUserID = userIterator.next();
+                        if (eventUserID == Long.parseLong(userID)) {
+                            eventJoined(e.getEventID());
+                        }
                     }
                 }
             }
