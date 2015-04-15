@@ -7,7 +7,7 @@
 
     <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:paddingTop="@dimen/activity_vertical_margin"
         android:paddingLeft="@dimen/activity_horizontal_margin"
         android:paddingRight="@dimen/activity_horizontal_margin"
@@ -141,6 +141,26 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true" />
+
+        <Button
+            android:id="@+id/findPhotos"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/find_photo"
+            android:layout_alignBottom="@+id/participantsInputField"
+            android:layout_toLeftOf="@+id/pickDateButton"
+            android:layout_alignLeft="@+id/pickTimeButton"
+            android:layout_alignStart="@+id/pickTimeButton" />
+
+        <ImageView
+            android:id="@+id/event_photo_view"
+            android:contentDescription="@string/event_creator_chosen_image"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:adjustViewBounds="true"
+            android:scaleType="fitCenter"
+            android:layout_below="@+id/findPhotos" />
 
     </RelativeLayout>
 
