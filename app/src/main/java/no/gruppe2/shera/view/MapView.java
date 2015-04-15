@@ -32,6 +32,7 @@ import com.firebase.client.ChildEventListener;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
+import com.firebase.client.Query;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
@@ -44,6 +45,8 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -71,7 +74,7 @@ public class MapView extends ActionBarActivity
     private Spinner categorySpinner;
 
     private Firebase ref, event;
-    private LinkedList<Event> list = new LinkedList<>();
+    static LinkedList<Event> list = new LinkedList<>();
     private ArrayList<Long> arrayList;
     private HashMap<String, Object> hash = new HashMap<>();
     private HashMap<String, Event> markerMap;
@@ -81,6 +84,7 @@ public class MapView extends ActionBarActivity
     private String userID;
     private final int ZOOMLEVEL = 14, THREE_WEEKS = 22, TEN_KILOMETRES = 11;
     private int dateSeekBarProgress, radiusSeekBarProgress;
+    private Query queryRef;
 
     private Circle circle;
 
@@ -110,6 +114,7 @@ public class MapView extends ActionBarActivity
 
         ref = new Firebase(getResources().getString(R.string.firebase_root));
         event = ref.child(getResources().getString(R.string.firebase_events));
+        queryRef = event.orderByChild("calendar");
 
         arrayList = new ArrayList<>();
         readEventsFromFirebase();
@@ -335,35 +340,14 @@ public class MapView extends ActionBarActivity
     }
 
     private void readEventsFromFirebase() {
-        event.addChildEventListener(new ChildEventListener() {
+        queryRef.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 hash = new HashMap<>();
                 hash = (HashMap<String, Object>) dataSnapshot.getValue();
-                String time = hash.get("calendar").toString();
-                cal = new GregorianCalendar();
-                cal.setTimeInMillis(Long.parseLong(time));
-                if (hash.get("participantsList") == null)
-                    arrayList = null;
-                else
-                    arrayList = (ArrayList<Long>) hash.get("participantsList");
-
-                eo = new Event(hash.get("eventID").toString(),
-                        Long.parseLong(hash.get("userID").toString()),
-                        hash.get("name").toString(),
-                        hash.get("description").toString(),
-                        hash.get("address").toString(),
-                        Double.parseDouble(hash.get("latitude").toString()),
-                        Double.parseDouble(hash.get("longitude").toString()),
-                        Integer.parseInt(hash.get("maxParticipants").toString()),
-                        Integer.parseInt(hash.get("numParticipants").toString()),
-                        Integer.parseInt(hash.get("category").toString()),
-                        cal,
-                        Boolean.parseBoolean(hash.get("adult").toString()),
-                        arrayList,
-                        hash.get("photoSource").toString());
-
+                eo = createObject(hash);
                 list.add(eo);
+
                 if (!adultCheck.isChecked() && !eo.isAdult())
                     addPin(eo);
                 else if (adultCheck.isChecked())
@@ -374,28 +358,7 @@ public class MapView extends ActionBarActivity
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
                 hash = new HashMap<>();
                 hash = (HashMap<String, Object>) dataSnapshot.getValue();
-                String time = hash.get("calendar").toString();
-                cal = new GregorianCalendar();
-                cal.setTimeInMillis(Long.parseLong(time));
-                if (hash.get("participantsList") == null)
-                    arrayList = null;
-                else
-                    arrayList = (ArrayList<Long>) hash.get("participantsList");
-
-                eo = new Event(hash.get("eventID").toString(),
-                        Long.parseLong(hash.get("userID").toString()),
-                        hash.get("name").toString(),
-                        hash.get("description").toString(),
-                        hash.get("address").toString(),
-                        Double.parseDouble(hash.get("latitude").toString()),
-                        Double.parseDouble(hash.get("longitude").toString()),
-                        Integer.parseInt(hash.get("maxParticipants").toString()),
-                        Integer.parseInt(hash.get("numParticipants").toString()),
-                        Integer.parseInt(hash.get("category").toString()),
-                        cal,
-                        Boolean.parseBoolean(hash.get("adult").toString()),
-                        arrayList,
-                        hash.get("photoSource").toString());
+                eo = createObject(hash);
 
                 for (int i = 0; i < list.size(); i++) {
                     if (list.get(i).getEventID().equals(eo.getEventID())) {
@@ -403,6 +366,8 @@ public class MapView extends ActionBarActivity
                         break;
                     }
                 }
+                Collections.sort(list, new CalendarCompare());
+                EventsView.newList(list);
                 updateMarkers();
             }
 
@@ -410,28 +375,7 @@ public class MapView extends ActionBarActivity
             public void onChildRemoved(DataSnapshot dataSnapshot) {
                 hash = new HashMap<>();
                 hash = (HashMap<String, Object>) dataSnapshot.getValue();
-                String time = hash.get("calendar").toString();
-                cal = new GregorianCalendar();
-                cal.setTimeInMillis(Long.parseLong(time));
-                if (hash.get("participantsList") == null)
-                    arrayList = null;
-                else
-                    arrayList = (ArrayList<Long>) hash.get("participantsList");
-
-                eo = new Event(hash.get("eventID").toString(),
-                        Long.parseLong(hash.get("userID").toString()),
-                        hash.get("name").toString(),
-                        hash.get("description").toString(),
-                        hash.get("address").toString(),
-                        Double.parseDouble(hash.get("latitude").toString()),
-                        Double.parseDouble(hash.get("longitude").toString()),
-                        Integer.parseInt(hash.get("maxParticipants").toString()),
-                        Integer.parseInt(hash.get("numParticipants").toString()),
-                        Integer.parseInt(hash.get("category").toString()),
-                        cal,
-                        Boolean.parseBoolean(hash.get("adult").toString()),
-                        arrayList,
-                        hash.get("photoSource").toString());
+                eo = createObject(hash);
 
                 for (int i = 0; i < list.size(); i++) {
                     if (list.get(i).getEventID().equals(eo.getEventID())) {
@@ -453,6 +397,33 @@ public class MapView extends ActionBarActivity
 
             }
         });
+    }
+
+    private Event createObject(HashMap<String, Object> hash) {
+        String time = hash.get("calendar").toString();
+        cal = new GregorianCalendar();
+        cal.setTimeInMillis(Long.parseLong(time));
+        if (hash.get("participantsList") == null)
+            arrayList = null;
+        else
+            arrayList = (ArrayList<Long>) hash.get("participantsList");
+
+        Event event = new Event(hash.get("eventID").toString(),
+                Long.parseLong(hash.get("userID").toString()),
+                hash.get("name").toString(),
+                hash.get("description").toString(),
+                hash.get("address").toString(),
+                Double.parseDouble(hash.get("latitude").toString()),
+                Double.parseDouble(hash.get("longitude").toString()),
+                Integer.parseInt(hash.get("maxParticipants").toString()),
+                Integer.parseInt(hash.get("numParticipants").toString()),
+                Integer.parseInt(hash.get("category").toString()),
+                cal,
+                Boolean.parseBoolean(hash.get("adult").toString()),
+                arrayList,
+                hash.get("photoSource").toString());
+
+        return event;
     }
 
     private void centerMapOnMyLocation() {
@@ -731,5 +702,16 @@ public class MapView extends ActionBarActivity
         SharedPreferences sharedPrefs = this.getSharedPreferences(
                 getResources().getString(R.string.shared_preferences_key), Context.MODE_PRIVATE);
         sharedPrefs.edit().putString("userID", userID).apply();
+    }
+
+    private class CalendarCompare implements Comparator<Event> {
+        @Override
+        public int compare(Event e1, Event e2) {
+            if (e1.getCalendar().getTimeInMillis() >= e2.getCalendar().getTimeInMillis()) {
+                return 1;
+            } else {
+                return -1;
+            }
+        }
     }
 }

@@ -1,5 +1,6 @@
 package no.gruppe2.shera.view;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
@@ -443,9 +444,18 @@ public class EventCreatorView extends ActionBarActivity {
 
         if (id == R.id.saveEvent) {
             saveEvent();
+
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onBackPressed() {
+        Intent data = new Intent();
+        data.putExtra("Event", event);
+        setResult(Activity.RESULT_OK, data);
+        super.onBackPressed();
     }
 
     private void showDatePickerDialog(View v) {
@@ -476,7 +486,8 @@ public class EventCreatorView extends ActionBarActivity {
                 updateEventObject();
                 updateObjectInDatabase();
                 showToast(getResources().getString(R.string.event_saved));
-                finish();
+                onBackPressed();
+                //finish();
             } else
                 return;
         } else {
@@ -514,9 +525,10 @@ public class EventCreatorView extends ActionBarActivity {
             }
         }
         if (event != null) {
-            if (validator.isMaxLargerThanNum(Integer.parseInt(participantsInput.getText().toString()), event.getNumParticipants())) {
+            if (!validator.isMaxLargerThanNum(Integer.parseInt(participantsInput.getText().toString()), event.getNumParticipants())) {
                 writeErrorMessage(getResources().getString(R.string.max_less_than_num_error) + "(" +
                         event.getNumParticipants() + ")");
+                return false;
             }
         }
         if (!validator.isDateInFuture(cal)) {
