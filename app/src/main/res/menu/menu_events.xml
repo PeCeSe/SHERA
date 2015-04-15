@@ -3,10 +3,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="no.gruppe2.shera.view.EventView">
 
-
     <item
         android:id="@+id/update_option"
         android:title="@string/update"
-            android:orderInCategory="100"
-        app:showAsAction="always" />
+        android:icon="@drawable/ic_update"
+        app:showAsAction="ifRoom" />
+
 </menu>
