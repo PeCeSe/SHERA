@@ -118,7 +118,8 @@
             android:layout_alignParentLeft="true"
             android:layout_toLeftOf="@+id/centerPoint"
             android:layout_marginTop="30dp"
-            android:layout_marginRight="15dp" />
+            android:layout_marginRight="15dp"
+            style="@style/CustomButton" />
 
         <TextView
             android:id="@+id/dateText"
@@ -134,7 +135,8 @@
             android:layout_toRightOf="@+id/centerPoint"
             android:layout_alignBaseline="@+id/pickTimeButton"
             android:layout_alignParentRight="true"
-            android:layout_marginLeft="15dp" />
+            android:layout_marginLeft="15dp"
+            style="@style/CustomButton" />
 
         <TextView
             android:id="@+id/centerPoint"
@@ -150,10 +152,11 @@
             android:text="@string/find_photo"
             android:layout_below="@+id/pickTimeButton"
             android:layout_marginTop="5dp"
-            android:layout_alignRight="@+id/pickTimeButton"
-            android:layout_alignEnd="@+id/pickTimeButton"
             android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true" />
+            android:layout_alignParentStart="true"
+            style="@style/CustomButton"
+            android:layout_alignRight="@+id/pickDateButton"
+            android:layout_alignEnd="@+id/pickDateButton" />
 
         <ImageView
             android:id="@+id/event_photo_view"
