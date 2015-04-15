@@ -81,7 +81,8 @@
         <activity
             android:name=".view.ChatView"
             android:label="@string/title_activity_chat"
-            android:parentActivityName=".view.EventView">
+            android:parentActivityName=".view.EventView"
+            android:windowSoftInputMode="stateAlwaysHidden">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".view.EventView" />
