@@ -148,13 +148,21 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/find_photo"
-            android:layout_below="@+id/pickTimeButton" />
+            android:layout_below="@+id/pickTimeButton"
+            android:layout_marginTop="5dp"
+            android:layout_alignRight="@+id/pickTimeButton"
+            android:layout_alignEnd="@+id/pickTimeButton"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true" />
 
         <ImageView
             android:id="@+id/event_photo_view"
+            android:contentDescription="@string/event_creator_chosen_image"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:scaleType="centerCrop"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:adjustViewBounds="true"
+            android:scaleType="fitCenter"
             android:layout_below="@+id/findPhotos" />
 
 
