@@ -42,8 +42,7 @@
                 android:layout_height="wrap_content"
                 tools:layout="@layout/fragment_seekbar"
                 android:layout_above="@+id/drawer_time_seekbar"
-                android:max="10"
-                android:layout_marginBottom="20dp" />
+                android:max="10" />
 
             <SeekBar
                 android:id="@+id/drawer_time_seekbar"
@@ -51,8 +50,7 @@
                 android:layout_height="wrap_content"
                 android:layout_above="@+id/drawer_category_spinner"
                 tools:layout="@layout/fragment_seekbar"
-                android:max="10"
-                android:layout_marginBottom="20dp" />
+                android:max="10" />
 
             <Spinner
                 android:id="@+id/drawer_category_spinner"
@@ -69,17 +67,9 @@
                 android:layout_height="wrap_content"
                 android:layout_toLeftOf="@+id/centerPointDrawer"
                 android:text="@string/adult"
-                android:layout_above="@+id/bottomDrawer"
                 android:layout_alignParentLeft="true"
+                android:layout_alignParentBottom="true"
                 android:layout_marginLeft="5dp" />
-
-            <TextView
-                android:id="@+id/bottomDrawer"
-                android:text=""
-                android:layout_width="0dp"
-                android:layout_height="15dp"
-                android:layout_centerHorizontal="true"
-                android:layout_alignParentBottom="true" />
 
             <TextView
                 android:id="@+id/centerPointDrawer"
