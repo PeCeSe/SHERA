@@ -1,5 +1,8 @@
 package no.gruppe2.shera.helpers;
 
+import android.content.Context;
+import android.widget.Toast;
+
 import java.util.Calendar;
 
 /**
@@ -20,5 +23,9 @@ public class HelpMethods {
         time += String.format("%02d", calendar.get(Calendar.HOUR_OF_DAY)) + ":"
                 + String.format("%02d", calendar.get(Calendar.MINUTE));
         return time;
+    }
+
+    public void createToast(String s, Context context) {
+        Toast.makeText(context, s, Toast.LENGTH_SHORT).show();
     }
 }
