@@ -99,8 +99,8 @@ public class ChatView extends ActionBarActivity {
     }
 
     @Override
-    public void onStop() {
-        super.onStop();
+    public void onBackPressed() {
+        finish();
     }
 
     @Override

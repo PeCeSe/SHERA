@@ -28,6 +28,7 @@ public class EventsView extends ActionBarActivity {
     private String userID;
     private SqlLiteDBHandler sqldb;
     private boolean first = true;
+    private boolean chat;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +38,12 @@ public class EventsView extends ActionBarActivity {
         sqldb = new SqlLiteDBHandler(this);
 
         Intent intent = getIntent();
+
+        chat = intent.getBooleanExtra("Chat", false);
+
+        if (chat) {
+            setTitle(getResources().getString(R.string.chat));
+        }
 
         events = intent.getParcelableArrayListExtra("Events");
 
@@ -121,6 +128,7 @@ public class EventsView extends ActionBarActivity {
 
         intent.putParcelableArrayListExtra(getResources().getString(R.string.intent_parcelable_key), eoList);
         intent.putParcelableArrayListExtra("Events", fullList);
+        intent.putExtra("Chat", chat);
 
         finish();
         startActivity(intent);
