@@ -18,4 +18,5 @@
     <color name="transparent_green">#1a7bff00</color>
     <color name="radius_green">#e69bff00</color>
     <color name="transparent">#00000000</color>
+    <color name="navigation_drawer_background">#50000000</color>
 </resources>

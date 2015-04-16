@@ -114,7 +114,8 @@ public class NavigationDrawerFragment extends Fragment {
     * The fragmentId is the android:id og this fragment and
     * the drawerLayout contains this fragment's UI.
     */
-    public void setUp(int fragmentId, DrawerLayout drawerLayout) {
+    public void setUp(int fragmentId, final DrawerLayout drawerLayout) {
+        drawerLayout.setScrimColor(getResources().getColor(R.color.navigation_drawer_background));
         fragmentContainerView = getActivity().findViewById(fragmentId);
 
         ActionBar actionBar = getActionBar();
