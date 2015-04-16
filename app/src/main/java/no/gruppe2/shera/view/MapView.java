@@ -50,6 +50,7 @@ import java.util.Comparator;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.ListIterator;
 import java.util.concurrent.TimeUnit;
 
@@ -326,10 +327,32 @@ public class MapView extends ActionBarActivity
             Marker m = map.addMarker(new MarkerOptions()
                     .position(new LatLng(eo.getLatitude(), eo.getLongitude()))
                     .title(eo.getName())
+                    .icon(BitmapDescriptorFactory.defaultMarker(getColor(eo)))
                     .snippet(eo.getDescription()));
             markerMap.put(m.getId(), eo);
             markerEventMap.put(eo.getEventID(), m);
         }
+    }
+
+    private float getColor(Event eo) {
+
+        float hue = BitmapDescriptorFactory.HUE_RED;
+
+        List<String> ownEvents = sqldb.getOwnEvents();
+
+        if (ownEvents.contains(eo.getEventID())) {
+            hue = BitmapDescriptorFactory.HUE_ORANGE;
+            return hue;
+        }
+
+        ArrayList<String> joinedEvents = sqldb.getJoinedEvents();
+
+        if (joinedEvents.contains(eo.getEventID())) {
+            hue = BitmapDescriptorFactory.HUE_GREEN;
+            return hue;
+        }
+
+        return hue;
     }
 
     private void removePin(Event eo) {

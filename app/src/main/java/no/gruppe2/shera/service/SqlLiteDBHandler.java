@@ -7,7 +7,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.ListIterator;
 
 import no.gruppe2.shera.dto.Event;
@@ -59,8 +58,8 @@ public class SqlLiteDBHandler extends SQLiteOpenHelper {
         db.close();
     }
 
-    public List<String> getOwnEvents() {
-        List<String> idList = new ArrayList<String>();
+    public ArrayList<String> getOwnEvents() {
+        ArrayList<String> idList = new ArrayList<String>();
         String selectQuery = "SELECT * FROM " + TABLE_EVENTS + " WHERE " + KEY_OWN_EVENT + " = 1";
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, null);
@@ -75,8 +74,8 @@ public class SqlLiteDBHandler extends SQLiteOpenHelper {
         return idList;
     }
 
-    public List<String> getJoinedEvents() {
-        List<String> idList = new ArrayList<String>();
+    public ArrayList<String> getJoinedEvents() {
+        ArrayList<String> idList = new ArrayList<String>();
         String selectQuery = "SELECT * FROM " + TABLE_EVENTS + " WHERE " + KEY_OWN_EVENT + " = 0";
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, null);
