@@ -553,10 +553,42 @@ public class MapView extends ActionBarActivity
 
                 intent.putParcelableArrayListExtra(getResources().getString(R.string.intent_parcelable_key), eoList);
                 intent.putParcelableArrayListExtra("Events", fullList);
+                intent.putExtra("Chat", false);
                 startActivity(intent);
                 break;
             }
             case 2: {
+                Intent intent = new Intent(this, EventsView.class);
+
+                checkForCancelledEvents();
+
+                ArrayList<Event> eoList = new ArrayList<>();
+
+                ListIterator<Event> itObject = list.listIterator();
+
+                ArrayList<String> localEvents = sqldb.getAllEvents();
+
+                while (itObject.hasNext()) {
+
+                    Event event = itObject.next();
+                    for (int i = 0; i < localEvents.size(); i++) {
+                        if (event.getEventID().equals(localEvents.get((i)))) {
+                            eoList.add(event);
+                        }
+                    }
+                }
+
+                ArrayList<Event> fullList = new ArrayList<>();
+                ListIterator iterator = list.listIterator();
+                while (iterator.hasNext()) {
+                    Event e = (Event) iterator.next();
+                    fullList.add(e);
+                }
+
+                intent.putParcelableArrayListExtra(getResources().getString(R.string.intent_parcelable_key), eoList);
+                intent.putParcelableArrayListExtra("Events", fullList);
+                intent.putExtra("Chat", true);
+                startActivity(intent);
                 break;
             }
             case 3: {

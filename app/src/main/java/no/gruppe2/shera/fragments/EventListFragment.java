@@ -18,6 +18,7 @@ import java.util.List;
 
 import no.gruppe2.shera.R;
 import no.gruppe2.shera.dto.Event;
+import no.gruppe2.shera.view.ChatView;
 import no.gruppe2.shera.view.EventView;
 
 /**
@@ -29,6 +30,7 @@ public class EventListFragment extends ListFragment {
     ArrayAdapter<String> adapter;
     private ListView l;
     private ArrayList<Event> events;
+    private boolean chat;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -45,9 +47,9 @@ public class EventListFragment extends ListFragment {
                     .getString(R.string.intent_parcelable_key));
         } else {
             events = new ArrayList<>();
-            Log.d("Intent", "Intent var null fuck");
         }
 
+        chat = intent.getBooleanExtra("Chat", false);
 
         eventsName = new LinkedList<>();
 
@@ -65,10 +67,16 @@ public class EventListFragment extends ListFragment {
 
         l.setOnItemClickListener(new OnItemClickListener() {
             public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
-                Intent intent1 = new Intent(getActivity().getBaseContext(), EventView.class);
-                intent1.putExtra(getResources()
-                        .getString(R.string.intent_parcelable_key), events.get(arg2));
-                startActivity(intent1);
+                if (chat) {
+                    Intent i = new Intent(getActivity().getBaseContext(), ChatView.class);
+                    i.putExtra(getResources().getString(R.string.intent_parcelable_key), events.get(arg2));
+                    startActivity(i);
+                } else {
+                    Intent intent1 = new Intent(getActivity().getBaseContext(), EventView.class);
+                    intent1.putExtra(getResources()
+                            .getString(R.string.intent_parcelable_key), events.get(arg2));
+                    startActivity(intent1);
+                }
             }
         });
     }
