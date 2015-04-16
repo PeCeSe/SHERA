@@ -58,6 +58,8 @@
     <string name="location_error">Problems retrieving the location from the address</string>
     <string name="write_to_db_error">Problems writing to the database</string>
 
+    <string name="cancelled">One of the events you were attending has been cancelled</string>
+
 
     <string name="show">SHOW</string>
     <string name="find_photo">Find photo</string>

@@ -23,6 +23,7 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.SeekBar;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import com.facebook.Request;
 import com.facebook.Response;
@@ -56,6 +57,7 @@ import java.util.concurrent.TimeUnit;
 import no.gruppe2.shera.R;
 import no.gruppe2.shera.dto.Event;
 import no.gruppe2.shera.fragments.NavigationDrawerFragment;
+import no.gruppe2.shera.helpers.HelpMethods;
 import no.gruppe2.shera.service.SqlLiteDBHandler;
 
 public class MapView extends ActionBarActivity
@@ -86,6 +88,8 @@ public class MapView extends ActionBarActivity
     private int dateSeekBarProgress, radiusSeekBarProgress;
     private Query queryRef;
 
+    private HelpMethods helpers;
+
     private Circle circle;
 
     private SqlLiteDBHandler sqldb;
@@ -95,6 +99,8 @@ public class MapView extends ActionBarActivity
         super.onCreate(savedInstanceState);
         Firebase.setAndroidContext(this);
         setContentView(R.layout.activity_map);
+
+        helpers = new HelpMethods();
 
         setSession();
         findUserID(session);
@@ -140,6 +146,30 @@ public class MapView extends ActionBarActivity
         centerMapOnMyLocation();
 
         setListeners();
+    }
+
+    private void checkForCancelledEvents() {
+        ArrayList<String> eventIDs = sqldb.getAllEvents();
+
+        ListIterator<Event> iterator = list.listIterator();
+
+        while (iterator.hasNext()) {
+            Event e = iterator.next();
+            if (eventIDs.contains(e.getEventID())) {
+                eventIDs.remove(e.getEventID());
+            }
+        }
+
+        if (!eventIDs.isEmpty()) {
+            for (int i = 0; i < eventIDs.size(); i++) {
+                sqldb.deleteEventID(eventIDs.get(i));
+                createToast(getBaseContext().getResources().getString(R.string.cancelled));
+            }
+        }
+    }
+
+    private void createToast(String s) {
+        Toast.makeText(this, s, Toast.LENGTH_SHORT).show();
     }
 
     private void setListeners() {
@@ -385,6 +415,12 @@ public class MapView extends ActionBarActivity
                         break;
                     }
                 }
+
+                ArrayList<String> eventIDs = sqldb.getAllEvents();
+                if (eventIDs.contains(eo.getEventID())) {
+                    sqldb.deleteEventID(eo.getEventID());
+                    createToast(getBaseContext().getResources().getString(R.string.cancelled));
+                }
             }
 
             @Override
@@ -466,6 +502,8 @@ public class MapView extends ActionBarActivity
             case 1: {
 
                 Intent intent = new Intent(this, EventsView.class);
+
+                checkForCancelledEvents();
 
                 ArrayList<Event> eoList = new ArrayList<>();
 
