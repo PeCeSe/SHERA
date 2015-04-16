@@ -32,14 +32,22 @@
             android:id="@+id/chat_send_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginRight="5dp"
+            android:layout_marginBottom="5dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginLeft="3dp"
             android:layout_alignParentRight="true"
-            android:layout_alignParentTop="false" />
+            android:layout_alignParentTop="false"
+            style="@style/CustomButton" />
 
         <EditText
             android:id="@+id/chat_input"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:isScrollContainer="true"
+            android:paddingTop="15dp"
+            android:paddingBottom="0dp"
+            android:layout_marginBottom="-5dp"
             android:minHeight="120dp"
             android:inputType="textMultiLine|textCapSentences"
             android:hint="@string/chat_hint"
