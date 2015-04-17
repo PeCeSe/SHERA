@@ -94,8 +94,8 @@ public class MapView extends ActionBarActivity
     private Circle circle;
 
     private SqlLiteDBHandler sqldb;
-    
-    private boolean doubleBackPressed;
+
+    private boolean doubleBackPressed, isOver18;
     
     private static final int DOUBLE_TAP_TIME = 2000;
     private long backButtonPressed;
@@ -105,6 +105,7 @@ public class MapView extends ActionBarActivity
         super.onCreate(savedInstanceState);
         Firebase.setAndroidContext(this);
         setContentView(R.layout.activity_map);
+        isOver18 = false;
         
         doubleBackPressed = false;
         list = new LinkedList<>();
@@ -156,6 +157,16 @@ public class MapView extends ActionBarActivity
         centerMapOnMyLocation();
 
         setListeners();
+        SharedPreferences prefs = getSharedPreferences(getResources()
+                .getString(R.string.shared_preferences_key), Context.MODE_PRIVATE);
+        isOver18 = prefs.getBoolean(getResources()
+                .getString(R.string.shared_preferences_is_over_18), false);
+        if (isOver18) {
+            adultCheck.setChecked(true);
+        } else {
+            adultCheck.setChecked(false);
+            adultCheck.setVisibility(View.INVISIBLE);
+        }
     }
 
     private void checkForCancelledEvents() {
@@ -422,7 +433,10 @@ public class MapView extends ActionBarActivity
                 hash = new HashMap<>();
                 hash = (HashMap<String, Object>) dataSnapshot.getValue();
                 eo = createObject(hash);
-                list.add(eo);
+                if (isOver18)
+                    list.add(eo);
+                else if (!isOver18 && !eo.isAdult())
+                    list.add(eo);
 
                 if (!adultCheck.isChecked() && !eo.isAdult())
                     addPin(eo);
@@ -438,7 +452,10 @@ public class MapView extends ActionBarActivity
 
                 for (int i = 0; i < list.size(); i++) {
                     if (list.get(i).getEventID().equals(eo.getEventID())) {
-                        list.set(i, eo);
+                        if (isOver18)
+                            list.set(i, eo);
+                        else if (!isOver18 && !eo.isAdult())
+                            list.set(i, eo);
                         break;
                     }
                 }
@@ -459,11 +476,13 @@ public class MapView extends ActionBarActivity
                 eo = createObject(hash);
 
                 for (int i = 0; i < list.size(); i++) {
-                    if (list.get(i).getEventID().equals(eo.getEventID())) {
-                        if (markerEventMap.containsKey(eo.getEventID()))
-                            removePin(eo);
-                        list.remove(i);
-                        break;
+                    if (list.contains(eo)) {
+                        if (list.get(i).getEventID().equals(eo.getEventID())) {
+                            if (markerEventMap.containsKey(eo.getEventID()))
+                                removePin(eo);
+                            list.remove(i);
+                            break;
+                        }
                     }
                 }
                 EventsView.newList(list);
