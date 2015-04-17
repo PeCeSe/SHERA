@@ -77,9 +77,9 @@ public class MapView extends ActionBarActivity
     private Spinner categorySpinner;
 
     private Firebase ref, event;
-    static LinkedList<Event> list = new LinkedList<>();
+    static LinkedList<Event> list;
     private ArrayList<Long> arrayList;
-    private HashMap<String, Object> hash = new HashMap<>();
+    private HashMap<String, Object> hash;
     private HashMap<String, Event> markerMap;
     private HashMap<String, Marker> markerEventMap;
     private Calendar cal;
@@ -94,12 +94,20 @@ public class MapView extends ActionBarActivity
     private Circle circle;
 
     private SqlLiteDBHandler sqldb;
+    
+    private boolean doubleBackPressed;
+    
+    private static final int DOUBLE_TAP_TIME = 2000;
+    private long backButtonPressed;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Firebase.setAndroidContext(this);
         setContentView(R.layout.activity_map);
+        
+        doubleBackPressed = false;
+        list = new LinkedList<>();
 
         helpers = new HelpMethods();
 
@@ -116,6 +124,7 @@ public class MapView extends ActionBarActivity
         map.getUiSettings().setZoomControlsEnabled(true);
         map = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
 
+        hash = new HashMap<>();
         markerMap = new HashMap<>();
         markerEventMap = new HashMap<>();
 
@@ -259,6 +268,20 @@ public class MapView extends ActionBarActivity
                 updateMarkers();
             }
         });
+    }
+    
+    @Override
+    public void onBackPressed() {
+        if (backButtonPressed + DOUBLE_TAP_TIME > System.currentTimeMillis()) {
+            Intent intent = new Intent(this, LogInView.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            intent.putExtra("EXIT", true);
+            startActivity(intent);
+            finish();
+        } else {
+            Toast.makeText(this, getResources().getString(R.string.double_tap_to_finish), Toast.LENGTH_SHORT).show();
+        }
+        backButtonPressed = System.currentTimeMillis();
     }
 
     private void updateMarkers() {
@@ -420,6 +443,11 @@ public class MapView extends ActionBarActivity
                     }
                 }
                 Collections.sort(list, new CalendarCompare());
+                removePin(eo);
+                addPin(eo);
+                Marker m = markerEventMap.get(eo.getEventID());
+                m.showInfoWindow();
+
                 EventsView.newList(list);
                 updateMarkers();
             }
@@ -438,6 +466,7 @@ public class MapView extends ActionBarActivity
                         break;
                     }
                 }
+                EventsView.newList(list);
 
                 ArrayList<String> eventIDs = sqldb.getAllEvents();
                 if (eventIDs.contains(eo.getEventID())) {
@@ -593,6 +622,7 @@ public class MapView extends ActionBarActivity
             }
             case 3: {
                 session.close();
+                session.closeAndClearTokenInformation();
                 finish();
                 break;
             }
