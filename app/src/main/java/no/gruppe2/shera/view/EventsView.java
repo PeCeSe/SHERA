@@ -27,7 +27,7 @@ public class EventsView extends ActionBarActivity {
     private static ArrayList<Event> events;
     private String userID;
     private SqlLiteDBHandler sqldb;
-    private boolean first = true;
+    private boolean first;
     private boolean chat;
 
     @Override
@@ -36,6 +36,7 @@ public class EventsView extends ActionBarActivity {
         setContentView(R.layout.activity_events);
 
         sqldb = new SqlLiteDBHandler(this);
+        first = true;
 
         Intent intent = getIntent();
 
