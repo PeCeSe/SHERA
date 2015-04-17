@@ -17,7 +17,7 @@ import no.gruppe2.shera.R;
 
 public class LogInView extends FragmentActivity {
 
-    private UiLifecycleHelper uiHelper;
+    static UiLifecycleHelper uiHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,10 +27,12 @@ public class LogInView extends FragmentActivity {
         uiHelper.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_log_in);
-        //(EditText) findViewById(R.id.descriptionInputField);
         LoginButton authButton = (LoginButton) findViewById(R.id.fb_login_button);
-        authButton.setReadPermissions(Arrays.asList("user_photos"));
-        //authButton.setReadPermissions(Arrays.asList("user_friends"));
+        authButton.setReadPermissions(Arrays.asList("user_photos","user_friends"));
+        
+        if(getIntent().getBooleanExtra("EXIT", false)) {
+            finish();
+        }
     }
 
     private Session.StatusCallback statusCallback = new Session.StatusCallback() {
@@ -46,6 +48,10 @@ public class LogInView extends FragmentActivity {
     @Override
     public void onResume() {
         super.onResume();
+        Session session = Session.getActiveSession();
+        if (session != null && session.isOpened()) {
+            logInFb(session);
+        }
         uiHelper.onResume();
     }
 
