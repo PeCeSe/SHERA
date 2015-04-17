@@ -6,5 +6,6 @@
     <string name="firebase_events">Events</string>
     <string name="chat_root">https://shera.firebaseio.com/Chat</string>
     <string name="shared_preferences_key">com.Gruppe2.SHERA</string>
+    <string name="shared_preferences_is_over_18">isOver18</string>
     <string name="intent_parcelable_key">Event</string>
 </resources>

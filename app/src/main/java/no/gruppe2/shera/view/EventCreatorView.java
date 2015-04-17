@@ -7,8 +7,10 @@ import android.app.Dialog;
 import android.app.DialogFragment;
 import android.app.ProgressDialog;
 import android.app.TimePickerDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.location.Address;
@@ -102,10 +104,9 @@ public class EventCreatorView extends ActionBarActivity {
     private ArrayList<String> myPhotoSourceList, tempMyPhotoSourceList;
     private ArrayList<Bitmap> myPhotoList;
     private String afterPhotos, beforePhotos, sourceToObject;
-    private boolean isMorePhotos;
+    private boolean isMorePhotos, isOver18, after, newList, gridViewLoadOnce, stopLoadingData, flag;
     private GridView gridView;
     private ProgressDialog progress;
-    private boolean after, newList, gridViewLoadOnce, stopLoadingData, flag;
     private Session session;
     private long last;
 
@@ -194,6 +195,14 @@ public class EventCreatorView extends ActionBarActivity {
                 }
             }
         });
+        SharedPreferences prefs = getSharedPreferences(getResources()
+                .getString(R.string.shared_preferences_key), Context.MODE_PRIVATE);
+        isOver18 = prefs.getBoolean(getResources()
+                .getString(R.string.shared_preferences_is_over_18), false);
+        if (!isOver18) {
+            adultCheck.setChecked(false);
+            adultCheck.setVisibility(View.GONE);
+        }
     }
 
     public void setGridView() {
