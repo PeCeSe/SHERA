@@ -85,11 +85,11 @@
             android:layout_height="wrap_content"
             android:entries="@array/category_array"
             android:layout_below="@+id/participantsInputField"
-            android:layout_alignLeft="@+id/pickTimeButton"
-            android:layout_alignStart="@+id/pickTimeButton"
+            android:layout_alignLeft="@+id/pickDateButton"
+            android:layout_alignStart="@+id/pickDateButton"
             android:layout_marginTop="15dp"
-            android:layout_alignRight="@+id/pickTimeButton"
-            android:layout_alignEnd="@+id/pickTimeButton" />
+            android:layout_alignRight="@+id/pickDateButton"
+            android:layout_alignEnd="@+id/pickDateButton" />
 
         <CheckBox
             android:id="@+id/adultCheck"
@@ -100,29 +100,11 @@
             android:layout_alignBottom="@+id/cat_spinner"
             android:layout_alignRight="@+id/participantsInputField"
             android:layout_alignEnd="@+id/participantsInputField"
-            android:layout_alignLeft="@+id/pickDateButton"
-            android:layout_alignStart="@+id/pickDateButton" />
+            android:layout_alignLeft="@+id/pickTimeButton"
+            android:layout_alignStart="@+id/pickTimeButton" />
 
         <TextView
             android:id="@+id/timeText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="20sp" />
-
-        <Button
-            android:id="@+id/pickTimeButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/pickTime"
-            android:layout_below="@+id/cat_spinner"
-            android:layout_alignParentLeft="true"
-            android:layout_toLeftOf="@+id/centerPoint"
-            android:layout_marginTop="30dp"
-            android:layout_marginRight="15dp"
-            style="@style/CustomButton" />
-
-        <TextView
-            android:id="@+id/dateText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="20sp" />
@@ -132,10 +114,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/pickDate"
-            android:layout_toRightOf="@+id/centerPoint"
+            android:layout_toLeftOf="@+id/centerPoint"
             android:layout_alignBaseline="@+id/pickTimeButton"
-            android:layout_alignParentRight="true"
-            android:layout_marginLeft="15dp"
+            android:layout_alignParentLeft="true"
+            android:layout_marginRight="15dp"
             style="@style/CustomButton" />
 
         <TextView
@@ -144,6 +126,24 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true" />
+
+        <Button
+            android:id="@+id/pickTimeButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/pickTime"
+            android:layout_below="@+id/adultCheck"
+            android:layout_alignParentRight="true"
+            android:layout_toRightOf="@+id/centerPoint"
+            android:layout_marginTop="15dp"
+            android:layout_marginLeft="15dp"
+            style="@style/CustomButton" />
+
+        <TextView
+            android:id="@+id/dateText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="20sp" />
 
         <Button
             android:id="@+id/findPhotos"
@@ -155,8 +155,8 @@
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
             style="@style/CustomButton"
-            android:layout_alignRight="@+id/pickDateButton"
-            android:layout_alignEnd="@+id/pickDateButton" />
+            android:layout_alignRight="@+id/pickTimeButton"
+            android:layout_alignEnd="@+id/pickTimeButton" />
 
         <ImageView
             android:id="@+id/event_photo_view"
@@ -167,7 +167,6 @@
             android:adjustViewBounds="true"
             android:scaleType="fitCenter"
             android:layout_below="@+id/findPhotos" />
-
 
     </RelativeLayout>
 

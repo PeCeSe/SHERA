@@ -84,12 +84,12 @@
             android:layout_height="wrap_content"
             android:entries="@array/category_array"
             android:prompt="@string/category_prompt"
-            android:layout_alignRight="@+id/pickTimeButton"
-            android:layout_alignEnd="@+id/pickTimeButton"
+            android:layout_alignRight="@+id/pickDateButton"
+            android:layout_alignEnd="@+id/pickDateButton"
             android:layout_toEndOf="@+id/centerPoint"
             android:layout_marginTop="10dp"
-            android:layout_alignLeft="@+id/pickTimeButton"
-            android:layout_alignStart="@+id/pickTimeButton" />
+            android:layout_alignLeft="@+id/pickDateButton"
+            android:layout_alignStart="@+id/pickDateButton" />
 
         <CheckBox
             android:id="@+id/adultCheck"
@@ -97,10 +97,10 @@
             android:layout_height="wrap_content"
             android:text="@string/adult"
             android:layout_alignTop="@+id/cat_spinner"
-            android:layout_alignLeft="@+id/pickDateButton"
-            android:layout_alignStart="@+id/pickDateButton"
-            android:layout_alignRight="@+id/pickDateButton"
-            android:layout_alignEnd="@+id/pickDateButton"
+            android:layout_alignLeft="@+id/pickTimeButton"
+            android:layout_alignStart="@+id/pickTimeButton"
+            android:layout_alignRight="@+id/pickTimeButton"
+            android:layout_alignEnd="@+id/pickTimeButton"
             android:layout_alignBottom="@+id/cat_spinner" />
 
         <TextView
@@ -115,10 +115,10 @@
             android:layout_height="wrap_content"
             android:text="@string/pickTime"
             android:layout_below="@+id/cat_spinner"
-            android:layout_toRightOf="@+id/centerPoint"
-            android:layout_toEndOf="@+id/centerPoint"
-            android:layout_marginLeft="20dp"
+            android:layout_toRightOf="@+id/pickDateButton"
+            android:layout_toEndOf="@+id/pickDateButton"
             android:layout_marginTop="20dp"
+            android:layout_marginLeft="30dp"
             style="@style/CustomButton" />
 
         <TextView
@@ -133,8 +133,8 @@
             android:layout_height="wrap_content"
             android:text="@string/pickDate"
             android:layout_alignBaseline="@+id/pickTimeButton"
-            android:layout_toRightOf="@+id/pickTimeButton"
-            android:layout_marginLeft="30dp"
+            android:layout_toRightOf="@+id/centerPoint"
+            android:layout_marginLeft="20dp"
             style="@style/CustomButton" />
 
         <TextView
@@ -150,10 +150,10 @@
             android:layout_height="wrap_content"
             android:text="@string/find_photo"
             android:layout_alignBottom="@+id/participantsInputField"
-            android:layout_alignLeft="@+id/pickTimeButton"
-            android:layout_alignStart="@+id/pickTimeButton"
-            android:layout_alignRight="@+id/pickDateButton"
-            android:layout_alignEnd="@+id/pickDateButton"
+            android:layout_alignLeft="@+id/pickDateButton"
+            android:layout_alignStart="@+id/pickDateButton"
+            android:layout_alignRight="@+id/pickTimeButton"
+            android:layout_alignEnd="@+id/pickTimeButton"
             style="@style/CustomButton" />
 
         <ImageView

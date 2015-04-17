@@ -24,32 +24,46 @@
     <!-- The navigation drawer -->
     <fragment
         android:id="@+id/navigation_drawer"
-        android:layout_width="@dimen/navigation_drawer_width"
-        android:layout_height="match_parent"
+        android:layout_width="@dimen/navigation_drawer_width_land"
+        android:layout_height="wrap_content"
         android:layout_gravity="start"
         android:background="@color/light_blue"
         android:choiceMode="singleChoice"
         android:name="no.gruppe2.shera.fragments.NavigationDrawerFragment">
 
-        <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fillViewport="true">
+
+            <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
             android:id="@+id/navigation_drawer_layout"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+                android:layout_height="400dp"
+                android:gravity="bottom">
 
-            <SeekBar
+                <SeekBar
                 android:id="@+id/drawer_radius_seekbar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                tools:layout="@layout/fragment_seekbar"
-                android:layout_above="@+id/drawer_time_seekbar"
-                android:max="10" />
+                    android:layout_marginRight="10dp"
+                    android:layout_below="@+id/drawer_time_seekbar"
+                    android:layout_marginTop="30dp"
+                    android:max="10" />
 
-            <SeekBar
+                <TextView
+                    android:id="@+id/textRadius"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceMedium" />
+
+                <SeekBar
                 android:id="@+id/drawer_time_seekbar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_above="@+id/drawer_category_spinner"
-                tools:layout="@layout/fragment_seekbar"
+                    android:layout_marginRight="10dp"
+                    android:layout_below="@+id/drawer_checkbox_adult"
+                    android:layout_marginTop="30dp"
                 android:max="10" />
 
             <Spinner
@@ -57,28 +71,40 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:entries="@array/drawer_category_array"
-                android:layout_toRightOf="@+id/centerPointDrawer"
+                android:layout_toLeftOf="@+id/centerPointDrawer"
                 android:layout_alignBottom="@+id/drawer_checkbox_adult"
-                android:layout_alignTop="@+id/drawer_checkbox_adult" />
+                android:layout_alignTop="@+id/drawer_checkbox_adult"
+                android:layout_alignParentLeft="true"
+                android:layout_marginLeft="5dp"
+                android:layout_below="@+id/bottomDrawer" />
 
-            <CheckBox
+                <CheckBox
                 android:id="@+id/drawer_checkbox_adult"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_toLeftOf="@+id/centerPointDrawer"
+                    android:layout_toRightOf="@+id/centerPointDrawer"
                 android:text="@string/adult"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentBottom="true"
-                android:layout_marginLeft="5dp" />
+                    android:layout_below="@+id/bottomDrawer" />
 
-            <TextView
-                android:id="@+id/centerPointDrawer"
+                <TextView
+                    android:id="@+id/bottomDrawer"
                 android:text=""
                 android:layout_width="0dp"
+                    android:layout_height="5dp"
+                    android:paddingBottom="50dp"
+                    android:layout_centerHorizontal="true"
+                    android:layout_centerInParent="true" />
+
+                <TextView
+                    android:id="@+id/centerPointDrawer"
+                    android:text=""
+                    android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true" />
 
         </RelativeLayout>
+
+        </ScrollView>
 
     </fragment>
 
