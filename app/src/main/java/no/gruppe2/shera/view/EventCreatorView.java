@@ -515,20 +515,20 @@ public class EventCreatorView extends ActionBarActivity {
 
     private boolean validateInput() {
         Validator validator = new Validator();
-        if (!validator.isNotEmpty(nameInput.getText().toString())) {
+        if (validator.isEmpty(nameInput.getText().toString())) {
             writeErrorMessage(getResources().getString(R.string.name_error));
             return false;
-        } else if (!validator.isNotEmpty(descriptionInput.getText().toString())) {
+        } else if (validator.isEmpty(descriptionInput.getText().toString())) {
             writeErrorMessage(getResources().getString(R.string.description_error));
             return false;
-        } else if (!validator.isNotEmpty(addressInput.getText().toString())) {
+        } else if (validator.isEmpty(addressInput.getText().toString())) {
             writeErrorMessage(getResources().getString(R.string.address_error));
             return false;
-        } else if (!validator.isNotEmpty(participantsInput.getText().toString().toString())) {
+        } else if (validator.isEmpty(participantsInput.getText().toString().toString())) {
             writeErrorMessage(getResources().getString(R.string.participants_error));
             return false;
-        } else if (!validator.isNotEmpty(participantsInput.getText().toString())) {
-            if (!validator.isNotEmpty(Integer.parseInt(participantsInput.getText().toString()))) {
+        } else if (validator.isEmpty(participantsInput.getText().toString())) {
+            if (validator.isEmpty(Integer.parseInt(participantsInput.getText().toString()))) {
                 writeErrorMessage(getResources().getString(R.string.participants_num_error));
                 return false;
             }
