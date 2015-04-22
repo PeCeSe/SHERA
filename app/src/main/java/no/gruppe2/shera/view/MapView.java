@@ -521,13 +521,11 @@ public class MapView extends ActionBarActivity
                 eo = createObject(hash);
 
                 for (int i = 0; i < list.size(); i++) {
-                    if (list.contains(eo)) {
-                        if (list.get(i).getEventID().equals(eo.getEventID())) {
-                            if (markerEventMap.containsKey(eo.getEventID()))
-                                removePin(eo);
-                            list.remove(i);
-                            break;
-                        }
+                    if (list.get(i).getEventID().equals(eo.getEventID())) {
+                        if (markerEventMap.containsKey(eo.getEventID()))
+                            removePin(eo);
+                        list.remove(i);
+                        break;
                     }
                 }
                 EventsView.newList(list);

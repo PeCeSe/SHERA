@@ -7,129 +7,40 @@ import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.Query;
-import com.firebase.client.ValueEventListener;
-
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-import java.util.HashMap;
-import java.util.LinkedList;
 
 import no.gruppe2.shera.R;
 import no.gruppe2.shera.dto.Chat;
 import no.gruppe2.shera.dto.Event;
 
 /**
- * Created by chris.forberg on 25.02.2015.
+ * Created by chris.forberg on 25.02.2015 10:09.
  */
-
 public class DBHandler {
 
-    private Firebase ref, event, id, chat, chatID, chatRef;
-    public LinkedList<Event> list = new LinkedList<>();
-    private Event eo;
-    private HashMap<String, Object> map;
-    private Calendar cal;
-    public long numChildren;
-    private Query queryRef;
+    private Firebase id, chatRef;
     private Context c;
-    private Chat message;
 
     public DBHandler(Context context) {
         c = context;
     }
 
     public void pushToDB(Event e, Firebase r) {
-        ref = r;
-        event = ref.child("Events");
-        eo = e;
+        Firebase event = r.child("Events");
         id = event.push();
         String s = id.toString();
-        eo.setEventID(s);
-        id.setValue(eo);
+        e.setEventID(s);
+        id.setValue(e);
     }
 
     public void pushChatMessageToDB(Chat c, Firebase r){
-        ref = r;
-        chat = ref.child("Chat");
-        chatID = chat.push();
+        Firebase chat = r.child("Chat");
+        Firebase chatID = chat.push();
         chatID.setValue(c);
     }
 
     public void updateEventDB(Event e) {
-        eo = e;
-        id = new Firebase(eo.getEventID());
-        id.setValue(eo);
-    }
-
-    public long getNumChildren(Firebase r) {
-        ref = r;
-        event = ref.child("Events");
-        event.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                numChildren = dataSnapshot.getChildrenCount();
-            }
-
-            @Override
-            public void onCancelled(FirebaseError firebaseError) {
-
-            }
-        });
-        return numChildren;
-    }
-
-    public LinkedList<Event> getFromDB(Firebase r) {
-        ref = r;
-        event = ref.child("Events");
-        event.addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                map = new HashMap<>();
-                map = (HashMap<String, Object>) dataSnapshot.getValue();
-                String time = map.get("calendar").toString();
-                cal = new GregorianCalendar();
-                cal.setTimeInMillis(Long.parseLong(time));
-                ArrayList<Long> listetest = new ArrayList<Long>();
-
-                eo = new Event(map.get("eventID").toString(),
-                        Long.parseLong(map.get("userID").toString()),
-                        map.get("name").toString(),
-                        map.get("description").toString(),
-                        map.get("address").toString(),
-                        Double.parseDouble(map.get("latitude").toString()),
-                        Double.parseDouble(map.get("longitude").toString()),
-                        Integer.parseInt(map.get("maxParticipants").toString()),
-                        Integer.parseInt(map.get("numParticipants").toString()),
-                        Integer.parseInt(map.get("category").toString()),
-                        cal,
-                        Boolean.parseBoolean(map.get("adult").toString()),
-                        listetest,
-                        map.get("photoSource").toString());
-                list.add(eo);
-            }
-
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onCancelled(FirebaseError firebaseError) {
-
-            }
-        });
-        return list;
+        id = new Firebase(e.getEventID());
+        id.setValue(e);
     }
 
     public void removeEvent(Event e) {
@@ -139,9 +50,9 @@ public class DBHandler {
     }
 
     public void deleteChat(Event e) {
-        ref = new Firebase(c.getResources().getString(R.string.firebase_root));
+        Firebase ref = new Firebase(c.getResources().getString(R.string.firebase_root));
         chatRef = ref.child("Chat");
-        queryRef = chatRef.orderByChild("eventID").equalTo(e.getEventID());
+        Query queryRef = chatRef.orderByChild("eventID").equalTo(e.getEventID());
 
         queryRef.addChildEventListener(new ChildEventListener() {
             @Override
