@@ -13,6 +13,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.SearchView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -433,15 +434,22 @@ public class MapView extends ActionBarActivity
                 hash = new HashMap<>();
                 hash = (HashMap<String, Object>) dataSnapshot.getValue();
                 eo = createObject(hash);
-                if (isOver18)
-                    list.add(eo);
-                else if (!isOver18 && !eo.isAdult())
-                    list.add(eo);
 
-                if (!adultCheck.isChecked() && !eo.isAdult())
-                    addPin(eo);
-                else if (adultCheck.isChecked())
-                    addPin(eo);
+                ArrayList<String> eventIDs = sqldb.getAllEvents();
+
+                if ((eo.getNumParticipants() < eo.getMaxParticipants()) ||
+                        ((eo.getNumParticipants() >= eo.getMaxParticipants()) &&
+                                eventIDs.contains(eo.getEventID()))) {
+                    if (isOver18)
+                        list.add(eo);
+                    else if (!isOver18 && !eo.isAdult())
+                        list.add(eo);
+
+                    if (!adultCheck.isChecked() && !eo.isAdult())
+                        addPin(eo);
+                    else if (adultCheck.isChecked())
+                        addPin(eo);
+                }
             }
 
             @Override
@@ -449,6 +457,8 @@ public class MapView extends ActionBarActivity
                 hash = new HashMap<>();
                 hash = (HashMap<String, Object>) dataSnapshot.getValue();
                 eo = createObject(hash);
+
+                Log.d("BÆSJ", "BÆSJ4");
 
                 for (int i = 0; i < list.size(); i++) {
                     if (list.get(i).getEventID().equals(eo.getEventID())) {
@@ -459,11 +469,46 @@ public class MapView extends ActionBarActivity
                         break;
                     }
                 }
-                Collections.sort(list, new CalendarCompare());
-                removePin(eo);
-                addPin(eo);
-                Marker m = markerEventMap.get(eo.getEventID());
-                m.showInfoWindow();
+
+                ArrayList<String> eventIDs = sqldb.getAllEvents();
+                if ((eo.getNumParticipants() < eo.getMaxParticipants()) ||
+                        ((eo.getNumParticipants() >= eo.getMaxParticipants()) &&
+                                eventIDs.contains(eo.getEventID()))) {
+                    for (int i = 0; i < list.size(); i++) {
+                        Log.d("BÆSJ", "BÆSJ5");
+                        if (list.get(i).getEventID().equals(eo.getEventID())) {
+                            Log.d("BÆSJ", "BÆSJ3");
+                            list.set(i, eo);
+                            Collections.sort(list, new CalendarCompare());
+                            if (markerEventMap.containsKey(eo.getEventID()))
+                                removePin(eo);
+                            addPin(eo);
+                            Marker m = markerEventMap.get(eo.getEventID());
+                            m.showInfoWindow();
+                        } else {
+                            list.add(eo);
+                            Collections.sort(list, new CalendarCompare());
+                            if (markerEventMap.containsKey(eo.getEventID()))
+                                removePin(eo);
+                            addPin(eo);
+                            Marker m = markerEventMap.get(eo.getEventID());
+                            m.showInfoWindow();
+                            break;
+                        }
+                    }
+                } else {
+                    for (int i = 0; i < list.size(); i++) {
+                        if (list.get(i).getEventID().equals(eo.getEventID())) {
+                            list.remove(i);
+                            Log.d("BÆSJ", "BÆSJ1");
+                            if (markerEventMap.containsKey(eo.getEventID())) {
+                                removePin(eo);
+                                Log.d("BÆSJ", "BÆSJ2");
+                            }
+                        }
+                    }
+                }
+
 
                 EventsView.newList(list);
                 updateMarkers();
