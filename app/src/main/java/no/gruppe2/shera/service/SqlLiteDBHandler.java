@@ -7,13 +7,9 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import java.util.ArrayList;
-import java.util.ListIterator;
 
 import no.gruppe2.shera.dto.Event;
 
-/**
- * Created by pernille.sethre on 13.03.2015.
- */
 public class SqlLiteDBHandler extends SQLiteOpenHelper {
 
     static String TABLE_EVENTS = "Events";
@@ -59,7 +55,7 @@ public class SqlLiteDBHandler extends SQLiteOpenHelper {
     }
 
     public ArrayList<String> getOwnEvents() {
-        ArrayList<String> idList = new ArrayList<String>();
+        ArrayList<String> idList = new ArrayList<>();
         String selectQuery = "SELECT * FROM " + TABLE_EVENTS + " WHERE " + KEY_OWN_EVENT + " = 1";
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, null);
@@ -75,7 +71,7 @@ public class SqlLiteDBHandler extends SQLiteOpenHelper {
     }
 
     public ArrayList<String> getJoinedEvents() {
-        ArrayList<String> idList = new ArrayList<String>();
+        ArrayList<String> idList = new ArrayList<>();
         String selectQuery = "SELECT * FROM " + TABLE_EVENTS + " WHERE " + KEY_OWN_EVENT + " = 0";
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, null);
@@ -91,7 +87,7 @@ public class SqlLiteDBHandler extends SQLiteOpenHelper {
     }
 
     public ArrayList<String> getAllEvents() {
-        ArrayList<String> idList = new ArrayList<String>();
+        ArrayList<String> idList = new ArrayList<>();
         String selectQuery = "SELECT * FROM " + TABLE_EVENTS;
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, null);
@@ -113,51 +109,21 @@ public class SqlLiteDBHandler extends SQLiteOpenHelper {
         db.close();
     }
 
-    public int countOwnEvents() {
-        String countQuery = "SELECT * FROM " + TABLE_EVENTS + " WHERE " + KEY_OWN_EVENT + " = 1";
-        SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery(countQuery, null);
-        cursor.close();
-        db.close();
-        return cursor.getCount();
-    }
-
-    public int countJoinedEvents() {
-        String countQuery = "SELECT * FROM " + TABLE_EVENTS + " WHERE " + KEY_OWN_EVENT + " = 0";
-        SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery(countQuery, null);
-        cursor.close();
-        db.close();
-        return cursor.getCount();
-    }
-
     public void updateSqlLite(ArrayList<Event> events, String userID) {
 
         ArrayList<String> arrayList = getAllEvents();
 
-        if (!arrayList.isEmpty()) {
-            for (int i = 0; i < arrayList.size(); i++) {
+        if (!arrayList.isEmpty())
+            for (int i = 0; i < arrayList.size(); i++)
                 deleteEventID(arrayList.get(i));
-            }
-        }
 
-        ListIterator<Event> eventIterator = events.listIterator();
-
-        while (eventIterator.hasNext()) {
-            Event e = eventIterator.next();
-
+        for (Event e : events) {
             if (e.getUserID() == Long.parseLong(userID)) {
                 eventCreated(e.getEventID());
             } else {
                 if (e.getParticipantsList() != null) {
-                    ListIterator<Long> userIterator = e.getParticipantsList().listIterator();
-
-                    while (userIterator.hasNext()) {
-                        Long eventUserID = userIterator.next();
-                        if (eventUserID == Long.parseLong(userID)) {
-                            eventJoined(e.getEventID());
-                        }
-                    }
+                    for (Long eventUserID : (Iterable<Long>) e.getParticipantsList())
+                        if (eventUserID == Long.parseLong(userID)) eventJoined(e.getEventID());
                 }
             }
         }
