@@ -2,7 +2,6 @@ package no.gruppe2.shera.view;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -20,7 +19,6 @@ import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.facebook.FacebookRequestError;
 import com.facebook.HttpMethod;
@@ -37,7 +35,6 @@ import org.json.JSONObject;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.ListIterator;
 
 import no.gruppe2.shera.R;
 import no.gruppe2.shera.dto.Event;
@@ -46,6 +43,15 @@ import no.gruppe2.shera.helpers.ImageAdapter;
 import no.gruppe2.shera.service.DBHandler;
 import no.gruppe2.shera.service.SqlLiteDBHandler;
 
+/*
+This class is meant to show the event that is clicked. The class receives an Intent which contains
+an event-object. The class uses this object to show the info about the event to the user.
+It also retrieve the UserID from sharedPreferences that is sat there in the MapView-class where it
+is retrieved from the Facebook-session. The UserID is used to determine the relation to the Event;
+if it was created by the user, and therefor sets it editable and deletable, if the user is
+participating you get access to the chat of the event and the opportunity to leave the event
+or if the user is eligible to join the event.
+ */
 public class EventView extends ActionBarActivity {
     TextView titleView, descriptionView, participantsView, dateView, timeView, addressView;
     MenuItem editButton, joinButton, unjoinButton, deleteButton, chatButton;
@@ -55,17 +61,15 @@ public class EventView extends ActionBarActivity {
     private ImageView eventImageView;
 
     private DBHandler db;
-    private Firebase ref;
     private HelpMethods help;
 
     private ArrayList<String> myFriendsListName;
     private ArrayList<String> myFriendsPhotosToShow, namesToShow;
     private ArrayList<Bitmap> myPhotoList;
-    private ArrayList<Long> myFriendsListID, participantsFromObject;
+    private ArrayList<Long> myFriendsListID;
+    private ArrayList participantsFromObject;
     private GraphObject graphObject;
     private GridView gridView;
-    private Session session;
-    private ProgressDialog progress;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,10 +82,8 @@ public class EventView extends ActionBarActivity {
         userID = prefs.getString("userID", null);
 
         sqldb = new SqlLiteDBHandler(this);
-
         db = new DBHandler(this);
         Firebase.setAndroidContext(this);
-        ref = new Firebase(getResources().getString(R.string.firebase_root));
 
         Intent i = getIntent();
         eo = i.getParcelableExtra(getResources().getString(R.string.intent_parcelable_key));
@@ -103,7 +105,7 @@ public class EventView extends ActionBarActivity {
         myPhotoList = new ArrayList<>();
         namesToShow = new ArrayList<>();
         participantsFromObject = eo.getParticipantsList();
-        session = Session.getActiveSession();
+        Session session = Session.getActiveSession();
         findFriendsList(session);
     }
 
@@ -126,9 +128,7 @@ public class EventView extends ActionBarActivity {
                 }
             } else {
                 List<String> events = sqldb.getJoinedEvents();
-                ListIterator<String> iterator = events.listIterator();
-                while (iterator.hasNext()) {
-                    String s = iterator.next();
+                for (String s : events) {
                     if (s.equals(eo.getEventID())) {
                         unjoinButton.setVisible(true);
                         chatButton.setVisible(true);
@@ -145,17 +145,13 @@ public class EventView extends ActionBarActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
+        // Handle action bar item clicks here.
         int id = item.getItemId();
 
         if (id == android.R.id.home) {
             finish();
             return true;
         }
-
-        //noinspection SimplifiableIfStatement
         if (id == R.id.change_button) {
             Intent i = new Intent(this, EventCreatorView.class);
             i.putExtra(getResources().getString(R.string.intent_parcelable_key), eo);
@@ -210,7 +206,7 @@ public class EventView extends ActionBarActivity {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == 1 && resultCode == Activity.RESULT_OK) {
-            Event returEvent = (Event) data.getParcelableExtra("Event");
+            Event returEvent = data.getParcelableExtra("Event");
             setFields(returEvent);
         }
     }
@@ -234,7 +230,7 @@ public class EventView extends ActionBarActivity {
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                showToast(namesToShow.get(position));
+                help.createToast(namesToShow.get(position), getBaseContext());
             }
         });
 
@@ -245,7 +241,7 @@ public class EventView extends ActionBarActivity {
                 new Request.Callback() {
                     public void onCompleted(Response response) {
                         FacebookRequestError error = response.getError();
-                        if (error != null && response != null) {
+                        if (error != null) {
                             Log.e("ERROR::", error.toString());
                         } else {
                             graphObject = response.getGraphObject();
@@ -263,12 +259,11 @@ public class EventView extends ActionBarActivity {
                 }
         ).executeAsync();
 
-        //myFriendsList = new ArrayList<>();
         new Request(session, "/me/taggable_friends", null, HttpMethod.GET,
                 new Request.Callback() {
                     public void onCompleted(Response response) {
                         FacebookRequestError error = response.getError();
-                        if (error != null && response != null) {
+                        if (error != null) {
                             Log.e("ERROR::", error.toString());
                         } else {
                             graphObject = response.getGraphObject();
@@ -281,18 +276,17 @@ public class EventView extends ActionBarActivity {
                                 String name = findFriendsName(json);
 
                                 for (int k = 0; k < myFriendsListName.size(); k++) {
-                                    if (name.equals(myFriendsListName.get(k))) {
-                                        if (participantsFromObject.contains(myFriendsListID.get(k))) {
-                                            try {
-                                                JSONObject obj = (JSONObject) json.get("picture");
-                                                JSONObject arr = (JSONObject) obj.get("data");
-                                                String s = arr.getString("url");
-                                                myFriendsPhotosToShow.add(s);
-                                                namesToShow.add(name);
+                                    if (name.equals(myFriendsListName.get(k)) &&
+                                            (participantsFromObject.contains(myFriendsListID.get(k)))) {
+                                        try {
+                                            JSONObject obj = (JSONObject) json.get("picture");
+                                            JSONObject arr = (JSONObject) obj.get("data");
+                                            String s = arr.getString("url");
+                                            myFriendsPhotosToShow.add(s);
+                                            namesToShow.add(name);
 
-                                            } catch (JSONException e) {
-                                                e.printStackTrace();
-                                            }
+                                        } catch (JSONException e) {
+                                            e.printStackTrace();
                                         }
                                     }
                                 }
@@ -327,9 +321,7 @@ public class EventView extends ActionBarActivity {
 
     private void joinEvent() {
         eo.addParticipantToList(Long.parseLong(userID));
-
         db.updateEventDB(eo);
-
         sqldb.eventJoined(eo.getEventID());
 
         joinButton.setVisible(false);
@@ -340,7 +332,6 @@ public class EventView extends ActionBarActivity {
         if (eo.removePartisipantFromList(Long.parseLong(userID))) {
             db.updateEventDB(eo);
         }
-
         sqldb.deleteEventID(eo.getEventID());
 
         joinButton.setVisible(true);
@@ -348,14 +339,10 @@ public class EventView extends ActionBarActivity {
 
     }
 
-    private void showToast(String s) {
-        Toast.makeText(getBaseContext(), s, Toast.LENGTH_SHORT).show();
-    }
-
     private class DownloadImages extends AsyncTask<String, Void, Bitmap> {
         ImageView bmImage;
         Bitmap view;
-        ArrayList<String> strings = new ArrayList<>();
+        ArrayList strings = new ArrayList<>();
         String source;
 
         public DownloadImages(List<String> list) {
@@ -368,17 +355,6 @@ public class EventView extends ActionBarActivity {
 
         @Override
         protected void onPreExecute() {
-            if (!strings.isEmpty()) {
-                progress = new ProgressDialog(EventView.this);
-                progress.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-                progress.setTitle(getResources().getString(R.string.loading));
-                progress.setMessage(getResources().getString(R.string.download_friends_profile_pictures_facebook));
-                progress.setCancelable(false);
-                progress.setIndeterminate(false);
-                progress.setMax(strings.size());
-                progress.setProgress(0);
-                progress.show();
-            }
         }
 
         protected Bitmap doInBackground(String... params) {
@@ -386,14 +362,13 @@ public class EventView extends ActionBarActivity {
             if (!strings.isEmpty()) {
                 bmImage = new ImageView(getBaseContext());
                 for (int i = 0; i < strings.size(); i++) {
-                    String url = strings.get(i);
+                    String url = (String) strings.get(i);
                     icon = null;
                     try {
                         InputStream in = new java.net.URL(url).openStream();
                         icon = BitmapFactory.decodeStream(in);
                         view = icon;
                         myPhotoList.add(view);
-                        onProgressUpdate(i);
                     } catch (Exception e) {
                         Log.e("Error", e + "");
                         e.printStackTrace();
@@ -415,15 +390,10 @@ public class EventView extends ActionBarActivity {
             return icon;
         }
 
-        protected void onProgressUpdate(Integer... values) {
-            progress.setProgress(values[0]);
-        }
-
         @Override
         protected void onPostExecute(Bitmap result) {
             if (!strings.isEmpty()) {
                 setGridView();
-                progress.dismiss();
             } else {
                 eventImageView.setImageBitmap(result);
             }
