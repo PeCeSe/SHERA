@@ -13,7 +13,6 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.SearchView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -59,15 +58,29 @@ import java.util.concurrent.TimeUnit;
 import no.gruppe2.shera.R;
 import no.gruppe2.shera.dto.Event;
 import no.gruppe2.shera.fragments.NavigationDrawerFragment;
-import no.gruppe2.shera.helpers.HelpMethods;
 import no.gruppe2.shera.service.SqlLiteDBHandler;
+
+/*
+This class displays a "Google-maps" instance for the user, where markers shows the location of
+various events. The user can tap on the markers to display an info-window with the name and
+description of the event, and tap the info-window to open EventView.class.
+The user can also create a new event by long-clicking on the location on the map where he wants
+the event to be. A new marker will then appear, which the user can drag around, or click the
+info window to create a new event at that location.
+The user can also create new events through the Navigation Drawer Menu on the left hand side.
+The menu also allows the user to navigate to the EventsView class (or ChatsView class),
+or to log out.
+The Navigation Drawer also provides filter options. The user can choose to only show events within
+a certain time or distance range, or to only show a given category.
+The user can also choose to show or hide adult-events (events which may contain alcohol consumption)
+if the user is over 18. If the user is under 18 the adult events will be hidden, and it will not be
+an option to show them.
+*/
 
 public class MapView extends ActionBarActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks {
 
-    // Fragment managing the behaviors, interactions and presentation of the navigation drawer.
     private NavigationDrawerFragment navigationDrawerFragment;
-    // Stores the last screen title.
     private CharSequence title;
 
     Session session;
@@ -77,41 +90,34 @@ public class MapView extends ActionBarActivity
     private CheckBox adultCheck;
     private Spinner categorySpinner;
 
-    private Firebase ref, event;
     static LinkedList<Event> list;
     private ArrayList<Long> arrayList;
     private HashMap<String, Object> hash;
     private HashMap<String, Event> markerMap;
     private HashMap<String, Marker> markerEventMap;
-    private Calendar cal;
     private Event eo;
     private String userID;
-    private final int ZOOMLEVEL = 14, THREE_WEEKS = 22, TEN_KILOMETRES = 11;
+    private final static int ZOOMLEVEL = 14, THREE_WEEKS = 22, TEN_KILOMETRES = 11,
+            DOUBLE_TAP_TIME = 2000;
     private int dateSeekBarProgress, radiusSeekBarProgress;
     private Query queryRef;
-
-    private HelpMethods helpers;
 
     private Circle circle;
 
     private SqlLiteDBHandler sqldb;
 
-    private boolean doubleBackPressed, isOver18;
-    
-    private static final int DOUBLE_TAP_TIME = 2000;
+    private boolean isOver18;
     private long backButtonPressed;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Firebase.setAndroidContext(this);
         setContentView(R.layout.activity_map);
-        isOver18 = false;
-        
-        doubleBackPressed = false;
-        list = new LinkedList<>();
 
-        helpers = new HelpMethods();
+        Firebase.setAndroidContext(this);
+        isOver18 = false;
+
+        list = new LinkedList<>();
 
         setSession();
         findUserID(session);
@@ -130,8 +136,8 @@ public class MapView extends ActionBarActivity
         markerMap = new HashMap<>();
         markerEventMap = new HashMap<>();
 
-        ref = new Firebase(getResources().getString(R.string.firebase_root));
-        event = ref.child(getResources().getString(R.string.firebase_events));
+        Firebase ref = new Firebase(getResources().getString(R.string.firebase_root));
+        Firebase event = ref.child(getResources().getString(R.string.firebase_events));
         queryRef = event.orderByChild("calendar");
 
         arrayList = new ArrayList<>();
@@ -170,13 +176,212 @@ public class MapView extends ActionBarActivity
         }
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        if (!navigationDrawerFragment.isDrawerOpen()) {
+            getMenuInflater().inflate(R.menu.menu_map, menu);
+
+            restoreActionBar();
+
+            MenuItem searchItem = menu.findItem(R.id.action_search);
+            SearchView searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
+
+            searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+
+                @Override
+                public boolean onQueryTextSubmit(String s) {
+                    return false;
+                }
+
+                @Override
+                public boolean onQueryTextChange(String s) {
+                    Calendar maxDate = Calendar.getInstance();
+                    long daysInMillis = TimeUnit.MILLISECONDS.convert(dateSeekBarProgress, TimeUnit.DAYS);
+                    maxDate.setTimeInMillis(maxDate.getTimeInMillis() + daysInMillis);
+
+                    if (s.length() > 0) {
+                        for (Event e : list) {
+                            if (!e.getName().toLowerCase().contains(s.toLowerCase()) &&
+                                    !e.getAddress().toLowerCase().contains(s.toLowerCase()) &&
+                                    !e.getDescription().toLowerCase().contains(s.toLowerCase())) {
+
+                                if (markerEventMap.containsKey(e.getEventID())) {
+                                    removePin(e);
+                                }
+
+                            } else if (e.getName().toLowerCase().contains(s.toLowerCase()) ||
+                                    e.getAddress().toLowerCase().contains(s.toLowerCase()) ||
+                                    e.getDescription().toLowerCase().contains(s.toLowerCase())) {
+
+                                if (!markerEventMap.containsKey(e.getEventID())) {
+                                    if (dateSeekBarProgress >= THREE_WEEKS || !(e.getCalendar().after(maxDate))) {
+                                        if (((radiusSeekBarProgress < TEN_KILOMETRES) && isEventInsideCircle(e)) || circle == null) {
+                                            if ((e.getCategory() == categorySpinner.getSelectedItemPosition()) || categorySpinner.getSelectedItemPosition() <= 0) {
+                                                if ((e.isAdult() && adultCheck.isChecked()) || !e.isAdult()) {
+                                                    addPin(e);
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        updateMarkers();
+                    }
+                    return false;
+                }
+            });
+
+            return true;
+        }
+
+
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (backButtonPressed + DOUBLE_TAP_TIME > System.currentTimeMillis()) {
+            Intent intent = new Intent(this, LogInView.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            intent.putExtra("EXIT", true);
+            startActivity(intent);
+            finish();
+        } else {
+            Toast.makeText(this, getResources().getString(R.string.double_tap_to_finish), Toast.LENGTH_SHORT).show();
+        }
+        backButtonPressed = System.currentTimeMillis();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        SharedPreferences sharedPrefs = this.getSharedPreferences(
+                getResources().getString(R.string.shared_preferences_key), Context.MODE_PRIVATE);
+        sharedPrefs.edit().putString("userID", userID).apply();
+    }
+
+    private void readEventsFromFirebase() {
+        queryRef.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                hash = new HashMap<>();
+                hash = (HashMap<String, Object>) dataSnapshot.getValue();
+                eo = createObject(hash);
+
+                ArrayList<String> eventIDs = sqldb.getAllEvents();
+
+                if ((eo.getNumParticipants() < eo.getMaxParticipants()) ||
+                        ((eo.getNumParticipants() >= eo.getMaxParticipants()) &&
+                                eventIDs.contains(eo.getEventID()))) {
+                    if (isOver18)
+                        list.add(eo);
+                    else if (!eo.isAdult())
+                        list.add(eo);
+
+                    if (!adultCheck.isChecked() && !eo.isAdult())
+                        addPin(eo);
+                    else if (adultCheck.isChecked())
+                        addPin(eo);
+                }
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                hash = new HashMap<>();
+                hash = (HashMap<String, Object>) dataSnapshot.getValue();
+                eo = createObject(hash);
+
+                for (int i = 0; i < list.size(); i++) {
+                    if (list.get(i).getEventID().equals(eo.getEventID())) {
+                        if (isOver18)
+                            list.set(i, eo);
+                        else if (!eo.isAdult())
+                            list.set(i, eo);
+                        break;
+                    }
+                }
+
+                ArrayList<String> eventIDs = sqldb.getAllEvents();
+                if ((eo.getNumParticipants() < eo.getMaxParticipants()) ||
+                        ((eo.getNumParticipants() >= eo.getMaxParticipants()) &&
+                                eventIDs.contains(eo.getEventID()))) {
+                    for (int i = 0; i < list.size(); i++) {
+                        if (list.get(i).getEventID().equals(eo.getEventID())) {
+                            list.set(i, eo);
+                            Collections.sort(list, new CalendarCompare());
+                            if (markerEventMap.containsKey(eo.getEventID()))
+                                removePin(eo);
+                            addPin(eo);
+                            Marker m = markerEventMap.get(eo.getEventID());
+                            m.showInfoWindow();
+                        } else {
+                            list.add(eo);
+                            Collections.sort(list, new CalendarCompare());
+                            if (markerEventMap.containsKey(eo.getEventID()))
+                                removePin(eo);
+                            addPin(eo);
+                            Marker m = markerEventMap.get(eo.getEventID());
+                            m.showInfoWindow();
+                            break;
+                        }
+                    }
+                } else {
+                    for (int i = 0; i < list.size(); i++) {
+                        if (list.get(i).getEventID().equals(eo.getEventID())) {
+                            list.remove(i);
+                            if (markerEventMap.containsKey(eo.getEventID())) {
+                                removePin(eo);
+                            }
+                        }
+                    }
+                }
+
+
+                EventsView.newList(list);
+                updateMarkers();
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+                hash = new HashMap<>();
+                hash = (HashMap<String, Object>) dataSnapshot.getValue();
+                eo = createObject(hash);
+
+                for (int i = 0; i < list.size(); i++) {
+                    if (list.get(i).getEventID().equals(eo.getEventID())) {
+                        if (markerEventMap.containsKey(eo.getEventID()))
+                            removePin(eo);
+                        list.remove(i);
+                        break;
+                    }
+                }
+                EventsView.newList(list);
+
+                ArrayList<String> eventIDs = sqldb.getAllEvents();
+                if (eventIDs.contains(eo.getEventID())) {
+                    sqldb.deleteEventID(eo.getEventID());
+                    createToast(getBaseContext().getResources().getString(R.string.cancelled));
+                }
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+
+            }
+        });
+    }
+
     private void checkForCancelledEvents() {
         ArrayList<String> eventIDs = sqldb.getAllEvents();
 
-        ListIterator<Event> iterator = list.listIterator();
-
-        while (iterator.hasNext()) {
-            Event e = iterator.next();
+        for (Event e : list) {
             if (eventIDs.contains(e.getEventID())) {
                 eventIDs.remove(e.getEventID());
             }
@@ -206,15 +411,11 @@ public class MapView extends ActionBarActivity
         categorySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                String s = getBaseContext().getResources().getStringArray(R.array.drawer_category_array)[position];
-
                 updateMarkers();
-
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
-
             }
         });
 
@@ -280,20 +481,6 @@ public class MapView extends ActionBarActivity
                 updateMarkers();
             }
         });
-    }
-    
-    @Override
-    public void onBackPressed() {
-        if (backButtonPressed + DOUBLE_TAP_TIME > System.currentTimeMillis()) {
-            Intent intent = new Intent(this, LogInView.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            intent.putExtra("EXIT", true);
-            startActivity(intent);
-            finish();
-        } else {
-            Toast.makeText(this, getResources().getString(R.string.double_tap_to_finish), Toast.LENGTH_SHORT).show();
-        }
-        backButtonPressed = System.currentTimeMillis();
     }
 
     private void updateMarkers() {
@@ -377,11 +564,7 @@ public class MapView extends ActionBarActivity
             Location.distanceBetween(event.getLatitude(), event.getLongitude(),
                     circle.getCenter().latitude, circle.getCenter().longitude, distance);
 
-            if (distance[0] < circle.getRadius()) {
-                return true;
-            } else {
-                return false;
-            }
+            return distance[0] < circle.getRadius();
         }
         return true;
     }
@@ -400,9 +583,7 @@ public class MapView extends ActionBarActivity
     }
 
     private float getColor(Event eo) {
-
         float hue = BitmapDescriptorFactory.HUE_RED;
-
         List<String> ownEvents = sqldb.getOwnEvents();
 
         if (ownEvents.contains(eo.getEventID())) {
@@ -416,7 +597,6 @@ public class MapView extends ActionBarActivity
             hue = BitmapDescriptorFactory.HUE_GREEN;
             return hue;
         }
-
         return hue;
     }
 
@@ -427,138 +607,16 @@ public class MapView extends ActionBarActivity
         marker.remove();
     }
 
-    private void readEventsFromFirebase() {
-        queryRef.addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                hash = new HashMap<>();
-                hash = (HashMap<String, Object>) dataSnapshot.getValue();
-                eo = createObject(hash);
-
-                ArrayList<String> eventIDs = sqldb.getAllEvents();
-
-                if ((eo.getNumParticipants() < eo.getMaxParticipants()) ||
-                        ((eo.getNumParticipants() >= eo.getMaxParticipants()) &&
-                                eventIDs.contains(eo.getEventID()))) {
-                    if (isOver18)
-                        list.add(eo);
-                    else if (!isOver18 && !eo.isAdult())
-                        list.add(eo);
-
-                    if (!adultCheck.isChecked() && !eo.isAdult())
-                        addPin(eo);
-                    else if (adultCheck.isChecked())
-                        addPin(eo);
-                }
-            }
-
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-                hash = new HashMap<>();
-                hash = (HashMap<String, Object>) dataSnapshot.getValue();
-                eo = createObject(hash);
-
-                Log.d("BÆSJ", "BÆSJ4");
-
-                for (int i = 0; i < list.size(); i++) {
-                    if (list.get(i).getEventID().equals(eo.getEventID())) {
-                        if (isOver18)
-                            list.set(i, eo);
-                        else if (!isOver18 && !eo.isAdult())
-                            list.set(i, eo);
-                        break;
-                    }
-                }
-
-                ArrayList<String> eventIDs = sqldb.getAllEvents();
-                if ((eo.getNumParticipants() < eo.getMaxParticipants()) ||
-                        ((eo.getNumParticipants() >= eo.getMaxParticipants()) &&
-                                eventIDs.contains(eo.getEventID()))) {
-                    for (int i = 0; i < list.size(); i++) {
-                        Log.d("BÆSJ", "BÆSJ5");
-                        if (list.get(i).getEventID().equals(eo.getEventID())) {
-                            Log.d("BÆSJ", "BÆSJ3");
-                            list.set(i, eo);
-                            Collections.sort(list, new CalendarCompare());
-                            if (markerEventMap.containsKey(eo.getEventID()))
-                                removePin(eo);
-                            addPin(eo);
-                            Marker m = markerEventMap.get(eo.getEventID());
-                            m.showInfoWindow();
-                        } else {
-                            list.add(eo);
-                            Collections.sort(list, new CalendarCompare());
-                            if (markerEventMap.containsKey(eo.getEventID()))
-                                removePin(eo);
-                            addPin(eo);
-                            Marker m = markerEventMap.get(eo.getEventID());
-                            m.showInfoWindow();
-                            break;
-                        }
-                    }
-                } else {
-                    for (int i = 0; i < list.size(); i++) {
-                        if (list.get(i).getEventID().equals(eo.getEventID())) {
-                            list.remove(i);
-                            Log.d("BÆSJ", "BÆSJ1");
-                            if (markerEventMap.containsKey(eo.getEventID())) {
-                                removePin(eo);
-                                Log.d("BÆSJ", "BÆSJ2");
-                            }
-                        }
-                    }
-                }
-
-
-                EventsView.newList(list);
-                updateMarkers();
-            }
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-                hash = new HashMap<>();
-                hash = (HashMap<String, Object>) dataSnapshot.getValue();
-                eo = createObject(hash);
-
-                for (int i = 0; i < list.size(); i++) {
-                    if (list.get(i).getEventID().equals(eo.getEventID())) {
-                        if (markerEventMap.containsKey(eo.getEventID()))
-                            removePin(eo);
-                        list.remove(i);
-                        break;
-                    }
-                }
-                EventsView.newList(list);
-
-                ArrayList<String> eventIDs = sqldb.getAllEvents();
-                if (eventIDs.contains(eo.getEventID())) {
-                    sqldb.deleteEventID(eo.getEventID());
-                    createToast(getBaseContext().getResources().getString(R.string.cancelled));
-                }
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onCancelled(FirebaseError firebaseError) {
-
-            }
-        });
-    }
-
     private Event createObject(HashMap<String, Object> hash) {
         String time = hash.get("calendar").toString();
-        cal = new GregorianCalendar();
+        Calendar cal = new GregorianCalendar();
         cal.setTimeInMillis(Long.parseLong(time));
         if (hash.get("participantsList") == null)
             arrayList = null;
         else
             arrayList = (ArrayList<Long>) hash.get("participantsList");
 
-        Event event = new Event(hash.get("eventID").toString(),
+        return new Event(hash.get("eventID").toString(),
                 Long.parseLong(hash.get("userID").toString()),
                 hash.get("name").toString(),
                 hash.get("description").toString(),
@@ -572,8 +630,6 @@ public class MapView extends ActionBarActivity
                 Boolean.parseBoolean(hash.get("adult").toString()),
                 arrayList,
                 hash.get("photoSource").toString());
-
-        return event;
     }
 
     private void centerMapOnMyLocation() {
@@ -603,31 +659,24 @@ public class MapView extends ActionBarActivity
     }
 
     public void onNavigationDrawerItemSelected(int position) {
-        // Update the main content by replacing fragments/activities
         FragmentManager fragmentManager = getSupportFragmentManager();
 
         switch (position) {
-
             case 0: {
                 Intent i = new Intent(this, EventCreatorView.class);
                 startActivity(i);
                 break;
             }
             case 1: {
-
                 Intent intent = new Intent(this, EventsView.class);
-
                 checkForCancelledEvents();
-
                 ArrayList<Event> eoList = new ArrayList<>();
-
                 ListIterator<Event> itObject = list.listIterator();
-
                 ArrayList<String> localEvents = sqldb.getAllEvents();
 
                 while (itObject.hasNext()) {
-
                     Event event = itObject.next();
+
                     for (int i = 0; i < localEvents.size(); i++) {
                         if (event.getEventID().equals(localEvents.get((i)))) {
                             eoList.add(event);
@@ -636,9 +685,7 @@ public class MapView extends ActionBarActivity
                 }
 
                 ArrayList<Event> fullList = new ArrayList<>();
-                ListIterator iterator = list.listIterator();
-                while (iterator.hasNext()) {
-                    Event e = (Event) iterator.next();
+                for (Event e : list) {
                     fullList.add(e);
                 }
 
@@ -650,18 +697,14 @@ public class MapView extends ActionBarActivity
             }
             case 2: {
                 Intent intent = new Intent(this, EventsView.class);
-
                 checkForCancelledEvents();
-
                 ArrayList<Event> eoList = new ArrayList<>();
-
                 ListIterator<Event> itObject = list.listIterator();
-
                 ArrayList<String> localEvents = sqldb.getAllEvents();
 
                 while (itObject.hasNext()) {
-
                     Event event = itObject.next();
+
                     for (int i = 0; i < localEvents.size(); i++) {
                         if (event.getEventID().equals(localEvents.get((i)))) {
                             eoList.add(event);
@@ -670,9 +713,8 @@ public class MapView extends ActionBarActivity
                 }
 
                 ArrayList<Event> fullList = new ArrayList<>();
-                ListIterator iterator = list.listIterator();
-                while (iterator.hasNext()) {
-                    Event e = (Event) iterator.next();
+
+                for (Event e : list) {
                     fullList.add(e);
                 }
 
@@ -723,76 +765,6 @@ public class MapView extends ActionBarActivity
         actionBar.setTitle(title);
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        if (!navigationDrawerFragment.isDrawerOpen()) {
-            /*
-            * Only show items in the action bar relevant to this screen
-            * if the drawer is not showing. Otherwise, let the drawer
-            * decide what to show in the action bar.
-            */
-            getMenuInflater().inflate(R.menu.menu_map, menu);
-            restoreActionBar();
-
-            MenuItem searchItem = menu.findItem(R.id.action_search);
-            SearchView searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
-
-            searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-                @Override
-                public boolean onQueryTextSubmit(String s) {
-                    return false;
-                }
-
-                @Override
-                public boolean onQueryTextChange(String s) {
-                    Calendar maxDate = new GregorianCalendar();
-                    maxDate = Calendar.getInstance();
-                    long daysInMillis = TimeUnit.MILLISECONDS.convert(dateSeekBarProgress, TimeUnit.DAYS);
-                    maxDate.setTimeInMillis(maxDate.getTimeInMillis() + daysInMillis);
-
-                    if (s.length() > 0) {
-                        ListIterator<Event> iterator = list.listIterator();
-                        while (iterator.hasNext()) {
-                            Event e = iterator.next();
-                            if (!e.getName().toLowerCase().contains(s.toLowerCase()) &&
-                                    !e.getAddress().toLowerCase().contains(s.toLowerCase()) &&
-                                    !e.getDescription().toLowerCase().contains(s.toLowerCase())) {
-
-                                if (markerEventMap.containsKey(e.getEventID())) {
-                                    removePin(e);
-                                }
-
-                            } else if (e.getName().toLowerCase().contains(s.toLowerCase()) ||
-                                    e.getAddress().toLowerCase().contains(s.toLowerCase()) ||
-                                    e.getDescription().toLowerCase().contains(s.toLowerCase())) {
-
-                                if (!markerEventMap.containsKey(e.getEventID())) {
-                                    if (dateSeekBarProgress >= THREE_WEEKS || !(e.getCalendar().after(maxDate))) {
-                                        if (((radiusSeekBarProgress < TEN_KILOMETRES) && isEventInsideCircle(e)) || circle == null) {
-                                            if ((e.getCategory() == categorySpinner.getSelectedItemPosition()) || categorySpinner.getSelectedItemPosition() <= 0) {
-                                                if ((e.isAdult() && adultCheck.isChecked()) || !e.isAdult()) {
-                                                    addPin(e);
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    } else {
-                        updateMarkers();
-                    }
-                    return false;
-                }
-            });
-
-            return true;
-        }
-
-
-        return super.onCreateOptionsMenu(menu);
-    }
-
     private void setNewMarkerListener() {
         map = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
         map.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
@@ -830,12 +802,9 @@ public class MapView extends ActionBarActivity
         marker.showInfoWindow();
     }
 
-    // A fragment containing the map view.
     public static class MapsFragment extends Fragment {
-        // The fragment argument representing the section number for this fragment.
         private static final String ARG_SECTION_NUMBER = "section_number";
 
-        // Returns a new instance of this fragment for the given section number.
         public static MapsFragment newInstance(int sectionNumber) {
             MapsFragment fragment = new MapsFragment();
             Bundle args = new Bundle();
@@ -847,8 +816,7 @@ public class MapView extends ActionBarActivity
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_map, container, false);
-            return rootView;
+            return inflater.inflate(R.layout.fragment_map, container, false);
         }
 
         @Override
@@ -879,14 +847,6 @@ public class MapView extends ActionBarActivity
                     }
                 }
         );
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        SharedPreferences sharedPrefs = this.getSharedPreferences(
-                getResources().getString(R.string.shared_preferences_key), Context.MODE_PRIVATE);
-        sharedPrefs.edit().putString("userID", userID).apply();
     }
 
     private class CalendarCompare implements Comparator<Event> {

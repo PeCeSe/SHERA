@@ -429,9 +429,9 @@ public class EventCreatorView extends ActionBarActivity {
                 if (addresses.get(0).getAddressLine(0) != null)
                     address += addresses.get(0).getAddressLine(0);
                 if (addresses.get(0).getAddressLine(1) != null)
-                    address += addresses.get(0).getAddressLine(1);
+                    address += " " + addresses.get(0).getAddressLine(1);
                 if (addresses.get(0).getAddressLine(2) != null)
-                    address += addresses.get(0).getAddressLine(2);
+                    address += " " + addresses.get(0).getAddressLine(2);
                 return address;
             } else {
                 return null;
