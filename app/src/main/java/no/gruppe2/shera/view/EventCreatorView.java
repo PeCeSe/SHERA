@@ -104,7 +104,8 @@ public class EventCreatorView extends ActionBarActivity {
     private ArrayList<String> myPhotoSourceList, tempMyPhotoSourceList;
     private ArrayList<Bitmap> myPhotoList;
     private String afterPhotos, beforePhotos, sourceToObject;
-    private boolean isMorePhotos, isOver18, after, newList, gridViewLoadOnce, stopLoadingData, flag;
+    private boolean isMorePhotos, isOver18, after, newList, gridViewLoadOnce, stopLoadingData, flag,
+            newImageSelected;
     private GridView gridView;
     private ProgressDialog progress;
     private Session session;
@@ -131,6 +132,7 @@ public class EventCreatorView extends ActionBarActivity {
         sourceToObject = "NOTSET";
         isMorePhotos = true;
         stopLoadingData = false;
+        newImageSelected = false;
         last = 0;
 
         nameInput = (EditText) findViewById(R.id.nameInputField);
@@ -227,6 +229,7 @@ public class EventCreatorView extends ActionBarActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 sourceToObject = myPhotoSourceList.get(position);
+                newImageSelected = true;
                 findPhotos.setText(getResources().getString(R.string.change_photo));
                 new DownloadImages(sourceToObject).execute();
                 alert.dismiss();
@@ -396,6 +399,9 @@ public class EventCreatorView extends ActionBarActivity {
             adultCheck.setChecked(true);
         }
         catSpinner.setSelection(event.getCategory() - 1);
+        if (!event.getPhotoSource().equals("NOTSET")) {
+            new DownloadImages(event.getPhotoSource()).execute();
+        }
     }
 
     private boolean fromMap() {
@@ -577,7 +583,8 @@ public class EventCreatorView extends ActionBarActivity {
             event.setCalendar(cal);
         }
         event.setAdult(adultCheck.isChecked());
-        event.setPhotoSource(sourceToObject);
+        if (newImageSelected)
+            event.setPhotoSource(sourceToObject);
     }
 
     public ArrayList<Address> getLocationFromAddress(String strAddress) {
