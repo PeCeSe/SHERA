@@ -206,8 +206,8 @@ public class EventView extends ActionBarActivity {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == 1 && resultCode == Activity.RESULT_OK) {
-            Event returEvent = data.getParcelableExtra("Event");
-            setFields(returEvent);
+            eo = data.getParcelableExtra("Event");
+            setFields(eo);
         }
     }
 
