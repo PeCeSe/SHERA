@@ -27,17 +27,17 @@ import no.gruppe2.shera.R;
 
 public class LogInView extends FragmentActivity {
 
-    static UiLifecycleHelper uiHelper;
+    private static UiLifecycleHelper uiHelper;
     private GraphObject graphObject;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_log_in);
 
         uiHelper = new UiLifecycleHelper(this, statusCallback);
         uiHelper.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_log_in);
         LoginButton authButton = (LoginButton) findViewById(R.id.fb_login_button);
         authButton.setReadPermissions(Arrays.asList("user_photos","user_friends"));
         
@@ -49,7 +49,6 @@ public class LogInView extends FragmentActivity {
     private Session.StatusCallback statusCallback = new Session.StatusCallback() {
         @Override
         public void call(Session session, SessionState state, Exception exception) {
-            Log.d("PERMISSION::", session.getPermissions() + "");
             if (state.isOpened()) {
                 logInFb(session);
             }
@@ -59,7 +58,9 @@ public class LogInView extends FragmentActivity {
     @Override
     public void onResume() {
         super.onResume();
+
         Session session = Session.getActiveSession();
+
         if (session != null && session.isOpened()) {
             logInFb(session);
         }
@@ -99,13 +100,13 @@ public class LogInView extends FragmentActivity {
         if (!b) {
             putAgeRangeShared();
         }
+
         Intent i = new Intent(this, MapView.class);
         i.putExtra("fb_session", session);
         startActivity(i);
     }
 
     public void putAgeRangeShared() {
-         /* make the API call */
         Bundle bundle = new Bundle();
         bundle.putString("fields", "age_range");
         new Request(
@@ -115,26 +116,18 @@ public class LogInView extends FragmentActivity {
                 HttpMethod.GET,
                 new Request.Callback() {
                     public void onCompleted(Response response) {
-                        /* handle the result */
                         FacebookRequestError error = response.getError();
                         boolean isOver18 = false;
-                        if (error != null && response != null) {
+                        if (error != null) {
                             Log.e("ERROR::", error.toString());
                         } else {
                             graphObject = response.getGraphObject();
-                            int min = 0, max = 0;
+                            int min = 0;
 
                             JSONObject dataObject = (JSONObject) graphObject.getProperty("age_range");
                             if (dataObject.has("min")) {
                                 try {
                                     min = Integer.parseInt(dataObject.get("min").toString());
-                                } catch (JSONException e) {
-                                    e.printStackTrace();
-                                }
-                            }
-                            if (dataObject.has("max")) {
-                                try {
-                                    max = Integer.parseInt(dataObject.get("max").toString());
                                 } catch (JSONException e) {
                                     e.printStackTrace();
                                 }
@@ -149,7 +142,7 @@ public class LogInView extends FragmentActivity {
                             SharedPreferences.Editor editor = sharedPrefs.edit();
                             editor.putBoolean(getResources()
                                     .getString(R.string.shared_preferences_is_over_18), isOver18);
-                            editor.commit();
+                            editor.apply();
                         }
 
                     }
