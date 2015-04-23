@@ -24,7 +24,6 @@ import android.widget.CompoundButton;
 import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.facebook.Request;
 import com.facebook.Response;
@@ -60,6 +59,7 @@ import java.util.concurrent.TimeUnit;
 import no.gruppe2.shera.R;
 import no.gruppe2.shera.dto.Event;
 import no.gruppe2.shera.fragments.NavigationDrawerFragment;
+import no.gruppe2.shera.helpers.HelpMethods;
 import no.gruppe2.shera.service.SqlLiteDBHandler;
 
 /*
@@ -98,6 +98,7 @@ public class MapView extends ActionBarActivity
     private HashMap<String, Event> markerMap;
     private HashMap<String, Marker> markerEventMap;
     private Event eo;
+    private HelpMethods help;
     private String userID;
     private final static int ZOOMLEVEL = 14, THREE_WEEKS = 22, TEN_KILOMETRES = 11,
             DOUBLE_TAP_TIME = 2000;
@@ -135,7 +136,6 @@ public class MapView extends ActionBarActivity
         map.setMyLocationEnabled(true);
         map.getUiSettings().setZoomControlsEnabled(true);
 
-        map.getUiSettings().setZoomControlsEnabled(true);
         map = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
 
         hash = new HashMap<>();
@@ -182,6 +182,7 @@ public class MapView extends ActionBarActivity
             adultCheck.setChecked(false);
             adultCheck.setVisibility(View.INVISIBLE);
         }
+        help = new HelpMethods();
     }
 
     @Override
@@ -257,7 +258,7 @@ public class MapView extends ActionBarActivity
             startActivity(intent);
             finish();
         } else {
-            Toast.makeText(this, getResources().getString(R.string.double_tap_to_finish), Toast.LENGTH_SHORT).show();
+            help.createToast(getResources().getString(R.string.double_tap_to_finish), this);
         }
         backButtonPressed = System.currentTimeMillis();
     }
@@ -277,15 +278,12 @@ public class MapView extends ActionBarActivity
                 hash = new HashMap<>();
                 hash = (HashMap<String, Object>) dataSnapshot.getValue();
                 eo = createObject(hash);
-
                 ArrayList<String> eventIDs = sqldb.getAllEvents();
 
                 if ((eo.getNumParticipants() < eo.getMaxParticipants()) ||
                         ((eo.getNumParticipants() >= eo.getMaxParticipants()) &&
                                 eventIDs.contains(eo.getEventID()))) {
-                    if (isOver18)
-                        list.add(eo);
-                    else if (!eo.isAdult())
+                    if (isOver18 || !eo.isAdult())
                         list.add(eo);
 
                     if (!adultCheck.isChecked() && !eo.isAdult())
@@ -303,18 +301,17 @@ public class MapView extends ActionBarActivity
 
                 for (int i = 0; i < list.size(); i++) {
                     if (list.get(i).getEventID().equals(eo.getEventID())) {
-                        if (isOver18)
-                            list.set(i, eo);
-                        else if (!eo.isAdult())
+                        if (isOver18 || !eo.isAdult())
                             list.set(i, eo);
                         break;
                     }
                 }
-
                 ArrayList<String> eventIDs = sqldb.getAllEvents();
                 if ((eo.getNumParticipants() < eo.getMaxParticipants()) ||
                         ((eo.getNumParticipants() >= eo.getMaxParticipants()) &&
                                 eventIDs.contains(eo.getEventID()))) {
+                    boolean found = false;
+
                     for (int i = 0; i < list.size(); i++) {
                         if (list.get(i).getEventID().equals(eo.getEventID())) {
                             list.set(i, eo);
@@ -324,29 +321,27 @@ public class MapView extends ActionBarActivity
                             addPin(eo);
                             Marker m = markerEventMap.get(eo.getEventID());
                             m.showInfoWindow();
-                        } else {
-                            list.add(eo);
-                            Collections.sort(list, new CalendarCompare());
-                            if (markerEventMap.containsKey(eo.getEventID()))
-                                removePin(eo);
-                            addPin(eo);
-                            Marker m = markerEventMap.get(eo.getEventID());
-                            m.showInfoWindow();
+                            found = true;
                             break;
                         }
+                    }
+                    if (!found) {
+                        list.add(eo);
+                        Collections.sort(list, new CalendarCompare());
+                        if (markerEventMap.containsKey(eo.getEventID()))
+                            removePin(eo);
+                        Marker m = markerEventMap.get(eo.getEventID());
+                        m.showInfoWindow();
                     }
                 } else {
                     for (int i = 0; i < list.size(); i++) {
                         if (list.get(i).getEventID().equals(eo.getEventID())) {
                             list.remove(i);
-                            if (markerEventMap.containsKey(eo.getEventID())) {
+                            if (markerEventMap.containsKey(eo.getEventID()))
                                 removePin(eo);
-                            }
                         }
                     }
                 }
-
-
                 EventsView.newList(list);
                 updateMarkers(list);
             }
@@ -367,10 +362,11 @@ public class MapView extends ActionBarActivity
                 }
                 EventsView.newList(list);
 
-                ArrayList<String> eventIDs = sqldb.getAllEvents();
+                ArrayList<String> eventIDs = sqldb.getJoinedEvents();
                 if (eventIDs.contains(eo.getEventID())) {
                     sqldb.deleteEventID(eo.getEventID());
-                    createToast(getBaseContext().getResources().getString(R.string.cancelled));
+                    help.createToast(getBaseContext().getResources().getString(R.string.cancelled),
+                            getBaseContext());
                 }
             }
 
@@ -398,13 +394,9 @@ public class MapView extends ActionBarActivity
         if (!eventIDs.isEmpty()) {
             for (int i = 0; i < eventIDs.size(); i++) {
                 sqldb.deleteEventID(eventIDs.get(i));
-                createToast(getBaseContext().getResources().getString(R.string.cancelled));
+                help.createToast(getBaseContext().getResources().getString(R.string.cancelled), this);
             }
         }
-    }
-
-    private void createToast(String s) {
-        Toast.makeText(this, s, Toast.LENGTH_SHORT).show();
     }
 
     private void setListeners() {
