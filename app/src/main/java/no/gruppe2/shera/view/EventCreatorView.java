@@ -215,7 +215,7 @@ public class EventCreatorView extends ActionBarActivity {
         if (myPhotoList.size() <= 0)
             findPhotosList(session);
 
-        gridView.setAdapter(new ImageAdapter(this, myPhotoList));
+        gridView.setAdapter(new ImageAdapter(this, myPhotoList, true));
         gridView.setNumColumns(4);
         gridView.setPadding(3, 3, 3, 3);
 
@@ -767,7 +767,7 @@ public class EventCreatorView extends ActionBarActivity {
             if (!strings.isEmpty()) {
                 if (gridViewLoadOnce) {
                     int currentPosition = gridView.getFirstVisiblePosition();
-                    gridView.setAdapter(new ImageAdapter(EventCreatorView.this, myPhotoList));
+                    gridView.setAdapter(new ImageAdapter(EventCreatorView.this, myPhotoList, true));
                     gridView.setSelection(currentPosition + 4);
                 } else
                     setGridView();
