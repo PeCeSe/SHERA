@@ -1,6 +1,5 @@
 package no.gruppe2.shera.view;
 
-import android.app.ActionBar;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
@@ -8,8 +7,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.ScrollView;
+import android.widget.TextView;
 
 import com.facebook.Request;
 import com.facebook.Response;
@@ -30,41 +29,43 @@ import no.gruppe2.shera.R;
 import no.gruppe2.shera.dto.Chat;
 import no.gruppe2.shera.dto.Event;
 import no.gruppe2.shera.helpers.HelpMethods;
+import no.gruppe2.shera.helpers.Validator;
 import no.gruppe2.shera.service.DBHandler;
 
-/**
- * Created by chris.forberg on 08.04.2015.
+/*
+This class retrieves the incoming events chat-objects from the Firebase database, and displays
+them in a TextView. It also allows the user to enter new messages, and stores these as chat-objects
+in Firebase, before displaying them on the screen.
  */
+
 public class ChatView extends ActionBarActivity {
     private TextView view;
     private ScrollView scroll;
     private EditText input;
-    private Button send;
     private Event eo;
-    private ActionBar actionBar;
-    private Intent i;
     private DBHandler db;
     private Chat message;
     private Calendar cal;
     private long userID;
     private Session session;
     private String userName;
-    private Firebase ref, chatRef;
+    private Firebase ref;
     private Query queryRef;
     private HashMap<String, Object> map;
     private LinkedList<Chat> chatList;
     private HelpMethods help;
+    private Validator validator;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat_view);
         Firebase.setAndroidContext(this);
-        i = getIntent();
+        Intent i = getIntent();
         eo = i.getParcelableExtra(getResources().getString(R.string.intent_parcelable_key));
         db = new DBHandler(this);
         ref = new Firebase(getResources().getString(R.string.firebase_root));
-        chatRef = ref.child("Chat");
+        Firebase chatRef = ref.child("Chat");
         queryRef = chatRef.orderByChild("eventID").equalTo(eo.getEventID());
         readChatMessage();
         session = Session.getActiveSession();
@@ -76,26 +77,24 @@ public class ChatView extends ActionBarActivity {
         help = new HelpMethods();
         view = (TextView) findViewById(R.id.chat_view);
         input = (EditText) findViewById(R.id.chat_input);
-        send = (Button) findViewById(R.id.chat_send_button);
+        Button send = (Button) findViewById(R.id.chat_send_button);
+        validator = new Validator();
 
         send.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View v) {
-                cal = new GregorianCalendar().getInstance();
+                cal = Calendar.getInstance();
                 session = Session.getActiveSession();
-                if (!input.getText().equals("")) {
+                if (!validator.isEmpty(input.getText().toString())) {
                     message = new Chat(cal, userID,
                             userName, input.getText().toString(),
                             eo.getEventID());
                     db.pushChatMessageToDB(message, ref);
-                } else {
-                    //ERROR MESSAGE
                 }
                 input.setText("");
             }
         });
-
     }
 
     @Override
