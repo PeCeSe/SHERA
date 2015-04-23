@@ -44,7 +44,7 @@ public class NavigationDrawerFragment extends Fragment {
     private ListView drawerListView;
     private View fragmentContainerView;
 
-    private int currentSelectedPosition = 5;
+    private int currentSelectedPosition = 6;
     private boolean fromSavedInstanceState, userLearnedDrawer;
 
     public NavigationDrawerFragment() {
@@ -96,6 +96,7 @@ public class NavigationDrawerFragment extends Fragment {
                 android.R.layout.simple_list_item_1,
                 android.R.id.text1,
                 new String[]{
+                        getString(R.string.blank),
                         getString(R.string.create_event_string),
                         getString(R.string.title_activity_events),
                         getString(R.string.action_settings),
