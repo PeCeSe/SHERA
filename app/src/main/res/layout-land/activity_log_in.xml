@@ -16,7 +16,7 @@
         android:layout_marginLeft="15dp"
         android:layout_marginRight="15dp"
         android:layout_marginBottom="90dp"
-        android:src="@drawable/logo_with_text_shera"/>
+        android:src="@drawable/logo_with_text_shera" />
 
     <com.facebook.widget.LoginButton
         android:id="@+id/fb_login_button"
@@ -26,8 +26,7 @@
         android:layout_marginRight="100dp"
         android:layout_marginLeft="100dp"
         android:layout_marginBottom="20dp"
-
         facebook:confirm_logout="false"
-        facebook:fetch_user_info="true"/>
+        facebook:fetch_user_info="true" />
 
 </RelativeLayout>
