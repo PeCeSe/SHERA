@@ -110,7 +110,7 @@ public class MapView extends ActionBarActivity
 
     private boolean isOver18;
     private long backButtonPressed;
-    
+
     private ProfilePictureView profilePictureView;
     private String userName;
     private TextView userNameTextView;
@@ -235,7 +235,7 @@ public class MapView extends ActionBarActivity
                             }
                         }
                     } else {
-                        updateMarkers();
+                        updateMarkers(list);
                     }
                     return false;
                 }
@@ -348,7 +348,7 @@ public class MapView extends ActionBarActivity
 
 
                 EventsView.newList(list);
-                updateMarkers();
+                updateMarkers(list);
             }
 
             @Override
@@ -412,14 +412,14 @@ public class MapView extends ActionBarActivity
         adultCheck.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                updateMarkers();
+                updateMarkers(list);
             }
         });
 
         categorySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                updateMarkers();
+                updateMarkers(list);
             }
 
             @Override
@@ -443,7 +443,7 @@ public class MapView extends ActionBarActivity
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                updateMarkers();
+                updateMarkers(list);
             }
         });
 
@@ -486,83 +486,43 @@ public class MapView extends ActionBarActivity
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                updateMarkers();
+                updateMarkers(list);
             }
         });
     }
 
-    private void updateMarkers() {
-        Calendar maxDate = new GregorianCalendar();
-        maxDate = Calendar.getInstance();
+    private int updateMarkers(LinkedList<Event> el) {
+
+        int pins = 0;
+
+        Calendar maxDate = Calendar.getInstance();
+
         long daysInMillis = TimeUnit.MILLISECONDS.convert(dateSeekBarProgress, TimeUnit.DAYS);
         maxDate.setTimeInMillis(maxDate.getTimeInMillis() + daysInMillis);
-        if (categorySpinner.getSelectedItemPosition() > 0) {
-            ListIterator<Event> iterator = list.listIterator();
-            while (iterator.hasNext()) {
-                Event event = iterator.next();
-                if (dateSeekBarProgress >= THREE_WEEKS || !(event.getCalendar().after(maxDate))) {
-                    if (((radiusSeekBarProgress < TEN_KILOMETRES) && isEventInsideCircle(event)) || circle == null) {
-                        if (event.getCategory() == categorySpinner.getSelectedItemPosition()) {
-                            if (event.isAdult() && adultCheck.isChecked()) {
-                                if (!markerEventMap.containsKey(event.getEventID())) {
-                                    addPin(event);
-                                }
-                            } else if (!event.isAdult()) {
-                                if (!markerEventMap.containsKey(event.getEventID())) {
-                                    addPin(event);
-                                }
-                            } else if (event.isAdult() && !adultCheck.isChecked()) {
-                                if (markerEventMap.containsKey(event.getEventID())) {
-                                    removePin(event);
-                                }
-                            }
-                        } else {
-                            if (markerEventMap.containsKey(event.getEventID())) {
-                                removePin(event);
-                            }
-                        }
-                    } else {
-                        if (markerEventMap.containsKey(event.getEventID())) {
-                            removePin(event);
-                        }
-                    }
-                } else {
-                    if (markerEventMap.containsKey(event.getEventID())) {
-                        removePin(event);
-                    }
+
+
+        for (Event event : el) {
+            if (((dateSeekBarProgress >= THREE_WEEKS) || !(event.getCalendar().after(maxDate)))
+                    && (((radiusSeekBarProgress < TEN_KILOMETRES)
+                    && isEventInsideCircle(event)) || circle == null)
+                    && ((((categorySpinner.getSelectedItemPosition() > 0)
+                    && event.getCategory() == categorySpinner.getSelectedItemPosition()))
+                    || (categorySpinner.getSelectedItemPosition() <= 0))
+                    && (((event.isAdult()) && (adultCheck.isChecked()))
+                    || (!event.isAdult()))) {
+
+                if (!markerEventMap.containsKey(event.getEventID())) {
+                    addPin(event);
+                    pins++;
                 }
-            }
-        } else {
-            ListIterator<Event> iterator = list.listIterator();
-            while (iterator.hasNext()) {
-                Event event = iterator.next();
-                if (dateSeekBarProgress >= THREE_WEEKS || !(event.getCalendar().after(maxDate))) {
-                    if (((radiusSeekBarProgress < TEN_KILOMETRES) && isEventInsideCircle(event)) || circle == null) {
-                        if (event.isAdult() && adultCheck.isChecked()) {
-                            if (!markerEventMap.containsKey(event.getEventID())) {
-                                addPin(event);
-                            }
-                        } else if (!event.isAdult()) {
-                            if (!markerEventMap.containsKey(event.getEventID())) {
-                                addPin(event);
-                            }
-                        } else if (event.isAdult() && !adultCheck.isChecked()) {
-                            if (markerEventMap.containsKey(event.getEventID())) {
-                                removePin(event);
-                            }
-                        }
-                    } else {
-                        if (markerEventMap.containsKey(event.getEventID())) {
-                            removePin(event);
-                        }
-                    }
-                } else {
-                    if (markerEventMap.containsKey(event.getEventID())) {
-                        removePin(event);
-                    }
+
+            } else {
+                if (markerEventMap.containsKey(event.getEventID())) {
+                    removePin(event);
                 }
             }
         }
+        return pins;
     }
 
     private boolean isEventInsideCircle(Event event) {
