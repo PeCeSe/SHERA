@@ -31,47 +31,84 @@
         android:choiceMode="singleChoice"
         android:name="no.gruppe2.shera.fragments.NavigationDrawerFragment">
 
+        <LinearLayout
+            android:layout_width="@dimen/navigation_drawer_width"
+            android:layout_height="wrap_content"
+            android:paddingBottom="1dp"
+            android:background="@drawable/border_navigation_drawer_profile_picture"
+            android:orientation="horizontal">
+
+            <com.facebook.widget.ProfilePictureView
+                android:id="@+id/userProfilePicture"
+                android:layout_width="@dimen/com_facebook_profilepictureview_preset_size_small"
+                android:layout_height="@dimen/com_facebook_profilepictureview_preset_size_small"
+                android:scaleType="centerInside"
+                android:foregroundGravity="top|left" />
+
+            <LinearLayout
+                android:layout_width="@dimen/navigation_drawer_width"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:layout_gravity="center|left">
+
+                <TextView
+                    android:id="@+id/loggedIn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="12sp"
+                    android:textColor="@color/text_blue"
+                    android:text="@string/logged_in"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginTop="5dp" />
+
+                <TextView
+                    android:id="@+id/userName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="18sp"
+                    android:textColor="@color/text_blue"
+                    android:layout_marginLeft="5dp" />
+            </LinearLayout>
+        </LinearLayout>
+
         <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
             android:id="@+id/navigation_drawer_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
-
-            <SeekBar
-                android:id="@+id/drawer_radius_seekbar"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                tools:layout="@layout/fragment_seekbar"
-                android:layout_above="@+id/drawer_time_seekbar"
-                android:max="10"
-                android:layout_marginBottom="20dp" />
-
-            <SeekBar
-                android:id="@+id/drawer_time_seekbar"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_above="@+id/drawer_category_spinner"
-                tools:layout="@layout/fragment_seekbar"
-                android:max="10"
-                android:layout_marginBottom="20dp" />
 
             <Spinner
                 android:id="@+id/drawer_category_spinner"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:entries="@array/drawer_category_array"
-                android:layout_toRightOf="@+id/centerPointDrawer"
-                android:layout_alignBottom="@+id/drawer_checkbox_adult"
-                android:layout_alignTop="@+id/drawer_checkbox_adult" />
+                android:layout_above="@+id/drawer_radius_seekbar"
+                android:layout_toLeftOf="@+id/centerPointDrawer"
+                android:layout_alignParentLeft="true"
+                android:layout_marginBottom="20dp"
+                android:layout_marginLeft="7dp" />
 
             <CheckBox
                 android:id="@+id/drawer_checkbox_adult"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_toLeftOf="@+id/centerPointDrawer"
+                android:layout_toRightOf="@+id/centerPointDrawer"
                 android:text="@string/adult"
-                android:layout_above="@+id/bottomDrawer"
-                android:layout_alignParentLeft="true"
+                android:layout_alignBottom="@+id/drawer_category_spinner"
+                android:layout_alignTop="@+id/drawer_category_spinner"
                 android:layout_marginLeft="5dp" />
+
+            <SeekBar
+                android:id="@+id/drawer_radius_seekbar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_above="@+id/drawer_time_seekbar"
+                android:layout_marginBottom="20dp" />
+
+            <SeekBar
+                android:id="@+id/drawer_time_seekbar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_above="@+id/bottomDrawer" />
 
             <TextView
                 android:id="@+id/bottomDrawer"
@@ -91,5 +128,5 @@
         </RelativeLayout>
 
     </fragment>
-
+    
 </android.support.v4.widget.DrawerLayout>
