@@ -108,6 +108,10 @@ public class MapView extends ActionBarActivity
 
     private boolean isOver18;
     private long backButtonPressed;
+    
+    private ProfilePictureView profilePictureView;
+    private String userName;
+    private TextView userNameTextView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -152,6 +156,8 @@ public class MapView extends ActionBarActivity
         adultCheck = (CheckBox) findViewById(R.id.drawer_checkbox_adult);
         categorySpinner = (Spinner) findViewById(R.id.drawer_category_spinner);
 
+        profilePictureView = (ProfilePictureView) findViewById(R.id.userProfilePicture);
+        userNameTextView = (TextView) findViewById(R.id.userName);
 
         navigationDrawerFragment = (NavigationDrawerFragment)
                 getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
@@ -650,6 +656,9 @@ public class MapView extends ActionBarActivity
                     if (session == Session.getActiveSession()) {
                         if (user != null) {
                             userID = user.getId();
+                            profilePictureView.setProfileId(userID);
+                            userName = user.getFirstName();
+                            userNameTextView.setText(userName);
                         }
                     }
                 }
@@ -663,11 +672,14 @@ public class MapView extends ActionBarActivity
 
         switch (position) {
             case 0: {
+                break;
+            }
+            case 1: {
                 Intent i = new Intent(this, EventCreatorView.class);
                 startActivity(i);
                 break;
             }
-            case 1: {
+            case 2: {
                 Intent intent = new Intent(this, EventsView.class);
                 checkForCancelledEvents();
                 ArrayList<Event> eoList = new ArrayList<>();
@@ -695,7 +707,7 @@ public class MapView extends ActionBarActivity
                 startActivity(intent);
                 break;
             }
-            case 2: {
+            case 3: {
                 Intent intent = new Intent(this, EventsView.class);
                 checkForCancelledEvents();
                 ArrayList<Event> eoList = new ArrayList<>();
@@ -724,13 +736,13 @@ public class MapView extends ActionBarActivity
                 startActivity(intent);
                 break;
             }
-            case 3: {
+            case 4: {
                 session.close();
                 session.closeAndClearTokenInformation();
                 finish();
                 break;
             }
-            case 4: {
+            case 5: {
                 fragmentManager.beginTransaction()
                         .replace(R.id.content_frame, MapsFragment.newInstance(position))
                         .commit();
@@ -742,18 +754,20 @@ public class MapView extends ActionBarActivity
     public void onSectionAttached(int number) {
         switch (number) {
             case 0:
-                title = getString(R.string.create_event_string);
                 break;
             case 1:
-                title = getString(R.string.title_activity_events);
+                title = getString(R.string.create_event_string);
                 break;
             case 2:
-                title = getString(R.string.action_settings);
+                title = getString(R.string.title_activity_events);
                 break;
             case 3:
-                title = getString(R.string.logout);
+                title = getString(R.string.action_settings);
                 break;
             case 4:
+                title = getString(R.string.logout);
+                break;
+            case 5:
                 title = getString(R.string.title_activity_map);
                 break;
         }
