@@ -21,7 +21,7 @@
         tools:layout="@layout/fragment_map"
         android:name="com.google.android.gms.maps.MapFragment" />
 
-    <!-- The navigation drawer -->
+     <!-- The navigation drawer -->
     <fragment
         android:id="@+id/navigation_drawer"
         android:layout_width="@dimen/navigation_drawer_width_land"
@@ -31,76 +31,127 @@
         android:choiceMode="singleChoice"
         android:name="no.gruppe2.shera.fragments.NavigationDrawerFragment">
 
+        <LinearLayout
+            android:layout_width="@dimen/navigation_drawer_width_land"
+            android:layout_height="wrap_content"
+            android:paddingBottom="1dp"
+            android:background="@drawable/border_navigation_drawer_profile_picture"
+            android:orientation="horizontal">
+
+            <com.facebook.widget.ProfilePictureView
+                android:id="@+id/userProfilePicture"
+                android:layout_width="@dimen/com_facebook_profilepictureview_preset_size_small"
+                android:layout_height="@dimen/com_facebook_profilepictureview_preset_size_small"
+                android:scaleType="centerInside"
+                android:foregroundGravity="top|left" />
+
+            <LinearLayout
+                android:layout_width="@dimen/navigation_drawer_width_land"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:layout_gravity="center|left">
+
+                <TextView
+                    android:id="@+id/loggedIn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="12sp"
+                    android:textColor="@color/text_blue"
+                    android:text="@string/logged_in"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginTop="5dp" />
+
+                <TextView
+                    android:id="@+id/userName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="18sp"
+                    android:textColor="@color/text_blue"
+                    android:layout_marginLeft="5dp" />
+            </LinearLayout>
+        </LinearLayout>
+
         <ScrollView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:fillViewport="true">
+            android:fillViewport="true"
+            android:scrollbars="none">
 
             <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 android:id="@+id/navigation_drawer_layout"
                 android:layout_width="match_parent"
-                android:layout_height="400dp"
+                android:layout_height="435dp"
                 android:gravity="bottom">
 
-                <SeekBar
-                    android:id="@+id/drawer_radius_seekbar"
-                    android:layout_width="match_parent"
+                <RelativeLayout
+                    android:id="@+id/navigation_drawer_scroll_layout_land"
+                    android:layout_width="@dimen/navigation_drawer_width_land"
                     android:layout_height="wrap_content"
-                    android:layout_marginRight="10dp"
-                    android:layout_below="@+id/drawer_time_seekbar"
-                    android:layout_marginTop="30dp"
-                    android:max="10" />
+                    android:layout_marginTop="20dp"
+                    android:background="@drawable/border_navigation_drawer_scroll">
 
-                <TextView
-                    android:id="@+id/textRadius"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textAppearance="?android:attr/textAppearanceMedium" />
+                    <SeekBar
+                        android:id="@+id/drawer_radius_seekbar"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginRight="10dp"
+                        android:layout_below="@+id/drawer_time_seekbar"
+                        android:layout_marginTop="30dp"
+                        android:layout_marginBottom="30dp"
+                        android:max="10" />
 
-                <SeekBar
-                    android:id="@+id/drawer_time_seekbar"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginRight="10dp"
-                    android:layout_below="@+id/drawer_checkbox_adult"
-                    android:layout_marginTop="30dp"
-                    android:max="10" />
+                    <TextView
+                        android:id="@+id/textRadius"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="?android:attr/textAppearanceMedium" />
 
-                <Spinner
-                    android:id="@+id/drawer_category_spinner"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:entries="@array/drawer_category_array"
-                    android:layout_toLeftOf="@+id/centerPointDrawer"
-                    android:layout_alignBottom="@+id/drawer_checkbox_adult"
-                    android:layout_alignTop="@+id/drawer_checkbox_adult"
-                    android:layout_alignParentLeft="true"
-                    android:layout_marginLeft="5dp"
-                    android:layout_below="@+id/bottomDrawer" />
+                    <SeekBar
+                        android:id="@+id/drawer_time_seekbar"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginRight="10dp"
+                        android:layout_below="@+id/drawer_checkbox_adult"
+                        android:layout_marginTop="30dp"
+                        android:max="10" />
 
-                <CheckBox
-                    android:id="@+id/drawer_checkbox_adult"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_toRightOf="@+id/centerPointDrawer"
-                    android:text="@string/adult"
-                    android:layout_below="@+id/bottomDrawer" />
+                    <Spinner
+                        android:id="@+id/drawer_category_spinner"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:entries="@array/drawer_category_array"
+                        android:layout_toLeftOf="@+id/centerPointDrawer"
+                        android:layout_alignBottom="@+id/drawer_checkbox_adult"
+                        android:layout_alignTop="@+id/drawer_checkbox_adult"
+                        android:layout_alignParentLeft="true"
+                        android:layout_marginLeft="5dp"
+                        android:layout_below="@+id/bottomDrawer" />
 
-                <TextView
-                    android:id="@+id/bottomDrawer"
-                    android:text=""
-                    android:layout_width="0dp"
-                    android:layout_height="5dp"
-                    android:paddingBottom="50dp"
-                    android:layout_centerHorizontal="true"
-                    android:layout_centerInParent="true" />
+                    <CheckBox
+                        android:id="@+id/drawer_checkbox_adult"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_toRightOf="@+id/centerPointDrawer"
+                        android:text="@string/adult"
+                        android:layout_below="@+id/bottomDrawer" />
 
-                <TextView
-                    android:id="@+id/centerPointDrawer"
-                    android:text=""
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_centerHorizontal="true" />
+                    <TextView
+                        android:id="@+id/bottomDrawer"
+                        android:text=""
+                        android:layout_width="0dp"
+                        android:layout_height="5dp"
+                        android:paddingBottom="50dp"
+                        android:layout_centerHorizontal="true"
+                        android:layout_centerInParent="true" />
+
+                    <TextView
+                        android:id="@+id/centerPointDrawer"
+                        android:text=""
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_centerHorizontal="true" />
+
+                </RelativeLayout>
 
             </RelativeLayout>
 
