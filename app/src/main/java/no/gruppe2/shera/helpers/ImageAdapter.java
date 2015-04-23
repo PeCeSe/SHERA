@@ -9,16 +9,20 @@ import android.widget.ImageView;
 
 import java.util.ArrayList;
 
+import no.gruppe2.shera.R;
+
 /**
  * Created by chris.forberg on 24.03.2015.
  */
 public class ImageAdapter extends BaseAdapter {
     private Context mContext;
     private ArrayList<Bitmap> photoList;
+    private boolean fromCreate;
 
-    public ImageAdapter(Context c, ArrayList<Bitmap> a) {
+    public ImageAdapter(Context c, ArrayList<Bitmap> a, boolean b) {
         mContext = c;
         photoList = a;
+        fromCreate = b;
     }
 
     public int getCount() {
@@ -37,8 +41,11 @@ public class ImageAdapter extends BaseAdapter {
         ImageView imageView;
         if (convertView == null) {
             imageView = new ImageView(mContext);
+            if (position == 0 && !fromCreate)
+                imageView.setBackgroundResource(R.drawable.host_border_layout);
             imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
             imageView.setPadding(15, 40, 15, 40);
+
         } else {
             imageView = (ImageView) convertView;
         }

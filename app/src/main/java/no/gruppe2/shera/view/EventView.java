@@ -223,7 +223,7 @@ public class EventView extends ActionBarActivity {
     }
 
     public void setGridView() {
-        gridView.setAdapter(new ImageAdapter(this, myPhotoList));
+        gridView.setAdapter(new ImageAdapter(this, myPhotoList, false));
         gridView.setNumColumns(4);
         gridView.setPadding(3, 3, 3, 3);
 
@@ -251,8 +251,10 @@ public class EventView extends ActionBarActivity {
                         if (dataArray.length() > 0) {
                             for (int i = 0; i < dataArray.length(); i++) {
                                 JSONObject json = dataArray.optJSONObject(i);
-                                myFriendsListName.add(findFriendsName(json));
-                                myFriendsListID.add(findFriendsID(json));
+                                long ID = findFriendsID(json);
+                                String name = findFriendsName(json);
+                                myFriendsListName.add(name);
+                                myFriendsListID.add(ID);
                             }
                         }
                     }
@@ -284,6 +286,26 @@ public class EventView extends ActionBarActivity {
                                             String s = arr.getString("url");
                                             myFriendsPhotosToShow.add(s);
                                             namesToShow.add(name);
+
+                                        } catch (JSONException e) {
+                                            e.printStackTrace();
+                                        }
+                                    } else if (name.equals(myFriendsListName.get(k)) && eo.getUserID() == myFriendsListID.get(k)) {
+                                        try {
+                                            JSONObject obj = (JSONObject) json.get("picture");
+                                            JSONObject arr = (JSONObject) obj.get("data");
+                                            String s = arr.getString("url");
+                                            if (myFriendsPhotosToShow.size() == 0) {
+                                                myFriendsPhotosToShow.add(s);
+                                                namesToShow.add("HOST: " + name);
+                                            } else {
+                                                String tempURL = myFriendsPhotosToShow.get(0);
+                                                String tempNAME = namesToShow.get(0);
+                                                myFriendsPhotosToShow.set(0, s);
+                                                namesToShow.set(0, "HOST: " + name);
+                                                myFriendsPhotosToShow.add(tempURL);
+                                                namesToShow.add(tempNAME);
+                                            }
 
                                         } catch (JSONException e) {
                                             e.printStackTrace();
@@ -323,7 +345,7 @@ public class EventView extends ActionBarActivity {
         eo.addParticipantToList(Long.parseLong(userID));
         db.updateEventDB(eo);
         sqldb.eventJoined(eo.getEventID());
-
+        setFields(eo);
         joinButton.setVisible(false);
         unjoinButton.setVisible(true);
     }
@@ -333,7 +355,7 @@ public class EventView extends ActionBarActivity {
             db.updateEventDB(eo);
         }
         sqldb.deleteEventID(eo.getEventID());
-
+        setFields(eo);
         joinButton.setVisible(true);
         unjoinButton.setVisible(false);
 
