@@ -25,6 +25,12 @@ import java.util.Arrays;
 import no.gruppe2.shera.R;
 
 
+/*
+This class uses Facebooks log-in button, which allows a user to start a new session with their
+facebook-account. When the session is opened, map view is started. If the session is already open
+when LogInView is started, the user is sent straight to map.
+ */
+
 public class LogInView extends FragmentActivity {
 
     private static UiLifecycleHelper uiHelper;
