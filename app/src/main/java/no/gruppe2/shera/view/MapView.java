@@ -91,6 +91,7 @@ public class MapView extends ActionBarActivity
     private SeekBar timeSeekBar, radiusSeekBar;
     private CheckBox adultCheck;
     private Spinner categorySpinner;
+    private TextView timeResult, radiusResult;
 
     static LinkedList<Event> list;
     private ArrayList<Long> arrayList;
@@ -135,7 +136,6 @@ public class MapView extends ActionBarActivity
         map.setMyLocationEnabled(true);
         map.getUiSettings().setZoomControlsEnabled(true);
 
-        map.getUiSettings().setZoomControlsEnabled(true);
         map = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
 
         hash = new HashMap<>();
@@ -154,7 +154,13 @@ public class MapView extends ActionBarActivity
         radiusSeekBarProgress = TEN_KILOMETRES;
 
         timeSeekBar = (SeekBar) findViewById(R.id.drawer_time_seekbar);
+        timeResult = (TextView) findViewById(R.id.timeResult);
+        timeResult.setText((getResources().getString(R.string.days_ahead) + " " +
+                (getResources().getString(R.string.all))));
         radiusSeekBar = (SeekBar) findViewById(R.id.drawer_radius_seekbar);
+        radiusResult = (TextView) findViewById(R.id.radiusResult);
+        radiusResult.setText((getResources().getString(R.string.radius) + " " +
+                (getResources().getString(R.string.no_limit))));
         adultCheck = (CheckBox) findViewById(R.id.drawer_checkbox_adult);
         categorySpinner = (Spinner) findViewById(R.id.drawer_category_spinner);
 
@@ -434,11 +440,16 @@ public class MapView extends ActionBarActivity
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 dateSeekBarProgress = progress;
+                timeResult.setText((getResources().getString(R.string.days_ahead) + " " +
+                        dateSeekBarProgress));
+                if (dateSeekBarProgress == THREE_WEEKS) {
+                    timeResult.setText((getResources().getString(R.string.days_ahead) + " " +
+                            (getResources().getString(R.string.all))));
+                }
             }
 
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
-
             }
 
             @Override
@@ -454,6 +465,13 @@ public class MapView extends ActionBarActivity
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 radiusSeekBarProgress = progress;
+                radiusResult.setText((getResources().getString(R.string.radius) + " " +
+                        radiusSeekBarProgress / 2 + getResources().getString(R.string.kilometers)));
+
+                if (radiusSeekBarProgress == TEN_KILOMETRES) {
+                    radiusResult.setText((getResources().getString(R.string.radius) + " " +
+                            (getResources().getString(R.string.no_limit))));
+                }
 
                 if (radiusSeekBarProgress < TEN_KILOMETRES) {
                     if (circle != null) {
@@ -764,7 +782,7 @@ public class MapView extends ActionBarActivity
                 title = getString(R.string.title_activity_events);
                 break;
             case 3:
-                title = getString(R.string.action_settings);
+                title = getString(R.string.chats);
                 break;
             case 4:
                 title = getString(R.string.logout);

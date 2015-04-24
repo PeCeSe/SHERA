@@ -3,7 +3,7 @@
 
     <string name="app_name">SHERA</string>
     <string name="hello_world">Hello world!</string>
-    <string name="action_settings">Settings</string>
+    <string name="chats">Chats</string>
     <string name="title_activity_map">Map</string>
     <string name="LogIn">Log in</string>
     <string name="create_event_string">Create Event</string>
@@ -49,6 +49,11 @@
     <string name="event_creator_chosen_image">Event banner image</string>
     <string name="blank"> </string>
     <string name="logged_in">Logged in as</string>
+    <string name="days_ahead">Days ahead:</string>
+    <string name="all">All</string>
+    <string name="radius">Radius:</string>
+    <string name="no_limit">No limit</string>
+    <string name="kilometers">km</string>
 
     <string name="name_error">Name can not be blank. </string>
     <string name="description_error">Description can not be blank. </string>

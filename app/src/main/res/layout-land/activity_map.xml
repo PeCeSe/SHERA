@@ -90,30 +90,49 @@
                     android:layout_marginTop="20dp"
                     android:background="@drawable/border_navigation_drawer_scroll">
 
-                    <SeekBar
-                        android:id="@+id/drawer_radius_seekbar"
-                        android:layout_width="match_parent"
+                    <LinearLayout
+                        android:id="@+id/seekbar_top_linear"
+                        android:layout_width="@dimen/navigation_drawer_width"
                         android:layout_height="wrap_content"
-                        android:layout_marginRight="10dp"
-                        android:layout_below="@+id/drawer_time_seekbar"
-                        android:layout_marginTop="30dp"
-                        android:layout_marginBottom="30dp"
-                        android:max="10" />
+                        android:orientation="vertical"
+                        android:layout_marginTop="40dp">
 
-                    <TextView
-                        android:id="@+id/textRadius"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textAppearance="?android:attr/textAppearanceMedium" />
+                        <TextView
+                            android:id="@+id/radiusResult"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_horizontal"
+                            android:text="@string/days_ahead" />
 
-                    <SeekBar
-                        android:id="@+id/drawer_time_seekbar"
-                        android:layout_width="match_parent"
+                        <SeekBar
+                            android:id="@+id/drawer_radius_seekbar"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/seekbar_bottom_linear"
+                        android:layout_width="@dimen/navigation_drawer_width"
                         android:layout_height="wrap_content"
-                        android:layout_marginRight="10dp"
-                        android:layout_below="@+id/drawer_checkbox_adult"
-                        android:layout_marginTop="30dp"
-                        android:max="10" />
+                        android:orientation="vertical"
+                        android:layout_below="@+id/seekbar_top_linear">
+
+                        <TextView
+                            android:id="@+id/timeResult"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="10dp"
+                            android:layout_gravity="center_horizontal"
+                            android:text="@string/days_ahead" />
+
+                        <SeekBar
+                            android:id="@+id/drawer_time_seekbar"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="10dp" />
+
+                    </LinearLayout>
 
                     <Spinner
                         android:id="@+id/drawer_category_spinner"
@@ -133,6 +152,7 @@
                         android:layout_height="wrap_content"
                         android:layout_toRightOf="@+id/centerPointDrawer"
                         android:text="@string/adult"
+                        android:layout_marginBottom="10dp"
                         android:layout_below="@+id/bottomDrawer" />
 
                     <TextView
