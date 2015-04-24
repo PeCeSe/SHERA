@@ -81,7 +81,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:entries="@array/drawer_category_array"
-                android:layout_above="@+id/drawer_radius_seekbar"
+                android:layout_above="@+id/seekbar_top_linear"
                 android:layout_toLeftOf="@+id/centerPointDrawer"
                 android:layout_alignParentLeft="true"
                 android:layout_marginBottom="20dp"
@@ -97,18 +97,61 @@
                 android:layout_alignTop="@+id/drawer_category_spinner"
                 android:layout_marginLeft="5dp" />
 
-            <SeekBar
-                android:id="@+id/drawer_radius_seekbar"
-                android:layout_width="match_parent"
+            <TextView
+                android:id="@+id/centerPointDrawer"
+                android:text=""
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_above="@+id/drawer_time_seekbar"
-                android:layout_marginBottom="20dp" />
+                android:layout_centerHorizontal="true" />
 
-            <SeekBar
-                android:id="@+id/drawer_time_seekbar"
-                android:layout_width="match_parent"
+            <LinearLayout
+                android:id="@+id/seekbar_top_linear"
+                android:layout_width="@dimen/navigation_drawer_width"
                 android:layout_height="wrap_content"
-                android:layout_above="@+id/bottomDrawer" />
+                android:orientation="vertical"
+                android:layout_above="@+id/seekbar_bottom_linear">
+
+                <TextView
+                    android:id="@+id/radiusResult"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginRight="5dp"
+                    android:layout_gravity="center_horizontal"
+                    android:text="@string/days_ahead" />
+
+                <SeekBar
+                    android:id="@+id/drawer_radius_seekbar"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="15dp" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/seekbar_bottom_linear"
+                android:layout_width="@dimen/navigation_drawer_width"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_above="@+id/bottomDrawer">
+
+                <TextView
+                    android:id="@+id/timeResult"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginRight="5dp"
+                    android:layout_gravity="center_horizontal"
+                    android:text="@string/days_ahead" />
+
+                <SeekBar
+                    android:id="@+id/drawer_time_seekbar"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+
+            </LinearLayout>
 
             <TextView
                 android:id="@+id/bottomDrawer"
@@ -117,13 +160,6 @@
                 android:layout_height="15dp"
                 android:layout_centerHorizontal="true"
                 android:layout_alignParentBottom="true" />
-
-            <TextView
-                android:id="@+id/centerPointDrawer"
-                android:text=""
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_centerHorizontal="true" />
 
         </RelativeLayout>
 

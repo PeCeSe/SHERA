@@ -33,17 +33,17 @@ when LogInView is started, the user is sent straight to map.
 
 public class LogInView extends FragmentActivity {
 
-    private static UiLifecycleHelper uiHelper;
+    static UiLifecycleHelper uiHelper;
     private GraphObject graphObject;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_log_in);
 
         uiHelper = new UiLifecycleHelper(this, statusCallback);
         uiHelper.onCreate(savedInstanceState);
 
+        setContentView(R.layout.activity_log_in);
         LoginButton authButton = (LoginButton) findViewById(R.id.fb_login_button);
         authButton.setReadPermissions(Arrays.asList("user_photos","user_friends"));
         

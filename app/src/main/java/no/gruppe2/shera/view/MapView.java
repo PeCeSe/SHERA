@@ -24,7 +24,6 @@ import android.widget.CompoundButton;
 import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.facebook.Request;
 import com.facebook.Response;
@@ -60,6 +59,7 @@ import java.util.concurrent.TimeUnit;
 import no.gruppe2.shera.R;
 import no.gruppe2.shera.dto.Event;
 import no.gruppe2.shera.fragments.NavigationDrawerFragment;
+import no.gruppe2.shera.helpers.HelpMethods;
 import no.gruppe2.shera.service.SqlLiteDBHandler;
 
 /*
@@ -91,6 +91,7 @@ public class MapView extends ActionBarActivity
     private SeekBar timeSeekBar, radiusSeekBar;
     private CheckBox adultCheck;
     private Spinner categorySpinner;
+    private TextView timeResult, radiusResult;
 
     static LinkedList<Event> list;
     private ArrayList<Long> arrayList;
@@ -98,6 +99,7 @@ public class MapView extends ActionBarActivity
     private HashMap<String, Event> markerMap;
     private HashMap<String, Marker> markerEventMap;
     private Event eo;
+    private HelpMethods help;
     private String userID;
     private final static int ZOOMLEVEL = 14, THREE_WEEKS = 22, TEN_KILOMETRES = 11,
             DOUBLE_TAP_TIME = 2000;
@@ -110,7 +112,7 @@ public class MapView extends ActionBarActivity
 
     private boolean isOver18;
     private long backButtonPressed;
-    
+
     private ProfilePictureView profilePictureView;
     private String userName;
     private TextView userNameTextView;
@@ -135,7 +137,6 @@ public class MapView extends ActionBarActivity
         map.setMyLocationEnabled(true);
         map.getUiSettings().setZoomControlsEnabled(true);
 
-        map.getUiSettings().setZoomControlsEnabled(true);
         map = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
 
         hash = new HashMap<>();
@@ -154,7 +155,13 @@ public class MapView extends ActionBarActivity
         radiusSeekBarProgress = TEN_KILOMETRES;
 
         timeSeekBar = (SeekBar) findViewById(R.id.drawer_time_seekbar);
+        timeResult = (TextView) findViewById(R.id.timeResult);
+        timeResult.setText((getResources().getString(R.string.days_ahead) + " " +
+                (getResources().getString(R.string.all))));
         radiusSeekBar = (SeekBar) findViewById(R.id.drawer_radius_seekbar);
+        radiusResult = (TextView) findViewById(R.id.radiusResult);
+        radiusResult.setText((getResources().getString(R.string.radius) + " " +
+                (getResources().getString(R.string.no_limit))));
         adultCheck = (CheckBox) findViewById(R.id.drawer_checkbox_adult);
         categorySpinner = (Spinner) findViewById(R.id.drawer_category_spinner);
 
@@ -182,6 +189,7 @@ public class MapView extends ActionBarActivity
             adultCheck.setChecked(false);
             adultCheck.setVisibility(View.INVISIBLE);
         }
+        help = new HelpMethods();
     }
 
     @Override
@@ -235,7 +243,7 @@ public class MapView extends ActionBarActivity
                             }
                         }
                     } else {
-                        updateMarkers();
+                        updateMarkers(list);
                     }
                     return false;
                 }
@@ -257,7 +265,7 @@ public class MapView extends ActionBarActivity
             startActivity(intent);
             finish();
         } else {
-            Toast.makeText(this, getResources().getString(R.string.double_tap_to_finish), Toast.LENGTH_SHORT).show();
+            help.createToast(getResources().getString(R.string.double_tap_to_finish), this);
         }
         backButtonPressed = System.currentTimeMillis();
     }
@@ -277,15 +285,12 @@ public class MapView extends ActionBarActivity
                 hash = new HashMap<>();
                 hash = (HashMap<String, Object>) dataSnapshot.getValue();
                 eo = createObject(hash);
-
                 ArrayList<String> eventIDs = sqldb.getAllEvents();
 
                 if ((eo.getNumParticipants() < eo.getMaxParticipants()) ||
                         ((eo.getNumParticipants() >= eo.getMaxParticipants()) &&
                                 eventIDs.contains(eo.getEventID()))) {
-                    if (isOver18)
-                        list.add(eo);
-                    else if (!eo.isAdult())
+                    if (isOver18 || !eo.isAdult())
                         list.add(eo);
 
                     if (!adultCheck.isChecked() && !eo.isAdult())
@@ -303,18 +308,17 @@ public class MapView extends ActionBarActivity
 
                 for (int i = 0; i < list.size(); i++) {
                     if (list.get(i).getEventID().equals(eo.getEventID())) {
-                        if (isOver18)
-                            list.set(i, eo);
-                        else if (!eo.isAdult())
+                        if (isOver18 || !eo.isAdult())
                             list.set(i, eo);
                         break;
                     }
                 }
-
                 ArrayList<String> eventIDs = sqldb.getAllEvents();
                 if ((eo.getNumParticipants() < eo.getMaxParticipants()) ||
                         ((eo.getNumParticipants() >= eo.getMaxParticipants()) &&
                                 eventIDs.contains(eo.getEventID()))) {
+                    boolean found = false;
+
                     for (int i = 0; i < list.size(); i++) {
                         if (list.get(i).getEventID().equals(eo.getEventID())) {
                             list.set(i, eo);
@@ -324,31 +328,29 @@ public class MapView extends ActionBarActivity
                             addPin(eo);
                             Marker m = markerEventMap.get(eo.getEventID());
                             m.showInfoWindow();
-                        } else {
-                            list.add(eo);
-                            Collections.sort(list, new CalendarCompare());
-                            if (markerEventMap.containsKey(eo.getEventID()))
-                                removePin(eo);
-                            addPin(eo);
-                            Marker m = markerEventMap.get(eo.getEventID());
-                            m.showInfoWindow();
+                            found = true;
                             break;
                         }
+                    }
+                    if (!found) {
+                        list.add(eo);
+                        Collections.sort(list, new CalendarCompare());
+                        if (markerEventMap.containsKey(eo.getEventID()))
+                            removePin(eo);
+                        Marker m = markerEventMap.get(eo.getEventID());
+                        m.showInfoWindow();
                     }
                 } else {
                     for (int i = 0; i < list.size(); i++) {
                         if (list.get(i).getEventID().equals(eo.getEventID())) {
                             list.remove(i);
-                            if (markerEventMap.containsKey(eo.getEventID())) {
+                            if (markerEventMap.containsKey(eo.getEventID()))
                                 removePin(eo);
-                            }
                         }
                     }
                 }
-
-
                 EventsView.newList(list);
-                updateMarkers();
+                updateMarkers(list);
             }
 
             @Override
@@ -367,10 +369,11 @@ public class MapView extends ActionBarActivity
                 }
                 EventsView.newList(list);
 
-                ArrayList<String> eventIDs = sqldb.getAllEvents();
+                ArrayList<String> eventIDs = sqldb.getJoinedEvents();
                 if (eventIDs.contains(eo.getEventID())) {
                     sqldb.deleteEventID(eo.getEventID());
-                    createToast(getBaseContext().getResources().getString(R.string.cancelled));
+                    help.createToast(getBaseContext().getResources().getString(R.string.cancelled),
+                            getBaseContext());
                 }
             }
 
@@ -398,13 +401,9 @@ public class MapView extends ActionBarActivity
         if (!eventIDs.isEmpty()) {
             for (int i = 0; i < eventIDs.size(); i++) {
                 sqldb.deleteEventID(eventIDs.get(i));
-                createToast(getBaseContext().getResources().getString(R.string.cancelled));
+                help.createToast(getBaseContext().getResources().getString(R.string.cancelled), this);
             }
         }
-    }
-
-    private void createToast(String s) {
-        Toast.makeText(this, s, Toast.LENGTH_SHORT).show();
     }
 
     private void setListeners() {
@@ -412,14 +411,14 @@ public class MapView extends ActionBarActivity
         adultCheck.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                updateMarkers();
+                updateMarkers(list);
             }
         });
 
         categorySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                updateMarkers();
+                updateMarkers(list);
             }
 
             @Override
@@ -434,16 +433,21 @@ public class MapView extends ActionBarActivity
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 dateSeekBarProgress = progress;
+                timeResult.setText((getResources().getString(R.string.days_ahead) + " " +
+                        dateSeekBarProgress));
+                if (dateSeekBarProgress == THREE_WEEKS) {
+                    timeResult.setText((getResources().getString(R.string.days_ahead) + " " +
+                            (getResources().getString(R.string.all))));
+                }
             }
 
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
-
             }
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                updateMarkers();
+                updateMarkers(list);
             }
         });
 
@@ -454,6 +458,13 @@ public class MapView extends ActionBarActivity
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 radiusSeekBarProgress = progress;
+                radiusResult.setText((getResources().getString(R.string.radius) + " " +
+                        radiusSeekBarProgress / 2 + getResources().getString(R.string.kilometers)));
+
+                if (radiusSeekBarProgress == TEN_KILOMETRES) {
+                    radiusResult.setText((getResources().getString(R.string.radius) + " " +
+                            (getResources().getString(R.string.no_limit))));
+                }
 
                 if (radiusSeekBarProgress < TEN_KILOMETRES) {
                     if (circle != null) {
@@ -486,83 +497,43 @@ public class MapView extends ActionBarActivity
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                updateMarkers();
+                updateMarkers(list);
             }
         });
     }
 
-    private void updateMarkers() {
-        Calendar maxDate = new GregorianCalendar();
-        maxDate = Calendar.getInstance();
+    private int updateMarkers(LinkedList<Event> el) {
+
+        int pins = 0;
+
+        Calendar maxDate = Calendar.getInstance();
+
         long daysInMillis = TimeUnit.MILLISECONDS.convert(dateSeekBarProgress, TimeUnit.DAYS);
         maxDate.setTimeInMillis(maxDate.getTimeInMillis() + daysInMillis);
-        if (categorySpinner.getSelectedItemPosition() > 0) {
-            ListIterator<Event> iterator = list.listIterator();
-            while (iterator.hasNext()) {
-                Event event = iterator.next();
-                if (dateSeekBarProgress >= THREE_WEEKS || !(event.getCalendar().after(maxDate))) {
-                    if (((radiusSeekBarProgress < TEN_KILOMETRES) && isEventInsideCircle(event)) || circle == null) {
-                        if (event.getCategory() == categorySpinner.getSelectedItemPosition()) {
-                            if (event.isAdult() && adultCheck.isChecked()) {
-                                if (!markerEventMap.containsKey(event.getEventID())) {
-                                    addPin(event);
-                                }
-                            } else if (!event.isAdult()) {
-                                if (!markerEventMap.containsKey(event.getEventID())) {
-                                    addPin(event);
-                                }
-                            } else if (event.isAdult() && !adultCheck.isChecked()) {
-                                if (markerEventMap.containsKey(event.getEventID())) {
-                                    removePin(event);
-                                }
-                            }
-                        } else {
-                            if (markerEventMap.containsKey(event.getEventID())) {
-                                removePin(event);
-                            }
-                        }
-                    } else {
-                        if (markerEventMap.containsKey(event.getEventID())) {
-                            removePin(event);
-                        }
-                    }
-                } else {
-                    if (markerEventMap.containsKey(event.getEventID())) {
-                        removePin(event);
-                    }
+
+
+        for (Event event : el) {
+            if (((dateSeekBarProgress >= THREE_WEEKS) || !(event.getCalendar().after(maxDate)))
+                    && (((radiusSeekBarProgress < TEN_KILOMETRES)
+                    && isEventInsideCircle(event)) || circle == null)
+                    && ((((categorySpinner.getSelectedItemPosition() > 0)
+                    && event.getCategory() == categorySpinner.getSelectedItemPosition()))
+                    || (categorySpinner.getSelectedItemPosition() <= 0))
+                    && (((event.isAdult()) && (adultCheck.isChecked()))
+                    || (!event.isAdult()))) {
+
+                if (!markerEventMap.containsKey(event.getEventID())) {
+                    addPin(event);
+                    pins++;
                 }
-            }
-        } else {
-            ListIterator<Event> iterator = list.listIterator();
-            while (iterator.hasNext()) {
-                Event event = iterator.next();
-                if (dateSeekBarProgress >= THREE_WEEKS || !(event.getCalendar().after(maxDate))) {
-                    if (((radiusSeekBarProgress < TEN_KILOMETRES) && isEventInsideCircle(event)) || circle == null) {
-                        if (event.isAdult() && adultCheck.isChecked()) {
-                            if (!markerEventMap.containsKey(event.getEventID())) {
-                                addPin(event);
-                            }
-                        } else if (!event.isAdult()) {
-                            if (!markerEventMap.containsKey(event.getEventID())) {
-                                addPin(event);
-                            }
-                        } else if (event.isAdult() && !adultCheck.isChecked()) {
-                            if (markerEventMap.containsKey(event.getEventID())) {
-                                removePin(event);
-                            }
-                        }
-                    } else {
-                        if (markerEventMap.containsKey(event.getEventID())) {
-                            removePin(event);
-                        }
-                    }
-                } else {
-                    if (markerEventMap.containsKey(event.getEventID())) {
-                        removePin(event);
-                    }
+
+            } else {
+                if (markerEventMap.containsKey(event.getEventID())) {
+                    removePin(event);
                 }
             }
         }
+        return pins;
     }
 
     private boolean isEventInsideCircle(Event event) {
@@ -764,7 +735,7 @@ public class MapView extends ActionBarActivity
                 title = getString(R.string.title_activity_events);
                 break;
             case 3:
-                title = getString(R.string.action_settings);
+                title = getString(R.string.chats);
                 break;
             case 4:
                 title = getString(R.string.logout);
