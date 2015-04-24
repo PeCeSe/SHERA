@@ -76,4 +76,5 @@
     <string name="chat_send">Send</string>
     <string name="abort_photo_download">Cancel</string>
     <string name="double_tap_to_finish">Press back again to exit the app</string>
+    <string name="no_address_on_these_coordinates">No address on these coordinates</string>
 </resources>
