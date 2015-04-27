@@ -1,5 +1,6 @@
 package no.gruppe2.shera.view;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
@@ -38,7 +39,6 @@ import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.TimePicker;
-import android.widget.Toast;
 
 import com.facebook.FacebookRequestError;
 import com.facebook.HttpMethod;
@@ -67,51 +67,53 @@ import no.gruppe2.shera.helpers.Validator;
 import no.gruppe2.shera.service.DBHandler;
 import no.gruppe2.shera.service.SqlLiteDBHandler;
 
+/*
+This class shows a view for the user to input different info about the event he has planned.
+There is fields for name, description, address(which is prefilled with address if you open
+the EventCreatorView class from long-click in the Map class or gives you alternative addresses
+when you have typed more than 3 characters) and a field max number of participants.
+There is also a button where you can pick the date(shows the date, when chosen) and a button to
+pick the time(shows time when chosen). A spinner let you chose different categories. A checkbox
+you can press if the event is not for people under 18.
+There is also a button to find a photo for your event, which you get from your public photos on
+Facebook.
+ */
 public class EventCreatorView extends ActionBarActivity {
 
-    EditText nameInput, descriptionInput, participantsInput;
-    TextView timeView, dateView, errorView;
-    AutoCompleteTextView addressInput;
-    static Button pickDateIn, pickTimeIn, findPhotos;
-    CheckBox adultCheck;
-    Spinner catSpinner;
+    private EditText nameInput, descriptionInput, participantsInput;
+    private AutoCompleteTextView addressInput;
+    private static Button pickDateIn, pickTimeIn, findPhotos;
+    private CheckBox adultCheck;
+    private Spinner catSpinner;
     private ImageView eventPhotoView;
 
     private HelpMethods help;
     private DBHandler db;
     private Firebase ref;
+    private SqlLiteDBHandler sqldb;
 
-    private long userID;
+    private long userID, last;
     private double lat, lng;
 
-    DialogFragment dateFragment;
-    DialogFragment timeFragment;
-
-    Event event;
-
-    SqlLiteDBHandler sqldb;
+    private Event event;
 
     private ArrayAdapter<String> adapter;
-    private ArrayList<Address> list;
+    private ArrayList list;
     private String[] array;
 
     public static Calendar cal;
     private static final String DATE_FORMAT = "dd-MM-yyyy", TIME_FORMAT = "kk:mm";
     private static final int TRESHOLD = 3, DEFAULTLONGLAT = 200, LISTOFLOCATIONSIZE = 5;
 
-    GraphObject graphObject;
-    private ArrayList<String> myFriendsList;
+    private GraphObject graphObject;
     private ArrayList<String> myPhotoSourceList, tempMyPhotoSourceList;
     private ArrayList<Bitmap> myPhotoList;
-    private String afterPhotos, beforePhotos, sourceToObject;
-    private boolean isMorePhotos, isOver18, after, newList, gridViewLoadOnce, stopLoadingData, flag,
-            newImageSelected;
+    private String afterPhotos, sourceToObject;
+    private boolean isMorePhotos, newList, gridViewLoadOnce, stopLoadingData, flag, newImageSelected;
     private GridView gridView;
     private ProgressDialog progress;
-    private Session session;
-    private long last;
-
     private AlertDialog alert;
+    private Session session;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -123,12 +125,10 @@ public class EventCreatorView extends ActionBarActivity {
         ref = new Firebase(getResources().getString(R.string.firebase_root));
         help = new HelpMethods();
         sqldb = new SqlLiteDBHandler(this);
-        myFriendsList = new ArrayList<>();
         myPhotoSourceList = new ArrayList<>();
         tempMyPhotoSourceList = new ArrayList<>();
         myPhotoList = new ArrayList<>();
         afterPhotos = "";
-        beforePhotos = "";
         sourceToObject = "NOTSET";
         isMorePhotos = true;
         stopLoadingData = false;
@@ -141,8 +141,6 @@ public class EventCreatorView extends ActionBarActivity {
         participantsInput = (EditText) findViewById(R.id.participantsInputField);
         pickDateIn = (Button) findViewById(R.id.pickDateButton);
         pickTimeIn = (Button) findViewById(R.id.pickTimeButton);
-        timeView = (TextView) findViewById(R.id.timeText);
-        dateView = (TextView) findViewById(R.id.dateText);
         adultCheck = (CheckBox) findViewById(R.id.adultCheck);
         catSpinner = (Spinner) findViewById(R.id.cat_spinner);
         findPhotos = (Button) findViewById(R.id.findPhotos);
@@ -152,11 +150,7 @@ public class EventCreatorView extends ActionBarActivity {
 
         session = Session.getActiveSession();
         findUserID(session);
-        after = true;
-        if (myPhotoSourceList == null)
-            newList = true;
-        else
-            newList = false;
+        newList = myPhotoSourceList == null;
         gridViewLoadOnce = false;
 
         if (fromMap()) {
@@ -164,8 +158,6 @@ public class EventCreatorView extends ActionBarActivity {
         } else if (incomingEvent()) {
             cal = event.getCalendar();
             setFields();
-        } else {
-
         }
 
         addressInput.setThreshold(TRESHOLD);
@@ -175,13 +167,13 @@ public class EventCreatorView extends ActionBarActivity {
         pickDateIn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View arg0) {
-                showDatePickerDialog(arg0);
+                showDatePickerDialog();
             }
         });
         pickTimeIn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View arg0) {
-                showTimePickerDialog(arg0);
+                showTimePickerDialog();
             }
         });
 
@@ -199,7 +191,7 @@ public class EventCreatorView extends ActionBarActivity {
         });
         SharedPreferences prefs = getSharedPreferences(getResources()
                 .getString(R.string.shared_preferences_key), Context.MODE_PRIVATE);
-        isOver18 = prefs.getBoolean(getResources()
+        boolean isOver18 = prefs.getBoolean(getResources()
                 .getString(R.string.shared_preferences_is_over_18), false);
         if (!isOver18) {
             adultCheck.setChecked(false);
@@ -247,7 +239,7 @@ public class EventCreatorView extends ActionBarActivity {
                                  int visibleItemCount, int totalItemCount) {
                 int lastInScreen = firstVisibleItem + visibleItemCount;
                 if ((lastInScreen == totalItemCount) && isMorePhotos && !stopLoadingData &&
-                        (System.currentTimeMillis() - last > 10000) && flag) {
+                        (System.currentTimeMillis() - last > 5000) && flag) {
                     stopLoadingData = true;
                     flag = false;
                     findPhotosList(session);
@@ -261,13 +253,12 @@ public class EventCreatorView extends ActionBarActivity {
         params.putString("after", afterPhotos);
 
         if (isMorePhotos) {
-            //myPhotoSourceList = new ArrayList<>();
             tempMyPhotoSourceList = new ArrayList<>();
             new Request(session, "/me/photos", params, HttpMethod.GET,
                     new Request.Callback() {
                         public void onCompleted(Response response) {
                             FacebookRequestError error = response.getError();
-                            if (error != null && response != null) {
+                            if (error != null) {
                                 Log.e("ERROR::", error.toString());
                             } else {
                                 graphObject = response.getGraphObject();
@@ -275,16 +266,15 @@ public class EventCreatorView extends ActionBarActivity {
 
                             JSONArray dataArray = (JSONArray) graphObject.getProperty("data");
                             JSONObject pages = (JSONObject) graphObject.getProperty("paging");
-                            JSONObject cursorObject = null;
+                            JSONObject cursorObject;
 
                             if (pages != null) {
                                 try {
                                     cursorObject = (JSONObject) pages.get("cursors");
                                     afterPhotos = cursorObject.getString("after");
-                                    beforePhotos = cursorObject.getString("before");
                                 } catch (JSONException e) {
                                     e.printStackTrace();
-                                }
+                            }
                             }
                             if (!pages.has("next")) {
                                 isMorePhotos = false;
@@ -297,12 +287,13 @@ public class EventCreatorView extends ActionBarActivity {
                                     JSONObject json = dataArray.optJSONObject(i);
                                     myPhotoSourceList.add(findPhotoSource(json));
                                     tempMyPhotoSourceList.add(findPhotoSource(json));
-                                }
                             }
+                        }
                             stopLoadingData = false;
                             new DownloadImages(tempMyPhotoSourceList).execute();
                         }
-                    }).executeAsync();
+                    }
+            ).executeAsync();
         }
     }
 
@@ -319,12 +310,9 @@ public class EventCreatorView extends ActionBarActivity {
     public boolean incomingEvent() {
         Intent i = getIntent();
         if (i != null) {
-            event = (Event) i.getParcelableExtra(getResources()
+            event = i.getParcelableExtra(getResources()
                     .getString(R.string.intent_parcelable_key));
-            if (event == null) {
-                return false;
-            }
-            return true;
+            return event != null;
         }
         return false;
     }
@@ -337,8 +325,9 @@ public class EventCreatorView extends ActionBarActivity {
                 Address out = null;
                 for (int i = 0; i < array.length; i++) {
                     if (array[i].equals(s))
-                        out = list.get(i);
+                        out = (Address) list.get(i);
                 }
+                assert out != null;
                 lat = out.getLatitude();
                 lng = out.getLongitude();
             }
@@ -349,7 +338,6 @@ public class EventCreatorView extends ActionBarActivity {
         addressInput.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
             }
 
             @Override
@@ -360,10 +348,10 @@ public class EventCreatorView extends ActionBarActivity {
                     if (list != null) {
                         array = new String[list.size()];
                         for (int i = 0; i < list.size(); i++) {
-                            loc = list.get(i);
+                            loc = (Address) list.get(i);
                             String in = "";
                             if (loc.getAddressLine(0) != null) {
-                                in += loc.getAddressLine(0).toString();
+                                in += loc.getAddressLine(0);
                             }
                             if (loc.getAddressLine(1) != null) {
                                 in += " " + loc.getAddressLine(1);
@@ -372,9 +360,8 @@ public class EventCreatorView extends ActionBarActivity {
                                 in += " " + loc.getAddressLine(2);
                             }
                             array[i] = in;
-                            Log.d("ARRAY::", array[i]);
                         }
-                        adapter = new ArrayAdapter<String>(getBaseContext(),
+                        adapter = new ArrayAdapter<>(getBaseContext(),
                                 android.R.layout.simple_spinner_dropdown_item, array);
                         addressInput.setAdapter(adapter);
                     }
@@ -383,7 +370,6 @@ public class EventCreatorView extends ActionBarActivity {
 
             @Override
             public void afterTextChanged(Editable s) {
-
             }
         });
     }
@@ -409,10 +395,7 @@ public class EventCreatorView extends ActionBarActivity {
         if (extras != null) {
             lat = extras.getDouble("Lat", DEFAULTLONGLAT);
             lng = extras.getDouble("Long", DEFAULTLONGLAT);
-            if (lat == DEFAULTLONGLAT || lng == DEFAULTLONGLAT) {
-                return false;
-            }
-            return true;
+            return !(lat == DEFAULTLONGLAT || lng == DEFAULTLONGLAT);
         }
         return false;
     }
@@ -423,8 +406,7 @@ public class EventCreatorView extends ActionBarActivity {
             List<Address> addresses;
             geocoder = new Geocoder(this);
             if (lat != 0 || lng != 0) {
-                addresses = geocoder.getFromLocation(lat,
-                        lng, 1);
+                addresses = geocoder.getFromLocation(lat, lng, 1);
                 String address = "";
                 if (addresses.get(0).getAddressLine(0) != null)
                     address += addresses.get(0).getAddressLine(0);
@@ -434,11 +416,11 @@ public class EventCreatorView extends ActionBarActivity {
                     address += " " + addresses.get(0).getAddressLine(2);
                 return address;
             } else {
-                return null;
+                return getResources().getString(R.string.no_address_on_these_coordinates);
             }
         } catch (Exception e) {
             e.printStackTrace();
-            return null;
+            return getResources().getString(R.string.no_address_on_these_coordinates);
         }
     }
 
@@ -456,10 +438,8 @@ public class EventCreatorView extends ActionBarActivity {
             finish();
             return true;
         }
-
         if (id == R.id.saveEvent) {
             saveEvent();
-
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -473,10 +453,9 @@ public class EventCreatorView extends ActionBarActivity {
         super.onBackPressed();
     }
 
-    private void showDatePickerDialog(View v) {
-        dateFragment = new DatePickerFragment();
+    private void showDatePickerDialog() {
+        DialogFragment dateFragment = new DatePickerFragment();
         dateFragment.show(getFragmentManager(), "datePicker");
-
     }
 
     private void findUserID(final Session session) {
@@ -500,11 +479,9 @@ public class EventCreatorView extends ActionBarActivity {
             if (validateInput()) {
                 updateEventObject();
                 updateObjectInDatabase();
-                showToast(getResources().getString(R.string.event_saved));
+                help.createToast(getResources().getString(R.string.event_saved), this);
                 onBackPressed();
-                //finish();
-            } else
-                return;
+            }
         } else {
             if (validateInput()) {
                 createEventObject();
@@ -512,10 +489,9 @@ public class EventCreatorView extends ActionBarActivity {
                     event.setPhotoSource(sourceToObject);
                 writeObjectToDatabase();
                 sqldb.eventCreated(event.getEventID());
-                showToast(getResources().getString(R.string.event_saved));
+                help.createToast(getResources().getString(R.string.event_saved), this);
                 finish();
-            } else
-                return;
+            }
         }
     }
 
@@ -530,7 +506,7 @@ public class EventCreatorView extends ActionBarActivity {
         } else if (validator.isEmpty(addressInput.getText().toString())) {
             writeErrorMessage(getResources().getString(R.string.address_error));
             return false;
-        } else if (validator.isEmpty(participantsInput.getText().toString().toString())) {
+        } else if (validator.isEmpty(participantsInput.getText().toString())) {
             writeErrorMessage(getResources().getString(R.string.participants_error));
             return false;
         } else if (validator.isEmpty(participantsInput.getText().toString())) {
@@ -555,7 +531,7 @@ public class EventCreatorView extends ActionBarActivity {
     }
 
     private void writeErrorMessage(String s) {
-        errorView = (TextView) findViewById(R.id.error_display_message);
+        TextView errorView = (TextView) findViewById(R.id.error_display_message);
         errorView.setVisibility(View.VISIBLE);
         errorView.setText(s);
     }
@@ -587,7 +563,7 @@ public class EventCreatorView extends ActionBarActivity {
             event.setPhotoSource(sourceToObject);
     }
 
-    public ArrayList<Address> getLocationFromAddress(String strAddress) {
+    public ArrayList getLocationFromAddress(String strAddress) {
         List<Address> result;
         ArrayList list = new ArrayList<>();
         Geocoder coder = new Geocoder(this);
@@ -603,7 +579,7 @@ public class EventCreatorView extends ActionBarActivity {
                 }
             }
         } catch (Exception e) {
-            showToast(getResources().getString(R.string.location_error));
+            help.createToast(getResources().getString(R.string.location_error), this);
         }
 
         return list;
@@ -613,7 +589,7 @@ public class EventCreatorView extends ActionBarActivity {
         try {
             db.pushToDB(event, ref);
         } catch (Exception e) {
-            showToast(getResources().getString(R.string.write_to_db_error));
+            help.createToast(getResources().getString(R.string.write_to_db_error), this);
         }
     }
 
@@ -621,26 +597,24 @@ public class EventCreatorView extends ActionBarActivity {
         try {
             db.updateEventDB(event);
         } catch (Exception e) {
-            showToast(getResources().getString(R.string.write_to_db_error));
+            help.createToast(getResources().getString(R.string.write_to_db_error), this);
         }
     }
 
-    private void showToast(String s) {
-        Toast.makeText(getBaseContext(), s, Toast.LENGTH_SHORT).show();
-    }
-
-    private void showTimePickerDialog(View v) {
-        timeFragment = new TimePickerFragment();
+    private void showTimePickerDialog() {
+        DialogFragment timeFragment = new TimePickerFragment();
         timeFragment.show(getFragmentManager(), "timePicker");
     }
 
     private static void updateDateButtonText() {
+        @SuppressLint("SimpleDateFormat")
         SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT);
         String dateForButton = dateFormat.format(cal.getTime());
         pickDateIn.setText(dateForButton);
     }
 
     private static void updateTimeButtonText() {
+        @SuppressLint("SimpleDateFormat")
         SimpleDateFormat timeFormat = new SimpleDateFormat(TIME_FORMAT);
         String timeForButton = timeFormat.format(cal.getTime());
         pickTimeIn.setText(timeForButton);
@@ -690,7 +664,7 @@ public class EventCreatorView extends ActionBarActivity {
     private class DownloadImages extends AsyncTask<String, Void, Bitmap> {
         ImageView bmImage;
         Bitmap view;
-        ArrayList<String> strings = new ArrayList<>();
+        ArrayList strings = new ArrayList<>();
         String source;
 
         public DownloadImages(List<String> list) {
@@ -729,7 +703,7 @@ public class EventCreatorView extends ActionBarActivity {
             if (!strings.isEmpty()) {
                 bmImage = new ImageView(getBaseContext());
                 for (int i = 0; i < strings.size(); i++) {
-                    String url = strings.get(i);
+                    String url = strings.get(i) + "";
                     icon = null;
                     try {
                         InputStream in = new java.net.URL(url).openStream();
