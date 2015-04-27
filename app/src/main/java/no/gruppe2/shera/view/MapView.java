@@ -459,7 +459,7 @@ public class MapView extends ActionBarActivity
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 radiusSeekBarProgress = progress;
                 radiusResult.setText((getResources().getString(R.string.radius) + " " +
-                        radiusSeekBarProgress / 2 + getResources().getString(R.string.kilometers)));
+                        (double) radiusSeekBarProgress / 2 + getResources().getString(R.string.kilometers)));
 
                 if (radiusSeekBarProgress == TEN_KILOMETRES) {
                     radiusResult.setText((getResources().getString(R.string.radius) + " " +
