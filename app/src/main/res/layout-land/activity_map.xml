@@ -71,49 +71,86 @@
             </LinearLayout>
         </LinearLayout>
 
-        <ScrollView
+        <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/navigation_center"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:fillViewport="true"
-            android:scrollbars="none">
+            android:layout_height="match_parent">
 
-            <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                android:id="@+id/navigation_drawer_layout"
+            <TextView
+                android:id="@+id/centerHorizontalLine"
+                android:text=""
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true" />
+
+            <ScrollView
                 android:layout_width="match_parent"
-                android:layout_height="435dp"
-                android:gravity="bottom">
+                android:layout_height="250dp"
+                android:layout_marginTop="42dp"
+                android:layout_below="@id/centerHorizontalLine"
+                android:scrollbars="none">
 
-                <RelativeLayout
-                    android:id="@+id/navigation_drawer_scroll_layout_land"
+                <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                    android:id="@+id/navigation_drawer_layout"
                     android:layout_width="@dimen/navigation_drawer_width_land"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="20dp"
-                    android:background="@drawable/border_navigation_drawer_scroll">
+                    android:gravity="top"
+                    android:background="@color/light_blue">
+
+                    <Spinner
+                        android:id="@+id/drawer_category_spinner"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:entries="@array/drawer_category_array"
+                        android:layout_toLeftOf="@+id/centerPointDrawer"
+                        android:layout_alignBottom="@+id/drawer_checkbox_adult"
+                        android:layout_alignTop="@+id/drawer_checkbox_adult"
+                        android:layout_alignParentLeft="true"
+                        android:layout_marginLeft="5dp" />
+
+                    <CheckBox
+                        android:id="@+id/drawer_checkbox_adult"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_toRightOf="@+id/centerPointDrawer"
+                        android:text="@string/adult"
+                        android:layout_marginTop="10dp" />
+
+                    <TextView
+                        android:id="@+id/centerPointDrawer"
+                        android:text=""
+                        android:layout_width="0dp"
+                        android:layout_marginRight="10dp"
+                        android:layout_marginLeft="10dp"
+                        android:layout_height="wrap_content"
+                        android:layout_centerHorizontal="true" />
 
                     <LinearLayout
                         android:id="@+id/seekbar_top_linear"
-                        android:layout_width="@dimen/navigation_drawer_width"
+                        android:layout_width="@dimen/navigation_drawer_width_land"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
-                        android:layout_marginTop="40dp">
+                        android:layout_below="@id/drawer_checkbox_adult">
 
                         <TextView
                             android:id="@+id/radiusResult"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_marginTop="10dp"
                             android:layout_gravity="center_horizontal"
                             android:text="@string/days_ahead" />
 
                         <SeekBar
                             android:id="@+id/drawer_radius_seekbar"
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content" />
+                            android:layout_height="wrap_content"
+                            android:layout_marginRight="10dp" />
 
                     </LinearLayout>
 
                     <LinearLayout
                         android:id="@+id/seekbar_bottom_linear"
-                        android:layout_width="@dimen/navigation_drawer_width"
+                        android:layout_width="@dimen/navigation_drawer_width_land"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
                         android:layout_below="@+id/seekbar_top_linear">
@@ -130,52 +167,16 @@
                             android:id="@+id/drawer_time_seekbar"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginBottom="10dp" />
+                            android:layout_marginBottom="20dp"
+                            android:layout_marginRight="10dp" />
 
                     </LinearLayout>
 
-                    <Spinner
-                        android:id="@+id/drawer_category_spinner"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:entries="@array/drawer_category_array"
-                        android:layout_toLeftOf="@+id/centerPointDrawer"
-                        android:layout_alignBottom="@+id/drawer_checkbox_adult"
-                        android:layout_alignTop="@+id/drawer_checkbox_adult"
-                        android:layout_alignParentLeft="true"
-                        android:layout_marginLeft="5dp"
-                        android:layout_below="@+id/bottomDrawer" />
-
-                    <CheckBox
-                        android:id="@+id/drawer_checkbox_adult"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_toRightOf="@+id/centerPointDrawer"
-                        android:text="@string/adult"
-                        android:layout_marginBottom="10dp"
-                        android:layout_below="@+id/bottomDrawer" />
-
-                    <TextView
-                        android:id="@+id/bottomDrawer"
-                        android:text=""
-                        android:layout_width="0dp"
-                        android:layout_height="5dp"
-                        android:paddingBottom="50dp"
-                        android:layout_centerHorizontal="true"
-                        android:layout_centerInParent="true" />
-
-                    <TextView
-                        android:id="@+id/centerPointDrawer"
-                        android:text=""
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_centerHorizontal="true" />
-
                 </RelativeLayout>
 
-            </RelativeLayout>
+            </ScrollView>
 
-        </ScrollView>
+        </RelativeLayout>
 
     </fragment>
 
