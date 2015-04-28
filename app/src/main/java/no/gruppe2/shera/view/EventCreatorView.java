@@ -423,8 +423,7 @@ public class EventCreatorView extends ActionBarActivity {
             List<Address> addresses;
             geocoder = new Geocoder(this);
             if (lat != 0 || lng != 0) {
-                addresses = geocoder.getFromLocation(lat,
-                        lng, 1);
+                addresses = geocoder.getFromLocation(lat, lng, 1);
                 String address = "";
                 if (addresses.get(0).getAddressLine(0) != null)
                     address += addresses.get(0).getAddressLine(0);

@@ -5,21 +5,11 @@
     android:layout_height="match_parent"
     android:orientation="horizontal">
 
-    <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/scrollViewChat"
+    <ListView
+        android:id="@+id/chatListView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="2dp"
-        android:fillViewport="true"
-        android:layout_above="@+id/InnerRelativeLayout">
-
-        <TextView
-            android:id="@+id/chat_view"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="bottom" />
-
-    </ScrollView>
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="80dp"></ListView>
 
     <RelativeLayout
         android:id="@+id/InnerRelativeLayout"
