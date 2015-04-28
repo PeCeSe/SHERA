@@ -2,9 +2,6 @@ package no.gruppe2.shera.dto;
 
 import java.util.Calendar;
 
-/**
- * Created by chris.forberg on 07.04.2015.
- */
 public class Chat {
     private String userName, message, eventID;
     private long userID;
@@ -18,11 +15,11 @@ public class Chat {
         setEventID(eventID);
     }
 
-    public String getEventID(){
+    public String getEventID() {
         return eventID;
     }
 
-    public void setEventID(String ID){
+    public void setEventID(String ID) {
         eventID = ID;
     }
 
