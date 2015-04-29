@@ -82,4 +82,6 @@
     <string name="abort_photo_download">Cancel</string>
     <string name="double_tap_to_finish">Press back again to exit the app</string>
     <string name="no_address_on_these_coordinates">No address on these coordinates</string>
+    <string name="destination_error">There is something wrong with your destination</string>
+    <string name="user_id_error">There is something wrong with your userID, try again later</string>
 </resources>

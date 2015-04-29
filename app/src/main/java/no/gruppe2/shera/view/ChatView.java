@@ -119,6 +119,11 @@ public class ChatView extends ActionBarActivity {
         });
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+    }
+
     private boolean sendChatMessage() {
         chatArrayAdapter.add(message);
         return true;

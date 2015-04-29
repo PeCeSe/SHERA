@@ -278,6 +278,11 @@ public class MapView extends ActionBarActivity
         sharedPrefs.edit().putString("userID", userID).apply();
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+    }
+
     private void readEventsFromFirebase() {
         queryRef.addChildEventListener(new ChildEventListener() {
             @Override
@@ -433,6 +438,7 @@ public class MapView extends ActionBarActivity
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 dateSeekBarProgress = progress;
+
                 timeResult.setText((getResources().getString(R.string.days_ahead) + " " +
                         dateSeekBarProgress));
                 if (dateSeekBarProgress == THREE_WEEKS) {
@@ -458,8 +464,15 @@ public class MapView extends ActionBarActivity
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 radiusSeekBarProgress = progress;
-                radiusResult.setText((getResources().getString(R.string.radius) + " " +
-                        (double) radiusSeekBarProgress / 2 + getResources().getString(R.string.kilometers)));
+                String out = "";
+                out += getResources().getString(R.string.radius) + " ";
+                if ((((double) radiusSeekBarProgress / 2) % 2) == 0 || (((double) radiusSeekBarProgress / 2) % 2) == 1) {
+                    out += radiusSeekBarProgress / 2;
+                } else {
+                    out += (double) radiusSeekBarProgress / 2;
+                }
+                out += getResources().getString(R.string.kilometers);
+                radiusResult.setText(out);
 
                 if (radiusSeekBarProgress == TEN_KILOMETRES) {
                     radiusResult.setText((getResources().getString(R.string.radius) + " " +
