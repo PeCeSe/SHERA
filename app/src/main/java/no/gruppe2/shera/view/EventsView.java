@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -92,6 +91,11 @@ public class EventsView extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+    }
+
     public static void newList(LinkedList<Event> list) {
         events = new ArrayList<>();
         for (int i = 0; i < list.size(); i++) {
@@ -145,10 +149,8 @@ public class EventsView extends ActionBarActivity {
             eventListFragment = new EventListFragment();
             getFragmentManager().beginTransaction().add(R.id.fragment_container, eventListFragment).commit();
         }
-        Log.d("RESUME::BEFORE", first + "");
         if (!first)
             updateList();
         first = false;
-        Log.d("RESUME::AFTER", first + "");
     }
 }

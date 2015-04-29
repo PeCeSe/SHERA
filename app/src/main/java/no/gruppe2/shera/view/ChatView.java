@@ -1,14 +1,15 @@
 package no.gruppe2.shera.view;
 
 import android.content.Intent;
+import android.database.DataSetObserver;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AbsListView;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ScrollView;
-import android.widget.TextView;
+import android.widget.ListView;
 
 import com.facebook.Request;
 import com.facebook.Response;
@@ -28,7 +29,7 @@ import java.util.LinkedList;
 import no.gruppe2.shera.R;
 import no.gruppe2.shera.dto.Chat;
 import no.gruppe2.shera.dto.Event;
-import no.gruppe2.shera.helpers.HelpMethods;
+import no.gruppe2.shera.helpers.ChatArrayAdapter;
 import no.gruppe2.shera.helpers.Validator;
 import no.gruppe2.shera.service.DBHandler;
 
@@ -39,8 +40,6 @@ in Firebase, before displaying them on the screen.
  */
 
 public class ChatView extends ActionBarActivity {
-    private TextView view;
-    private ScrollView scroll;
     private EditText input;
     private Event eo;
     private DBHandler db;
@@ -53,39 +52,62 @@ public class ChatView extends ActionBarActivity {
     private Query queryRef;
     private HashMap<String, Object> map;
     private LinkedList<Chat> chatList;
-    private HelpMethods help;
     private Validator validator;
+    private ListView listView;
+    private ChatArrayAdapter chatArrayAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat_view);
-        Firebase.setAndroidContext(this);
+
+
         Intent i = getIntent();
         eo = i.getParcelableExtra(getResources().getString(R.string.intent_parcelable_key));
+
+        Firebase.setAndroidContext(this);
         db = new DBHandler(this);
         ref = new Firebase(getResources().getString(R.string.firebase_root));
         Firebase chatRef = ref.child("Chat");
         queryRef = chatRef.orderByChild("eventID").equalTo(eo.getEventID());
         readChatMessage();
+
         session = Session.getActiveSession();
         findUserFirstName(session);
         findUserID(session);
 
         map = new HashMap<>();
         chatList = new LinkedList<>();
-        help = new HelpMethods();
-        view = (TextView) findViewById(R.id.chat_view);
+        validator = new Validator();
+
         input = (EditText) findViewById(R.id.chat_input);
         Button send = (Button) findViewById(R.id.chat_send_button);
-        validator = new Validator();
+        listView = (ListView) findViewById(R.id.chatListView);
+
+        chatArrayAdapter = new ChatArrayAdapter(getApplicationContext(), R.layout.single_chat_bubble);
+        listView.setAdapter(chatArrayAdapter);
+        listView.setDivider(null);
+        listView.setDividerHeight(0);
+
+        listView.setTranscriptMode(AbsListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
+        listView.setAdapter(chatArrayAdapter);
+
+        chatArrayAdapter.registerDataSetObserver(new DataSetObserver() {
+            @Override
+            public void onChanged() {
+                super.onChanged();
+                listView.setSelection(chatArrayAdapter.getCount() - 1);
+            }
+        });
 
         send.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View v) {
+
                 cal = Calendar.getInstance();
                 session = Session.getActiveSession();
+
                 if (!validator.isEmpty(input.getText().toString())) {
                     message = new Chat(cal, userID,
                             userName, input.getText().toString(),
@@ -95,6 +117,16 @@ public class ChatView extends ActionBarActivity {
                 input.setText("");
             }
         });
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+    }
+
+    private boolean sendChatMessage() {
+        chatArrayAdapter.add(message);
+        return true;
     }
 
     @Override
@@ -114,29 +146,25 @@ public class ChatView extends ActionBarActivity {
     }
 
     private void readChatMessage() {
+
         queryRef.addChildEventListener(new ChildEventListener() {
+
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+
                 map = (HashMap<String, Object>) dataSnapshot.getValue();
                 String time = map.get("dateTime").toString();
+
                 cal = new GregorianCalendar();
                 cal.setTimeInMillis(Long.parseLong(time));
+
                 message = new Chat(cal, Long.parseLong(map.get("userID").toString()),
                         map.get("userName").toString(),
                         map.get("message").toString(), map.get("eventID").toString());
+
                 chatList.add(message);
-                view.append(help.leadingZeroesDate(message.getDateTime()) + " " +
-                        help.leadingZeroesTime(message.getDateTime()) + " " +
-                        message.getUserName() + "\n" +
-                        message.getMessage() + "\n");
-                        
-                scroll = ((ScrollView) findViewById(R.id.scrollViewChat));
-                scroll.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        scroll.fullScroll(ScrollView.FOCUS_DOWN);
-                    }
-                });        
+
+                sendChatMessage();
             }
 
             @Override
@@ -162,10 +190,13 @@ public class ChatView extends ActionBarActivity {
     }
 
     private void findUserID(final Session session) {
+
         if (session != null && session.isOpened()) {
+
             Request request = Request.newMeRequest(session, new Request.GraphUserCallback() {
                 @Override
                 public void onCompleted(GraphUser user, Response response) {
+
                     if (session == Session.getActiveSession()) {
                         if (user != null) {
                             userID = Long.parseLong(user.getId());
@@ -178,10 +209,13 @@ public class ChatView extends ActionBarActivity {
     }
 
     private void findUserFirstName(final Session session) {
+
         if (session != null && session.isOpened()) {
+
             Request request = Request.newMeRequest(session, new Request.GraphUserCallback() {
                 @Override
                 public void onCompleted(GraphUser user, Response response) {
+
                     if (session == Session.getActiveSession()) {
                         if (user != null) {
                             userName = user.getFirstName();
@@ -192,4 +226,8 @@ public class ChatView extends ActionBarActivity {
             Request.executeBatchAsync(request);
         }
     }
+
+
 }
+
+

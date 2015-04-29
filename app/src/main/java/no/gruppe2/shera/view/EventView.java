@@ -211,6 +211,11 @@ public class EventView extends ActionBarActivity {
         }
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+    }
+
     private void setFields(Event eo) {
         if (!eo.getPhotoSource().equals("NOTSET"))
             new DownloadImages(eo.getPhotoSource()).execute();

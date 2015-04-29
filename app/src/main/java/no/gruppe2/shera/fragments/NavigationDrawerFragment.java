@@ -65,6 +65,8 @@ public class NavigationDrawerFragment extends Fragment {
             fromSavedInstanceState = true;
         }
 
+        setRetainInstance(true);
+
         // Either the default item (0) is selected, or the last selected item.
         selectItem(currentSelectedPosition);
     }
@@ -99,7 +101,7 @@ public class NavigationDrawerFragment extends Fragment {
                         getString(R.string.blank),
                         getString(R.string.create_event_string),
                         getString(R.string.title_activity_events),
-                        getString(R.string.action_settings),
+                        getString(R.string.chats),
                         getString(R.string.logout),
                 }));
         drawerListView.setItemChecked(currentSelectedPosition, true);

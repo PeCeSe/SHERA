@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -278,6 +280,11 @@ public class MapView extends ActionBarActivity
         sharedPrefs.edit().putString("userID", userID).apply();
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+    }
+
     private void readEventsFromFirebase() {
         queryRef.addChildEventListener(new ChildEventListener() {
             @Override
@@ -433,6 +440,7 @@ public class MapView extends ActionBarActivity
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 dateSeekBarProgress = progress;
+
                 timeResult.setText((getResources().getString(R.string.days_ahead) + " " +
                         dateSeekBarProgress));
                 if (dateSeekBarProgress == THREE_WEEKS) {
@@ -458,8 +466,15 @@ public class MapView extends ActionBarActivity
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 radiusSeekBarProgress = progress;
-                radiusResult.setText((getResources().getString(R.string.radius) + " " +
-                        (double) radiusSeekBarProgress / 2 + getResources().getString(R.string.kilometers)));
+                String out = "";
+                out += getResources().getString(R.string.radius) + " ";
+                if ((((double) radiusSeekBarProgress / 2) % 2) == 0 || (((double) radiusSeekBarProgress / 2) % 2) == 1) {
+                    out += radiusSeekBarProgress / 2;
+                } else {
+                    out += (double) radiusSeekBarProgress / 2;
+                }
+                out += getResources().getString(R.string.kilometers);
+                radiusResult.setText(out);
 
                 if (radiusSeekBarProgress == TEN_KILOMETRES) {
                     radiusResult.setText((getResources().getString(R.string.radius) + " " +
@@ -554,29 +569,32 @@ public class MapView extends ActionBarActivity
             Marker m = map.addMarker(new MarkerOptions()
                     .position(new LatLng(eo.getLatitude(), eo.getLongitude()))
                     .title(eo.getName())
-                    .icon(BitmapDescriptorFactory.defaultMarker(getColor(eo)))
+                    .icon(BitmapDescriptorFactory.fromBitmap(getColor(eo)))
                     .snippet(eo.getDescription()));
             markerMap.put(m.getId(), eo);
             markerEventMap.put(eo.getEventID(), m);
         }
     }
 
-    private float getColor(Event eo) {
-        float hue = BitmapDescriptorFactory.HUE_RED;
+    private Bitmap getColor(Event eo) {
+        Bitmap bitMap = BitmapFactory.decodeResource(getResources(),
+                R.drawable.ic_pin_general_red);
         List<String> ownEvents = sqldb.getOwnEvents();
 
         if (ownEvents.contains(eo.getEventID())) {
-            hue = BitmapDescriptorFactory.HUE_ORANGE;
-            return hue;
+            bitMap = BitmapFactory.decodeResource(getResources(),
+                    R.drawable.ic_pin_creator_orange);
+            return bitMap;
         }
 
         ArrayList<String> joinedEvents = sqldb.getJoinedEvents();
 
         if (joinedEvents.contains(eo.getEventID())) {
-            hue = BitmapDescriptorFactory.HUE_GREEN;
-            return hue;
+            bitMap = BitmapFactory.decodeResource(getResources(),
+                    R.drawable.ic_pin_joined_green);
+            return bitMap;
         }
-        return hue;
+        return bitMap;
     }
 
     private void removePin(Event eo) {
@@ -784,7 +802,7 @@ public class MapView extends ActionBarActivity
                 .position(new LatLng(lat, lng))
                 .title(getResources().getString(R.string.pin_new_event)).draggable(true)
                 .snippet(getResources().getString(R.string.pin_creation_info))
-                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_VIOLET)));
+                .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_pin_new_purple)));
 
         marker.showInfoWindow();
     }
