@@ -99,7 +99,7 @@ public class NavigationDrawerFragment extends Fragment {
                         getString(R.string.blank),
                         getString(R.string.create_event_string),
                         getString(R.string.title_activity_events),
-                        getString(R.string.action_settings),
+                        getString(R.string.chats),
                         getString(R.string.logout),
                 }));
         drawerListView.setItemChecked(currentSelectedPosition, true);
