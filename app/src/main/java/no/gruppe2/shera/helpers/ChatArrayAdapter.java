@@ -43,11 +43,17 @@ public class ChatArrayAdapter extends ArrayAdapter {
         }
         Chat message = getItem(position);
         TextView chatText = (TextView) row.findViewById(R.id.singleMessage);
+        TextView infoText = (TextView) row.findViewById(R.id.message_datetime);
 
-        String text = "\n" + help.leadingZeroesDate(message.getDateTime()) + " " +
+        String info = "\n" + help.leadingZeroesDate(message.getDateTime()) + " " +
                 help.leadingZeroesTime(message.getDateTime()) + " " +
-                message.getUserName() + "\n\n"
-                + message.getMessage() + "\n\n";
+                message.getUserName();
+
+
+        infoText.setText(info);
+
+
+        String text = "\n" + message.getMessage() + "\n\n";
 
         chatText.setText(text);
         chatText.setTextColor(getContext().getResources().getColor(R.color.white));
