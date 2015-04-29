@@ -113,6 +113,11 @@ public class ChatView extends ActionBarActivity {
         }
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+    }
+
     private void readChatMessage() {
         queryRef.addChildEventListener(new ChildEventListener() {
             @Override
@@ -129,14 +134,14 @@ public class ChatView extends ActionBarActivity {
                         help.leadingZeroesTime(message.getDateTime()) + " " +
                         message.getUserName() + "\n" +
                         message.getMessage() + "\n");
-                        
+
                 scroll = ((ScrollView) findViewById(R.id.scrollViewChat));
                 scroll.post(new Runnable() {
                     @Override
                     public void run() {
                         scroll.fullScroll(ScrollView.FOCUS_DOWN);
                     }
-                });        
+                });
             }
 
             @Override

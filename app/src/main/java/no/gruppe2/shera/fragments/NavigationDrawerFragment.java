@@ -60,6 +60,8 @@ public class NavigationDrawerFragment extends Fragment {
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
         userLearnedDrawer = sharedPref.getBoolean(PREF_USER_LEARNED_DRAWER, false);
 
+        setRetainInstance(true);
+
         if (savedInstanceState != null) {
             currentSelectedPosition = savedInstanceState.getInt(STATE_SELECTED_POSITION);
             fromSavedInstanceState = true;
@@ -99,7 +101,7 @@ public class NavigationDrawerFragment extends Fragment {
                         getString(R.string.blank),
                         getString(R.string.create_event_string),
                         getString(R.string.title_activity_events),
-                        getString(R.string.action_settings),
+                        getString(R.string.chats),
                         getString(R.string.logout),
                 }));
         drawerListView.setItemChecked(currentSelectedPosition, true);

@@ -57,7 +57,9 @@ import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.Set;
 
 import no.gruppe2.shera.R;
 import no.gruppe2.shera.dto.Event;
@@ -109,7 +111,8 @@ public class EventCreatorView extends ActionBarActivity {
     private ArrayList<String> myPhotoSourceList, tempMyPhotoSourceList;
     private ArrayList<Bitmap> myPhotoList;
     private String afterPhotos, sourceToObject;
-    private boolean isMorePhotos, newList, gridViewLoadOnce, stopLoadingData, flag, newImageSelected;
+    private boolean isMorePhotos, newList, gridViewLoadOnce, stopLoadingData, flag,
+            newImageSelected;
     private GridView gridView;
     private ProgressDialog progress;
     private AlertDialog alert;
@@ -134,6 +137,8 @@ public class EventCreatorView extends ActionBarActivity {
         stopLoadingData = false;
         newImageSelected = false;
         last = 0;
+        lat = DEFAULTLONGLAT;
+        lng = DEFAULTLONGLAT;
 
         nameInput = (EditText) findViewById(R.id.nameInputField);
         descriptionInput = (EditText) findViewById(R.id.descriptionInputField);
@@ -148,6 +153,30 @@ public class EventCreatorView extends ActionBarActivity {
 
         cal = Calendar.getInstance();
 
+        if (savedInstanceState != null) {
+            Set set = savedInstanceState.keySet();
+            if (set.contains("lat")) {
+                lat = savedInstanceState.getDouble("lat");
+            }
+            if (set.contains("lng")) {
+                lng = savedInstanceState.getDouble("lng");
+            }
+            Calendar tempCal = new GregorianCalendar();
+            if (set.contains("cal")) {
+                tempCal.setTimeInMillis(savedInstanceState.getLong("cal"));
+                cal = tempCal;
+                updateTimeButtonText();
+                updateDateButtonText();
+            }
+            if (set.contains("photo")) {
+                if (!savedInstanceState.getString("photo").equals("NOTSET")) {
+                    sourceToObject = savedInstanceState.getString("photo");
+                    findPhotos.setText(getResources().getString(R.string.change_photo));
+                    new DownloadImages(sourceToObject).execute();
+                }
+            }
+        }
+
         session = Session.getActiveSession();
         findUserID(session);
         newList = myPhotoSourceList == null;
@@ -159,6 +188,7 @@ public class EventCreatorView extends ActionBarActivity {
             cal = event.getCalendar();
             setFields();
         }
+
 
         addressInput.setThreshold(TRESHOLD);
         setAddressFieldListener();
@@ -197,6 +227,25 @@ public class EventCreatorView extends ActionBarActivity {
             adultCheck.setChecked(false);
             adultCheck.setVisibility(View.GONE);
         }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (lat != DEFAULTLONGLAT)
+            outState.putDouble("lat", lat);
+        if (lng != DEFAULTLONGLAT)
+            outState.putDouble("lng", lng);
+        if (cal != null)
+            if (cal.getTimeInMillis() != 0)
+                outState.putLong("cal", cal.getTimeInMillis());
+        if (!sourceToObject.equals("NOTSET"))
+            outState.putString("photo", sourceToObject);
     }
 
     public void setGridView() {
@@ -274,21 +323,20 @@ public class EventCreatorView extends ActionBarActivity {
                                     afterPhotos = cursorObject.getString("after");
                                 } catch (JSONException e) {
                                     e.printStackTrace();
-                            }
+                                }
                             }
                             if (!pages.has("next")) {
                                 isMorePhotos = false;
                                 stopLoadingData = true;
                             }
 
-
                             if (dataArray.length() > 0) {
                                 for (int i = 0; i < dataArray.length(); i++) {
                                     JSONObject json = dataArray.optJSONObject(i);
                                     myPhotoSourceList.add(findPhotoSource(json));
                                     tempMyPhotoSourceList.add(findPhotoSource(json));
+                                }
                             }
-                        }
                             stopLoadingData = false;
                             new DownloadImages(tempMyPhotoSourceList).execute();
                         }
@@ -476,12 +524,13 @@ public class EventCreatorView extends ActionBarActivity {
 
     private void saveEvent() {
         if (event != null) {
-            if (validateInput()) {
-                updateEventObject();
-                updateObjectInDatabase();
-                help.createToast(getResources().getString(R.string.event_saved), this);
-                onBackPressed();
-            }
+            if (userID != 0)
+                if (validateInput()) {
+                    updateEventObject();
+                    updateObjectInDatabase();
+                    help.createToast(getResources().getString(R.string.event_saved), this);
+                    onBackPressed();
+                }
         } else {
             if (validateInput()) {
                 createEventObject();
@@ -524,6 +573,19 @@ public class EventCreatorView extends ActionBarActivity {
         }
         if (!validator.isDateInFuture(cal)) {
             writeErrorMessage(getResources().getString(R.string.calendar_error));
+            return false;
+        }
+        if (validator.isLatDefault(lat)) {
+            writeErrorMessage(getResources().getString(R.string.destination_error) + "LAT");
+            return false;
+        }
+        if (validator.isLongDefault(lng)) {
+            writeErrorMessage(getResources().getString(R.string.destination_error) + "LONG");
+            return false;
+        }
+        if (validator.isUserIDGreaterThanZero(userID)) {
+            findUserID(session);
+            writeErrorMessage(getResources().getString(R.string.user_id_error));
             return false;
         }
         return true;
