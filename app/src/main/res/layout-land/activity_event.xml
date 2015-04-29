@@ -97,8 +97,7 @@
                 android:textSize="20sp"
                 android:layout_marginRight="30dp"
                 android:layout_alignParentStart="true"
-                android:layout_toLeftOf="@+id/centerPoint_event"
-                android:layout_toStartOf="@+id/centerPoint_event" />
+                android:layout_toLeftOf="@+id/centerPoint_event" />
 
             <TextView
                 android:id="@+id/timeView"

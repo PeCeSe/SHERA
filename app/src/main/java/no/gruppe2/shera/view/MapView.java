@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -554,29 +556,32 @@ public class MapView extends ActionBarActivity
             Marker m = map.addMarker(new MarkerOptions()
                     .position(new LatLng(eo.getLatitude(), eo.getLongitude()))
                     .title(eo.getName())
-                    .icon(BitmapDescriptorFactory.defaultMarker(getColor(eo)))
+                    .icon(BitmapDescriptorFactory.fromBitmap(getColor(eo)))
                     .snippet(eo.getDescription()));
             markerMap.put(m.getId(), eo);
             markerEventMap.put(eo.getEventID(), m);
         }
     }
 
-    private float getColor(Event eo) {
-        float hue = BitmapDescriptorFactory.HUE_RED;
+    private Bitmap getColor(Event eo) {
+        Bitmap bitMap = BitmapFactory.decodeResource(getResources(),
+                R.drawable.ic_pin_general_red);
         List<String> ownEvents = sqldb.getOwnEvents();
 
         if (ownEvents.contains(eo.getEventID())) {
-            hue = BitmapDescriptorFactory.HUE_ORANGE;
-            return hue;
+            bitMap = BitmapFactory.decodeResource(getResources(),
+                    R.drawable.ic_pin_creator_orange);
+            return bitMap;
         }
 
         ArrayList<String> joinedEvents = sqldb.getJoinedEvents();
 
         if (joinedEvents.contains(eo.getEventID())) {
-            hue = BitmapDescriptorFactory.HUE_GREEN;
-            return hue;
+            bitMap = BitmapFactory.decodeResource(getResources(),
+                    R.drawable.ic_pin_joined_green);
+            return bitMap;
         }
-        return hue;
+        return bitMap;
     }
 
     private void removePin(Event eo) {
@@ -784,7 +789,7 @@ public class MapView extends ActionBarActivity
                 .position(new LatLng(lat, lng))
                 .title(getResources().getString(R.string.pin_new_event)).draggable(true)
                 .snippet(getResources().getString(R.string.pin_creation_info))
-                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_VIOLET)));
+                .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_pin_new_purple)));
 
         marker.showInfoWindow();
     }
