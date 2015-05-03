@@ -45,8 +45,8 @@
     <string name="delete">Delete</string>
     <string name="update">Update</string>
     <string name="chat_hint">Type here</string>
-    <string name="event_banner_image">Event banner image</string>
-    <string name="event_creator_chosen_image">Event banner image</string>
+    <string name="event_banner_image" translatable="false">Event banner image</string>
+    <string name="event_creator_chosen_image" translatable="false">Event banner image</string>
     <string name="blank"> </string>
     <string name="logged_in">Logged in as</string>
     <string name="days_ahead">Days ahead:</string>
@@ -71,7 +71,7 @@
     <string name="show">SHOW</string>
     <string name="find_photo">Find photo</string>
     <string name="choose_picture">Choose picture</string>
-    <string name="loading">Loading&#8230;</string>
+    <string name="loading" translatable="false">Loading&#8230;</string>
     <string name="download_from_facebook">Loading images from Facebook</string>
     <string name="download_friends_profile_pictures_facebook">Loading profile pictures from Facebook</string>
     <string name="change_photo">Change photo</string>
