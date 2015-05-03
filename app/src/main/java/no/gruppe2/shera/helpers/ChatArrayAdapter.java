@@ -12,6 +12,12 @@ import java.util.ArrayList;
 import no.gruppe2.shera.R;
 import no.gruppe2.shera.dto.Chat;
 
+/*
+This class is a custom adapter that allows us to put two TextViews inside a LinearLayout into
+a ListView. The getView-method finds the correct chat-object in the list, and uses it to assign the
+correct information to the two TextViews. This creates chat-bubbles.
+ */
+
 public class ChatArrayAdapter extends ArrayAdapter {
 
     private ArrayList<Chat> chatMessageList = new ArrayList();
@@ -38,10 +44,13 @@ public class ChatArrayAdapter extends ArrayAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
         View row = convertView;
         if (row == null) {
-            LayoutInflater inflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            LayoutInflater inflater = (LayoutInflater) this.getContext().getSystemService
+                    (Context.LAYOUT_INFLATER_SERVICE);
             row = inflater.inflate(R.layout.single_chat_bubble, parent, false);
         }
+
         Chat message = getItem(position);
+
         TextView chatText = (TextView) row.findViewById(R.id.singleMessage);
         TextView infoText = (TextView) row.findViewById(R.id.message_datetime);
 

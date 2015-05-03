@@ -1,9 +1,13 @@
 package no.gruppe2.shera.helpers;
 
-
 import java.util.Calendar;
 
+/*
+This class contains methods used to validate the input entered by the user in EventCreator.
+ */
+
 public class Validator {
+
     private final int DEFAULTLATLONG = 200;
 
     public boolean isEmpty(String s) {

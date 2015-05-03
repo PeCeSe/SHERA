@@ -8,6 +8,10 @@ import java.util.Calendar;
 
 import no.gruppe2.shera.dto.Event;
 
+/*
+This class contains three methods used in the MapView class to filter which pins should be
+displayed on the map.
+ */
 public class FilterFunctions {
 
     public boolean isDateWithinRange(Event event, Calendar range) {
