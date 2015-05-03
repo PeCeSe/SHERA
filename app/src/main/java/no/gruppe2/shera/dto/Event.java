@@ -22,6 +22,11 @@ public class Event implements Parcelable {
 
     //private static final int CASUAL = 1, FAMILY = 2, HOBBY = 3, SPORTS = 4, CULTURAL = 5;
 
+    public Event() {
+    }
+
+    ; //Only for testing purposes
+
     public Event(long userid, String eventName,
                  String eventDescription, String eventAddress,
                  double eventLatitude, double eventLongitude,
