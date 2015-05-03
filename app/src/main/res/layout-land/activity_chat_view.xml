@@ -9,7 +9,7 @@
         android:id="@+id/chatListView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="80dp"></ListView>
+        android:layout_marginBottom="80dp" />
 
     <RelativeLayout
         android:id="@+id/InnerRelativeLayout"
@@ -46,6 +46,6 @@
             android:layout_toLeftOf="@id/chat_send_button"
             android:layout_alignBottom="@id/chat_send_button"
             android:layout_alignParentTop="true" />
-    
+
     </RelativeLayout>
 </RelativeLayout>

@@ -37,10 +37,8 @@
     <string name="event_saved">Arrangementet ble lagret</string>
     <string name="family">Familie</string>
     <string name="find_photo">Finn et bilde</string>
-    <string name="firebase_events">Arrangementer</string>
     <string name="hello_world">Hei verden!</string>
     <string name="hobby">Hobby</string>
-    <string name="intent_parcelable_key">Arrangement</string>
     <string name="join">Bli med</string>
     <string name="kilometers">km</string>
     <string name="location_error">Kunne ikke finne adresse</string>
@@ -79,4 +77,6 @@
     <string name="where">Hvor?</string>
     <string name="write_to_db_error">Problemer med å skrive til databasen</string>
     <string name="yes">Ja</string>
+    <string name="blank"> </string>
+    <string name="shera_logo">SHERA Logoen</string>
 </resources>
