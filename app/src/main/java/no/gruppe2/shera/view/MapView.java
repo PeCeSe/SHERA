@@ -61,6 +61,7 @@ import java.util.concurrent.TimeUnit;
 import no.gruppe2.shera.R;
 import no.gruppe2.shera.dto.Event;
 import no.gruppe2.shera.fragments.NavigationDrawerFragment;
+import no.gruppe2.shera.helpers.FilterFunctions;
 import no.gruppe2.shera.helpers.HelpMethods;
 import no.gruppe2.shera.service.SqlLiteDBHandler;
 
@@ -118,6 +119,8 @@ public class MapView extends ActionBarActivity
     private ProfilePictureView profilePictureView;
     private String userName;
     private TextView userNameTextView;
+
+    private FilterFunctions filterFunctions;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -191,7 +194,9 @@ public class MapView extends ActionBarActivity
             adultCheck.setChecked(false);
             adultCheck.setVisibility(View.INVISIBLE);
         }
+
         help = new HelpMethods();
+        filterFunctions = new FilterFunctions();
     }
 
     @Override
@@ -233,7 +238,7 @@ public class MapView extends ActionBarActivity
 
                                 if (!markerEventMap.containsKey(e.getEventID())) {
                                     if (dateSeekBarProgress >= THREE_WEEKS || !(e.getCalendar().after(maxDate))) {
-                                        if (((radiusSeekBarProgress < TEN_KILOMETRES) && isEventInsideCircle(e)) || circle == null) {
+                                        if (((radiusSeekBarProgress < TEN_KILOMETRES) && filterFunctions.isEventInsideCircle(e, circle)) || circle == null) {
                                             if ((e.getCategory() == categorySpinner.getSelectedItemPosition()) || categorySpinner.getSelectedItemPosition() <= 0) {
                                                 if ((e.isAdult() && adultCheck.isChecked()) || !e.isAdult()) {
                                                     addPin(e);
@@ -526,14 +531,17 @@ public class MapView extends ActionBarActivity
         long daysInMillis = TimeUnit.MILLISECONDS.convert(dateSeekBarProgress, TimeUnit.DAYS);
         maxDate.setTimeInMillis(maxDate.getTimeInMillis() + daysInMillis);
 
+        int category = categorySpinner.getSelectedItemPosition();
+
 
         for (Event event : el) {
-            if (((dateSeekBarProgress >= THREE_WEEKS) || !(event.getCalendar().after(maxDate)))
+            if (((dateSeekBarProgress >= THREE_WEEKS)
+                    || filterFunctions.isDateWithinRange(event, maxDate))
                     && (((radiusSeekBarProgress < TEN_KILOMETRES)
-                    && isEventInsideCircle(event)) || circle == null)
+                    && filterFunctions.isEventInsideCircle(event, circle)) || circle == null)
                     && ((((categorySpinner.getSelectedItemPosition() > 0)
-                    && event.getCategory() == categorySpinner.getSelectedItemPosition()))
-                    || (categorySpinner.getSelectedItemPosition() <= 0))
+                    && filterFunctions.isEventOfSelectedCategory(event, category)))
+                    || (category <= 0))
                     && (((event.isAdult()) && (adultCheck.isChecked()))
                     || (!event.isAdult()))) {
 
@@ -551,17 +559,7 @@ public class MapView extends ActionBarActivity
         return pins;
     }
 
-    private boolean isEventInsideCircle(Event event) {
-        float[] distance = new float[2];
 
-        if (circle != null) {
-            Location.distanceBetween(event.getLatitude(), event.getLongitude(),
-                    circle.getCenter().latitude, circle.getCenter().longitude, distance);
-
-            return distance[0] < circle.getRadius();
-        }
-        return true;
-    }
 
     private void addPin(Event eo) {
         Calendar today = Calendar.getInstance();
