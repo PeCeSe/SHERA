@@ -5,8 +5,9 @@ import android.widget.Toast;
 
 import java.util.Calendar;
 
-/**
- * Created by chris.forberg on 17.03.2015.
+/*
+This class contains a selection of methods used several places in the application. By extracting
+them here, we don't have to write them several times in the code, and avoid redundancy.
  */
 public class HelpMethods {
 
