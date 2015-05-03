@@ -36,10 +36,8 @@
     <string name="event_saved">Die Veranstaltung wurde gespeichert</string>
     <string name="family">Familie</string>
     <string name="find_photo">Bilde finden</string>
-    <string name="firebase_events">Veranstaltungen</string>
     <string name="hello_world">Hallo Welt!</string>
     <string name="hobby">Hobby</string>
-    <string name="intent_parcelable_key">Veranstaltung</string>
     <string name="join">Teilnemen</string>
     <string name="kilometers">km</string>
     <string name="location_error">Adresse konnte nicht gefunden werden</string>
@@ -78,4 +76,5 @@
     <string name="write_to_db_error">Probleme beim Schreiben auf die Datenbank</string>
     <string name="yes">Ja</string>
     <string name="show">Ansicht</string>
+    <string name="shera_logo">Er SHERA logo</string>
 </resources>

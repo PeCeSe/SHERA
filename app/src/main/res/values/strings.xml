@@ -38,7 +38,7 @@
     <string name="main_menu">Menu</string>
     <string name="edit">Edit</string>
     <string name="join">Join</string>
-    <string name="unjoin">Unjoin</string>
+    <string name="unjoin">Leave</string>
     <string name="search">Search</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
@@ -61,7 +61,8 @@
     <string name="participants_error">Number of participants can not be blank. </string>
     <string name="participants_num_error">Number of participants must be one or more. </string>
     <string name="calendar_error">Event can not be in the past.</string>
-    <string name="max_less_than_num_error">Max participants can\'t be less than number of participants already attending.</string>
+    <string name="max_less_than_num_error">Max participants can't be less than number of
+        participants already attending.</string>
     <string name="location_error">Problems retrieving the location from the address</string>
     <string name="write_to_db_error">Problems writing to the database</string>
 
@@ -73,7 +74,8 @@
     <string name="choose_picture">Choose picture</string>
     <string name="loading" translatable="false">Loading&#8230;</string>
     <string name="download_from_facebook">Loading images from Facebook</string>
-    <string name="download_friends_profile_pictures_facebook">Loading profile pictures from Facebook</string>
+    <string name="download_friends_profile_pictures_facebook">
+        Loading profile pictures from Facebook</string>
     <string name="change_photo">Change photo</string>
     <string name="are_you_sure">Are you sure you want to delete?</string>
     <string name="title_activity_chat">Chat</string>
@@ -84,4 +86,6 @@
     <string name="no_address_on_these_coordinates">No address on these coordinates</string>
     <string name="destination_error">There is something wrong with your destination</string>
     <string name="user_id_error">There is something wrong with your userID, try again later</string>
+    <string name="shera_logo">SHERA Logo</string>
+
 </resources>

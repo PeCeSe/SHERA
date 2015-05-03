@@ -24,7 +24,6 @@ import com.firebase.client.Query;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
-import java.util.LinkedList;
 
 import no.gruppe2.shera.R;
 import no.gruppe2.shera.dto.Chat;
@@ -51,7 +50,6 @@ public class ChatView extends ActionBarActivity {
     private Firebase ref;
     private Query queryRef;
     private HashMap<String, Object> map;
-    private LinkedList<Chat> chatList;
     private Validator validator;
     private ListView listView;
     private ChatArrayAdapter chatArrayAdapter;
@@ -77,7 +75,6 @@ public class ChatView extends ActionBarActivity {
         findUserID(session);
 
         map = new HashMap<>();
-        chatList = new LinkedList<>();
         validator = new Validator();
 
         input = (EditText) findViewById(R.id.chat_input);
@@ -161,8 +158,6 @@ public class ChatView extends ActionBarActivity {
                 message = new Chat(cal, Long.parseLong(map.get("userID").toString()),
                         map.get("userName").toString(),
                         map.get("message").toString(), map.get("eventID").toString());
-
-                chatList.add(message);
 
                 sendChatMessage();
             }

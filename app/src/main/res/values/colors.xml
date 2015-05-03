@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <resources>
+
     <color name="red">#FF0000</color>
     <color name="dark_blue">#397f9a</color>
     <color name="dark_green">#1E9D3A</color>
@@ -16,7 +18,7 @@
     <color name="light_red">#FF7263</color>
     <color name="light_orange">#FFB463</color>
     <color name="light_yellow">#ECFEAA</color>
-    
+
     <color name="profile_picture_area_background">#397f9a</color>
     <color name="scroll_area">#ffe4e2e4</color>
 
@@ -25,4 +27,5 @@
     <color name="radius_green">#e69bff00</color>
     <color name="transparent">#00000000</color>
     <color name="navigation_drawer_background">#50000000</color>
+
 </resources>

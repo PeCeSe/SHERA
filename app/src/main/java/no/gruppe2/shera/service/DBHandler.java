@@ -12,9 +12,6 @@ import no.gruppe2.shera.R;
 import no.gruppe2.shera.dto.Chat;
 import no.gruppe2.shera.dto.Event;
 
-/**
- * Created by chris.forberg on 25.02.2015 10:09.
- */
 public class DBHandler {
 
     private Firebase id, chatRef;
@@ -32,7 +29,7 @@ public class DBHandler {
         id.setValue(e);
     }
 
-    public void pushChatMessageToDB(Chat c, Firebase r){
+    public void pushChatMessageToDB(Chat c, Firebase r) {
         Firebase chat = r.child("Chat");
         Firebase chatID = chat.push();
         chatID.setValue(c);

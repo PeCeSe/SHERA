@@ -6,4 +6,4 @@
     android:id="@+id/seekBar"
     android:max="100"
     android:progress="50"
-    tools:context=".NavigationDrawerFragment"></SeekBar>
+    tools:context=".NavigationDrawerFragment" />

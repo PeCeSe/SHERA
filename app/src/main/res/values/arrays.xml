@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <resources>
+
     <string-array name="category_array">
         <item>Casual</item>
         <item>Family</item>
@@ -16,4 +18,5 @@
         <item>Sports</item>
         <item>Cultural</item>
     </string-array>
+
 </resources>
