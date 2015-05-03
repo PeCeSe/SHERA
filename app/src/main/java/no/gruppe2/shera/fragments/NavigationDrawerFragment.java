@@ -22,7 +22,10 @@ import android.widget.ListView;
 
 import no.gruppe2.shera.R;
 
-// Fragment for interaction and presentation of a navigation drawer.
+/*
+This class contains a fragments that controls the presentation and behaviour of the
+NavigationDrawer shown in the MapView class.
+ */
 public class NavigationDrawerFragment extends Fragment {
 
     // Shared preference that remembers the position of the selected item
@@ -238,10 +241,7 @@ public class NavigationDrawerFragment extends Fragment {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (drawerToggle.onOptionsItemSelected(item)) {
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
+        return drawerToggle.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
     }
 
     /*
