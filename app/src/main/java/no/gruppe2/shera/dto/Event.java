@@ -7,9 +7,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
-/**
- * Created by pernille.sethre on 19.02.2015.
- */
 public class Event implements Parcelable {
 
     private String name, description, address, eventID, photoSource;
@@ -21,6 +18,9 @@ public class Event implements Parcelable {
     private ArrayList<Long> participants = new ArrayList<>();
 
     //private static final int CASUAL = 1, FAMILY = 2, HOBBY = 3, SPORTS = 4, CULTURAL = 5;
+
+    public Event() {
+    } //Only for testing purposes
 
     public Event(long userid, String eventName,
                  String eventDescription, String eventAddress,
@@ -48,7 +48,7 @@ public class Event implements Parcelable {
                  double eventLongitude, int eventMaxParticipants,
                  int eventNumParticipants, int eventCategory,
                  Calendar eventDateTime, boolean eventAdult,
-                 ArrayList eventParticipantsList, String photoSource) {
+                 ArrayList<Long> eventParticipantsList, String photoSource) {
         setEventID(eventid);
         setUserID(userid);
         setName(eventName);
@@ -174,7 +174,7 @@ public class Event implements Parcelable {
         calendar.setTimeInMillis(l);
     }
 
-    public void setParticipantsList(ArrayList list) {
+    public void setParticipantsList(ArrayList<Long> list) {
         participants = list;
     }
 

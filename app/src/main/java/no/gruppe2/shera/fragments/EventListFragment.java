@@ -3,7 +3,7 @@ package no.gruppe2.shera.fragments;
 import android.app.ListFragment;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
+import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,19 +21,20 @@ import no.gruppe2.shera.dto.Event;
 import no.gruppe2.shera.view.ChatView;
 import no.gruppe2.shera.view.EventView;
 
-/**
- * Created by pernille.sethre on 20.02.2015.
+
+/*
+This class contains a ListFragment that displays either Events or Chats available, and sends the
+user to the corresponding EventView or ChatView when clicked.
  */
 public class EventListFragment extends ListFragment {
 
-    private List<String> eventsName;
     ArrayAdapter<String> adapter;
-    private ListView l;
     private ArrayList<Event> events;
     private boolean chat;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_event_list, container, false);
     }
 
@@ -49,9 +50,10 @@ public class EventListFragment extends ListFragment {
             events = new ArrayList<>();
         }
 
+        assert intent != null;
         chat = intent.getBooleanExtra("Chat", false);
 
-        eventsName = new LinkedList<>();
+        List<String> eventsName = new LinkedList<>();
 
         if (events != null) {
             for (int i = 0; i < events.size(); i++) {
@@ -62,14 +64,14 @@ public class EventListFragment extends ListFragment {
         adapter = new ArrayAdapter<>(getActivity().getBaseContext(),
                 android.R.layout.simple_list_item_1, eventsName);
 
-        l = (ListView) getActivity().findViewById(R.id.listview);
+        ListView l = (ListView) getActivity().findViewById(R.id.listview);
         l.setAdapter(adapter);
-
         l.setOnItemClickListener(new OnItemClickListener() {
             public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
                 if (chat) {
                     Intent i = new Intent(getActivity().getBaseContext(), ChatView.class);
-                    i.putExtra(getResources().getString(R.string.intent_parcelable_key), events.get(arg2));
+                    i.putExtra(getResources().getString(R.string.intent_parcelable_key),
+                            events.get(arg2));
                     startActivity(i);
                 } else {
                     Intent intent1 = new Intent(getActivity().getBaseContext(), EventView.class);
@@ -84,6 +86,5 @@ public class EventListFragment extends ListFragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Log.d("Fragment.onDestroy", "Destroyed");
     }
 }

@@ -11,9 +11,10 @@ import java.util.ArrayList;
 
 import no.gruppe2.shera.R;
 
-/**
- * Created by chris.forberg on 24.03.2015.
+/*
+This class contains a custom ImageAdapter that shows the incoming images in a grid-view.
  */
+
 public class ImageAdapter extends BaseAdapter {
     private Context mContext;
     private ArrayList<Bitmap> photoList;

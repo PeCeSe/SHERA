@@ -17,7 +17,15 @@ import no.gruppe2.shera.dto.Event;
 import no.gruppe2.shera.fragments.EventListFragment;
 import no.gruppe2.shera.service.SqlLiteDBHandler;
 
-//This class is going to contain a listfragment
+/*
+This class contains an Activity that displays a ListViewFragment containing either Events or
+Chats that the user has a connection to. The ListView is clickable, and sends the user to the
+corresponding Event or Chat.
+
+The activity also contains a refresh-button, in case the application data has been deleted.
+The updateList-method then searches through the entire firebase-database, and restores the
+SQLite-database and displays the list in the ListViewFragment.
+ */
 
 public class EventsView extends ActionBarActivity {
 
@@ -58,23 +66,21 @@ public class EventsView extends ActionBarActivity {
                 return;
             }
             eventListFragment = new EventListFragment();
-            getFragmentManager().beginTransaction().add(R.id.fragment_container, eventListFragment).commit();
+            getFragmentManager().beginTransaction()
+                    .add(R.id.fragment_container, eventListFragment)
+                    .commit();
         }
     }
 
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_events, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
         if (id == android.R.id.home) {
@@ -82,7 +88,6 @@ public class EventsView extends ActionBarActivity {
             return true;
         }
 
-        //noinspection SimplifiableIfStatement
         if (id == R.id.update_option) {
             updateList();
             return true;
@@ -125,9 +130,7 @@ public class EventsView extends ActionBarActivity {
         }
 
         ArrayList<Event> fullList = new ArrayList<>();
-        ListIterator iterator = MapView.list.listIterator();
-        while (iterator.hasNext()) {
-            Event e = (Event) iterator.next();
+        for (Event e : MapView.list) {
             fullList.add(e);
         }
 
@@ -137,8 +140,6 @@ public class EventsView extends ActionBarActivity {
 
         finish();
         startActivity(intent);
-        //recreate();
-
     }
 
     @Override
