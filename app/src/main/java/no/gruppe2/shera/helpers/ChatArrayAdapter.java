@@ -9,11 +9,6 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
-import com.facebook.Request;
-import com.facebook.Response;
-import com.facebook.Session;
-import com.facebook.model.GraphUser;
-
 import java.util.ArrayList;
 
 import no.gruppe2.shera.R;
@@ -29,19 +24,20 @@ public class ChatArrayAdapter extends ArrayAdapter {
 
     private ArrayList<Chat> chatMessageList = new ArrayList();
     HelpMethods help = new HelpMethods();
-    long userID = 0;
-    Session session;
+    long userID = 0, hostID = 0;
+    Chat message;
 
 
-    public void add(Chat object) {
+    public void add(Chat object, long host, long user) {
+        message = object;
         chatMessageList.add(object);
+        hostID = host;
+        userID = user;
         super.add(object);
     }
 
     public ChatArrayAdapter(Context context, int textViewResourceId) {
         super(context, textViewResourceId);
-        session = Session.getActiveSession();
-        findUserID(session);
     }
 
     public int getCount() {
@@ -76,35 +72,15 @@ public class ChatArrayAdapter extends ArrayAdapter {
 
 
         String text = "\n" + message.getMessage() + "\n\n";
-        if (message.getUserID() == userID) {
+        if (hostID == message.getUserID()) {
+            chatText.setBackground(getContext().getResources().getDrawable(R.drawable.bubble_gold));
+        } else if (message.getUserID() == userID) {
             chatText.setBackground(getContext().getResources().getDrawable(R.drawable.bubble_green));
         }
-        /*
-        else if(creatorID == userID){
-            chatText.setBackground(getContext().getResources.getDrawable(R.drawable.bubble_gold));
-        }
-         */
         else {
             chatText.setBackground(getContext().getResources().getDrawable(R.drawable.bubble_blue));
         }
         chatText.setText(text);
         return row;
     }
-
-    private void findUserID(final Session session) {
-        if (session != null && session.isOpened()) {
-            Request request = Request.newMeRequest(session, new Request.GraphUserCallback() {
-                @Override
-                public void onCompleted(GraphUser user, Response response) {
-                    if (session == Session.getActiveSession()) {
-                        if (user != null) {
-                            userID = Long.parseLong(user.getId());
-                        }
-                    }
-                }
-            });
-            Request.executeBatchAsync(request);
-        }
-    }
-
 }
