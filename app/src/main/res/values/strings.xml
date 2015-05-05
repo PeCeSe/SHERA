@@ -61,7 +61,7 @@
     <string name="participants_error">Number of participants can not be blank. </string>
     <string name="participants_num_error">Number of participants must be one or more. </string>
     <string name="calendar_error">Event can not be in the past.</string>
-    <string name="max_less_than_num_error">Max participants can't be less than number of
+    <string name="max_less_than_num_error">Max participants can\'t be less than number of
         participants already attending.</string>
     <string name="location_error">Problems retrieving the location from the address</string>
     <string name="write_to_db_error">Problems writing to the database</string>

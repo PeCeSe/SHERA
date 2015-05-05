@@ -15,7 +15,8 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_margin="5dp"
-        android:background="@drawable/chatbubble"
+        android:background="@drawable/bubble_blue"
+        android:textColor="@color/black"
         android:textSize="20sp" />
 
 
