@@ -16,14 +16,15 @@ This class contains a custom ImageAdapter that shows the incoming images in a gr
  */
 
 public class ImageAdapter extends BaseAdapter {
-    private Context mContext;
+    private Context context;
     private ArrayList<Bitmap> photoList;
-    private boolean fromCreate;
+    private boolean fromCreate, friendHost;
 
-    public ImageAdapter(Context c, ArrayList<Bitmap> a, boolean b) {
-        mContext = c;
+    public ImageAdapter(Context c, ArrayList<Bitmap> a, boolean b, boolean host) {
+        context = c;
         photoList = a;
         fromCreate = b;
+        friendHost = host;
     }
 
     public int getCount() {
@@ -41,8 +42,8 @@ public class ImageAdapter extends BaseAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
         ImageView imageView;
         if (convertView == null) {
-            imageView = new ImageView(mContext);
-            if (position == 0 && !fromCreate)
+            imageView = new ImageView(context);
+            if (position == 0 && !fromCreate && friendHost)
                 imageView.setBackgroundResource(R.drawable.host_border_layout);
             imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
             imageView.setPadding(15, 40, 15, 40);
