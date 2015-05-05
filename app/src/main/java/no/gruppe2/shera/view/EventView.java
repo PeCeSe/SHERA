@@ -59,6 +59,7 @@ public class EventView extends ActionBarActivity {
     private String userID;
     private SqlLiteDBHandler sqldb;
     private ImageView eventImageView;
+    private boolean friendHost;
 
     private DBHandler db;
     private HelpMethods help;
@@ -96,6 +97,7 @@ public class EventView extends ActionBarActivity {
         timeView = (TextView) findViewById(R.id.timeView);
         addressView = (TextView) findViewById(R.id.addressView);
         gridView = (GridView) findViewById(R.id.profile_photos);
+        friendHost = false;
 
         setFields(eo);
 
@@ -228,7 +230,7 @@ public class EventView extends ActionBarActivity {
     }
 
     public void setGridView() {
-        gridView.setAdapter(new ImageAdapter(this, myPhotoList, false));
+        gridView.setAdapter(new ImageAdapter(this, myPhotoList, false, friendHost));
         gridView.setNumColumns(4);
         gridView.setPadding(3, 3, 3, 3);
 
@@ -315,6 +317,7 @@ public class EventView extends ActionBarActivity {
                                         } catch (JSONException e) {
                                             e.printStackTrace();
                                         }
+                                        friendHost = true;
                                     }
                                 }
                             }
