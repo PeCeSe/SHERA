@@ -122,7 +122,7 @@ public class ChatView extends ActionBarActivity {
     }
 
     private boolean sendChatMessage() {
-        chatArrayAdapter.add(message);
+        chatArrayAdapter.add(message, eo.getUserID(), userID);
         return true;
     }
 
