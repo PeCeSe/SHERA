@@ -32,8 +32,8 @@
     <string name="drawer_close">Lukk meny</string>
     <string name="drawer_open">Åpne meny</string>
     <string name="edit">Endre</string>
-    <string name="event_banner_image" translatable="false">Event banner image</string>
-    <string name="event_creator_chosen_image" translatable="false">Event banner image</string>
+    <string name="event_banner_image" translatable="false">Arrangementsbilde</string>
+    <string name="event_creator_chosen_image" translatable="false">Arrangementsbilde</string>
     <string name="event_saved">Arrangementet ble lagret</string>
     <string name="family">Familie</string>
     <string name="find_photo">Finn et bilde</string>

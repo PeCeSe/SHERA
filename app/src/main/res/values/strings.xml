@@ -45,8 +45,8 @@
     <string name="delete">Delete</string>
     <string name="update">Update</string>
     <string name="chat_hint">Type here</string>
-    <string name="event_banner_image" translatable="false">Event banner image</string>
-    <string name="event_creator_chosen_image" translatable="false">Event banner image</string>
+    <string name="event_banner_image">Event banner image</string>
+    <string name="event_creator_chosen_image">Event banner image</string>
     <string name="blank"> </string>
     <string name="logged_in">Logged in as</string>
     <string name="days_ahead">Days ahead:</string>

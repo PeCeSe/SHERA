@@ -77,4 +77,6 @@
     <string name="yes">Ja</string>
     <string name="show">Ansicht</string>
     <string name="shera_logo">Er SHERA logo</string>
+    <string name="event_banner_image" translatable="false">Veranstaltung Bild banner</string>
+    <string name="event_creator_chosen_image" translatable="false">Veranstaltung Bild banner</string>
 </resources>
