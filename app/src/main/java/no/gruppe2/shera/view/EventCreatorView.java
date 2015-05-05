@@ -582,7 +582,7 @@ public class EventCreatorView extends ActionBarActivity {
             writeErrorMessage(getResources().getString(R.string.destination_error) + "LONG");
             return false;
         }
-        if (validator.isUserIDGreaterThanZero(userID)) {
+        if (!validator.isUserIDGreaterThanZero(userID)) {
             findUserID(session);
             writeErrorMessage(getResources().getString(R.string.user_id_error));
             return false;
