@@ -338,8 +338,6 @@ public class MapView extends ActionBarActivity
                             if (markerEventMap.containsKey(eo.getEventID()))
                                 removePin(eo);
                             addPin(eo);
-                            Marker m = markerEventMap.get(eo.getEventID());
-                            m.showInfoWindow();
                             found = true;
                             break;
                         }
