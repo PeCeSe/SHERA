@@ -349,8 +349,6 @@ public class MapView extends ActionBarActivity
                         Collections.sort(list, new CalendarCompare());
                         if (markerEventMap.containsKey(eo.getEventID()))
                             removePin(eo);
-                        Marker m = markerEventMap.get(eo.getEventID());
-                        m.showInfoWindow();
                     }
                 } else {
                     for (int i = 0; i < list.size(); i++) {
