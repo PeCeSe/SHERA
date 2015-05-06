@@ -322,13 +322,12 @@ public class EventCreatorView extends ActionBarActivity {
                                     afterPhotos = cursorObject.getString("after");
                                 } catch (JSONException e) {
                                     e.printStackTrace();
+                                }
                             }
-                            }
-                            if (!pages.has("next")) {
+                            if (pages != null && !pages.has("next")) {
                                 isMorePhotos = false;
                                 stopLoadingData = true;
                             }
-
 
                             if (dataArray.length() > 0) {
                                 for (int i = 0; i < dataArray.length(); i++) {
@@ -436,6 +435,8 @@ public class EventCreatorView extends ActionBarActivity {
         if (!event.getPhotoSource().equals("NOTSET")) {
             new DownloadImages(event.getPhotoSource()).execute();
         }
+        lat = event.getLatitude();
+        lng = event.getLongitude();
     }
 
     private boolean fromMap() {
