@@ -50,7 +50,7 @@ public class EventsView extends ActionBarActivity {
         chat = intent.getBooleanExtra("Chat", false);
 
         if (chat) {
-            setTitle(getResources().getString(R.string.chat));
+            setTitle(getResources().getString(R.string.chats));
         }
 
         events = intent.getParcelableArrayListExtra("Events");
