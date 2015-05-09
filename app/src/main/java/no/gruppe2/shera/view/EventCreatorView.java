@@ -576,11 +576,11 @@ public class EventCreatorView extends ActionBarActivity {
             return false;
         }
         if (validator.isLatDefault(lat)) {
-            writeErrorMessage(getResources().getString(R.string.destination_error) + "LAT");
+            writeErrorMessage(getResources().getString(R.string.destination_error));
             return false;
         }
         if (validator.isLongDefault(lng)) {
-            writeErrorMessage(getResources().getString(R.string.destination_error) + "LONG");
+            writeErrorMessage(getResources().getString(R.string.destination_error));
             return false;
         }
         if (!validator.isUserIDGreaterThanZero(userID)) {
