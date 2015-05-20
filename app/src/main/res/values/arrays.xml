@@ -11,7 +11,7 @@
     </string-array>
 
     <string-array name="drawer_category_array">
-        <item>All</item>
+        <item>All Categories</item>
         <item>Casual</item>
         <item>Family</item>
         <item>Hobby</item>
